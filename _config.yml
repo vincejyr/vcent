@@ -35,6 +35,14 @@ defaults:
     values:
       layout: music-review
 
+# The site has no _posts, so feeds come from the two collections.
+feed:
+  collections:
+    writing:
+      path: "/feed/writing.xml"
+    music-reviews:
+      path: "/feed/music-reviews.xml"
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag

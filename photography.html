@@ -1,31 +1,67 @@
 ---
-layout: page
+layout: default
 title: "Photography"
 permalink: "/photography/"
+# Each row is a list of photos laid out side by side. "g" is the share of the
+# row's width (rows add up to 12) and "r" is the crop's aspect ratio — keep
+# r proportional to g within a row so the photos line up in height.
+rows:
+  - - { src: "161489433-view-from-marina-bay-sands-singapore-6261eebd.jpg", g: 12, r: 2.2, caption: "Marina Bay, Singapore", alt: "Singapore skyline and Marina Bay lit up at night, seen from above" }
+  - - { src: "img-7abd6287.jpg", g: 7, r: 1.6, caption: "Fire breathers", alt: "Two frames of a performer breathing a large ball of fire at night" }
+    - { src: "SSG_1-c536ed5d.jpg", g: 5, r: 1.14, caption: "Classical dancer", alt: "A classical dancer in a red costume mid-pose under a red spotlight" }
+  - - { src: "16533997-tom-araya-slayer-eadd1d12.jpg", g: 4, r: 1.2, caption: "Tom Araya, Slayer", alt: "Tom Araya of Slayer singing into a microphone while playing bass on a dark stage" }
+    - { src: "IMG_0105-80df043b.JPG", g: 4, r: 1.2, caption: "Brutal Assault festival", alt: "Silhouette of the Brutal Assault festival sign and people against an orange dusk sky" }
+    - { src: "IMG_0027-b8f7f5e4.JPG", g: 4, r: 1.2, caption: "Römerberg, Frankfurt", alt: "Half-timbered houses on a town square under a stormy sky, with market stalls in front" }
+  - - { src: "Untitled-1-4fa01aa5.jpg", g: 5, r: 1.14, caption: "Street art among temple ruins", alt: "Stencil art of a figure on a concrete post, with temple towers and ruins in the background" }
+    - { src: "IMG_0070-0af56aef.JPG", g: 7, r: 1.6, caption: "Memorial to the Murdered Jews of Europe, Berlin", alt: "Rows of grey concrete stelae under a pale sky" }
+  - - { src: "IMG_0051-8dfae78e.JPG", g: 6, r: 1.5, caption: "Love locks", alt: "Hundreds of colourful padlocks on a bridge railing, people walking past out of focus" }
+    - { src: "IMG_0193-b11b87c2.JPG", g: 6, r: 1.5, caption: "Cat", alt: "Close-up of a tabby cat peering over a ledge against green bokeh" }
+  - - { src: "93794271-jojo-the-magnificent-b6c5c731.jpg", g: 4, r: 1.2, caption: "Puppy", alt: "A small brown and white puppy lying on pavement in the sun" }
+    - { src: "IMG_0085-8e3067a0.JPG", g: 4, r: 1.2, caption: "Kitten", alt: "A black kitten crouching on a patterned rug, looking at the camera" }
+    - { src: "IMG_0286-95ec22b8.JPG", g: 4, r: 1.2, caption: "Bonfire", alt: "A bonfire throwing sparks into the night sky" }
+  - - { src: "83571679-sunset-hues-be705c8f.jpg", g: 12, r: 2.2, caption: "Sunset hues", alt: "Dark blue clouds lit orange by the last of a sunset over a silhouetted town" }
 ---
+<div class="wrap">
+  <header class="page-head">
+    <h1 class="kicker">Photography</h1>
+    <p class="intro">Pictures from travels, festivals and wherever the camera happened to be. Tap any photo to see it larger.</p>
+  </header>
 
-<div class="gallery">
-  <img src="/assets/images/img-7abd6287.jpg" loading="lazy" alt="">
-  <img src="/assets/images/161489433-view-from-marina-bay-sands-singapore-6261eebd.jpg" loading="lazy" alt="">
-  <img src="/assets/images/SSG_1-c536ed5d.jpg" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0105-80df043b.JPG" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0027-b8f7f5e4.JPG" loading="lazy" alt="">
-  <img src="/assets/images/16533997-tom-araya-slayer-eadd1d12.jpg" loading="lazy" alt="">
-  <img src="/assets/images/Untitled-1-4fa01aa5.jpg" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0193-b11b87c2.JPG" loading="lazy" alt="">
-  <img src="/assets/images/93794271-jojo-the-magnificent-b6c5c731.jpg" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0070-0af56aef.JPG" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0286-95ec22b8.JPG" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0051-8dfae78e.JPG" loading="lazy" alt="">
-  <img src="/assets/images/IMG_0085-8e3067a0.JPG" loading="lazy" alt="">
-  <img src="/assets/images/83571679-sunset-hues-be705c8f.jpg" loading="lazy" alt="">
+  <div class="gallery page-body">
+    {% assign n = 0 %}
+    {% for row in page.rows %}
+    <div class="gallery-row">
+      {% for p in row %}
+      {% assign n = n | plus: 1 %}
+      <figure style="--g: {{ p.g }}; --r: {{ p.r }}">
+        <button type="button" aria-label="View larger: {{ p.caption | escape }}">
+          <img src="{{ '/assets/images/' | append: p.src | relative_url }}" alt="{{ p.alt | escape }}" data-caption="{{ p.caption | escape }}" loading="lazy">
+        </button>
+        <figcaption><span class="num">{% if n < 10 %}0{% endif %}{{ n }}</span><span>{{ p.caption }}</span></figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
 </div>
 
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
-  <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&lsaquo;</button>
-  <img id="lightbox-img" src="" alt="">
-  <button class="lightbox-next" id="lightbox-next" aria-label="Next photo">&rsaquo;</button>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="lightbox-bar">
+    <span id="lightbox-count"></span>
+    <button type="button" id="lightbox-close" aria-label="Close">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+    </button>
+  </div>
+  <div class="lightbox-stage">
+    <button type="button" id="lightbox-prev" aria-label="Previous photo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <img id="lightbox-img" src="" alt="">
+    <button type="button" id="lightbox-next" aria-label="Next photo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+  <p class="lightbox-caption" id="lightbox-caption"></p>
 </div>
 
 <script>
@@ -34,6 +70,8 @@ permalink: "/photography/"
   var images = Array.prototype.slice.call(gallery.querySelectorAll('img'));
   var lightbox = document.getElementById('lightbox');
   var lightboxImg = document.getElementById('lightbox-img');
+  var caption = document.getElementById('lightbox-caption');
+  var count = document.getElementById('lightbox-count');
   var closeBtn = document.getElementById('lightbox-close');
   var prevBtn = document.getElementById('lightbox-prev');
   var nextBtn = document.getElementById('lightbox-next');
@@ -45,27 +83,34 @@ permalink: "/photography/"
     var img = images[currentIndex];
     lightboxImg.src = img.src;
     lightboxImg.alt = img.alt;
+    caption.textContent = img.getAttribute('data-caption') || '';
+    count.textContent = (currentIndex + 1) + ' / ' + images.length;
   }
 
   function openLightbox(index) {
     lastFocused = document.activeElement;
     showImage(index);
     lightbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
     closeBtn.focus();
   }
 
   function closeLightbox() {
     lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
     lightboxImg.src = '';
     if (lastFocused) lastFocused.focus();
   }
 
   gallery.addEventListener('click', function (e) {
-    if (e.target.tagName === 'IMG') openLightbox(images.indexOf(e.target));
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var img = btn.querySelector('img');
+    if (img) openLightbox(images.indexOf(img));
   });
 
   lightbox.addEventListener('click', function (e) {
-    if (e.target === lightbox) closeLightbox();
+    if (e.target === lightbox || e.target.classList.contains('lightbox-stage')) closeLightbox();
   });
 
   closeBtn.addEventListener('click', closeLightbox);

@@ -3,14 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-  {% feed_meta %}
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}: Writing" href="{{ '/feed/writing.xml' | relative_url }}">
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}: Music reviews" href="{{ '/feed/music-reviews.xml' | relative_url }}">
   {% seo title=true %}
 </head>
 <body>
   {% include header.html %}
-  <main class="wrap">
+  <main>
     {{ content }}
   </main>
   {% include footer.html %}

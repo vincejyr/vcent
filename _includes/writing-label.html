@@ -1,0 +1,8 @@
+{%- comment -%}
+  Section label for a writing post. Usage:
+  {% include writing-label.html post=post %} (short, for lists) or add long=true.
+{%- endcomment -%}
+{%- if include.post.tags contains "bookreviews" -%}{% if include.long %}Book review{% else %}Books{% endif %}
+{%- elsif include.post.tags contains "productmanagement" -%}{% if include.long %}Product management{% else %}Product{% endif %}
+{%- else -%}Writing
+{%- endif -%}

@@ -1,11 +1,11 @@
 <header class="site-header">
   <div class="wrap">
     <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
-    <nav class="site-nav">
-      <a href="{{ '/writing/' | relative_url }}">Writing</a>
-      <a href="{{ '/music-reviews/' | relative_url }}">Music</a>
-      <a href="{{ '/photography/' | relative_url }}">Photography</a>
-      <a href="{{ '/newsletter/' | relative_url }}">Newsletter</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="{{ '/writing/' | relative_url }}"{% if page.url contains '/writing/' %} aria-current="page"{% endif %}>Writing</a>
+      <a href="{{ '/music-reviews/' | relative_url }}"{% if page.url contains '/music-reviews/' %} aria-current="page"{% endif %}>Music Reviews</a>
+      <a href="{{ '/photography/' | relative_url }}"{% if page.url contains '/photography/' %} aria-current="page"{% endif %}>Photography</a>
+      <a href="{{ '/newsletter/' | relative_url }}"{% if page.url contains '/newsletter/' %} aria-current="page"{% endif %}>Newsletter</a>
     </nav>
   </div>
 </header>

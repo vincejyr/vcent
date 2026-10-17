@@ -1,5 +1,6 @@
 <footer class="site-footer">
   <div class="wrap">
-    <p>&copy; {{ site.time | date: "%Y" }} {{ site.author }}. Say hi at <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+    <span>&copy; {{ site.time | date: "%Y" }} {{ site.author }}</span>
+    <span><a href="mailto:{{ site.email }}">{{ site.email }}</a> &middot; RSS: <a href="{{ '/feed/writing.xml' | relative_url }}">Writing</a>, <a href="{{ '/feed/music-reviews.xml' | relative_url }}">Music</a></span>
   </div>
 </footer>

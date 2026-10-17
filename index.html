@@ -4,51 +4,76 @@ title: "Vince J"
 permalink: "/"
 ---
 
-<div class="sqs-html-content" data-sqsp-text-block-content>
-  <h2 style="white-space:pre-wrap;">Oh hi, I’m Vince!&nbsp;🙌🏼 </h2>
-</div>
+<section class="hero">
+  <div class="hero-text">
+    <p class="kicker">Product &middot; Heavy music &middot; Photography</p>
+    <h1>Oh hi, I’m <em>Vince.</em></h1>
+    <p class="lede">I’m a principal product manager in B2B SaaS. Before that I worked in B2B e‑commerce, B2C online education, and had a stint at a heavy‑machinery company.</p>
+    <p class="sub">Here I write about product management, review heavy music, and share photographs. If you want to work with me or just say hi — <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+  </div>
+  <figure>
+    <img src="{{ '/assets/images/Clipboard01-73ad36f4.jpg' | relative_url }}" alt="Vince standing on the Trolltunga rock ledge above a fjord in Norway">
+    <figcaption>Trolltunga, Norway — June 2017</figcaption>
+  </figure>
+</section>
 
-  
-  
+<section class="section" aria-labelledby="writing-h">
+  <div class="section-head">
+    <h2 id="writing-h">Writing</h2>
+    <p>Experiences and opinions on <a href="{{ '/writing/tags/productmanagement/' | relative_url }}">#productmanagement</a>, plus the occasional <a href="{{ '/writing/tags/bookreviews/' | relative_url }}">#bookreviews</a>.</p>
+    <a class="more" href="{{ '/writing/' | relative_url }}">All {{ site.writing.size }} posts &rarr;</a>
+  </div>
+  <div class="section-body">
+    <ol class="post-list">
+      {% assign latest = site.writing | sort: "date" | reverse | slice: 0, 5 %}
+      {% for post in latest %}
+      <li>
+        <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <span class="meta">{% include writing-label.html post=post %} &middot; {{ post.date | date: "%b %Y" }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
 
-  
-       <figure><img src="/assets/images/Clipboard01-73ad36f4.jpg" alt=" Trolltunga (Norway), June 2017 "/><figcaption>Trolltunga (Norway), June 2017</figcaption></figure> 
-  
+<section class="section" aria-labelledby="music-h">
+  <div class="section-head">
+    <h2 id="music-h">Heavy music</h2>
+    <p>Reviews I write for <a href="https://www.tempelores.com">Tempelores</a>, a little heavy‑music site out of the Netherlands and Finland — plus a best‑of list every December.</p>
+    <a class="more" href="{{ '/music-reviews/' | relative_url }}">All reviews &rarr;</a>
+  </div>
+  <div class="section-body music-grid">
+    {% assign all_reviews = site["music-reviews"] | sort: "date" | reverse %}
+    {% for post in all_reviews %}{% unless post.tags contains "AOTY" %}{% assign featured = post %}{% break %}{% endunless %}{% endfor %}
+    {% if featured %}
+    {% include cover.html html=featured.content %}
+    <a class="feature-card" href="{{ featured.url | relative_url }}">
+      {% if cover_src != "" %}<img src="{{ cover_src }}" alt="Album cover for {{ featured.title | escape }}" loading="lazy">{% endif %}
+      <span class="label">Review &middot; {{ featured.date | date: "%b %Y" }}</span>
+      <span class="title">{{ featured.title }}</span>
+      <span class="excerpt">{{ featured.content | strip_html | truncatewords: 26 }}</span>
+    </a>
+    {% endif %}
+    <div class="stack-list">
+      {% assign lists = all_reviews | where_exp: "p", "p.tags contains 'AOTY'" | slice: 0, 3 %}
+      {% for post in lists %}
+      <a href="{{ post.url | relative_url }}">
+        <span class="label">Album of the year</span>
+        <span class="title">{{ post.title }}</span>
+        {% if forloop.first %}<span class="excerpt">{{ post.content | strip_html | truncatewords: 18 }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 
-<div class="sqs-html-content" data-sqsp-text-block-content>
-  <h2 style="white-space:pre-wrap;">Welcome to my tiny real estate on the wonderful (and strange)&nbsp;interweb! </h2><p class="" style="white-space:pre-wrap;">I have always been passionate about products, technology and user-centric design. I am currently working as a <strong>principal</strong> <strong>product manager</strong> in B2B SaaS. In my previous roles, I have worked in the domains of B2B e-commerce,&nbsp;B2C online-education and also had a stint at a heavy-machinery/engineering company.</p><p class="" style="white-space:pre-wrap;">Under ‘<a href="/writing">Writing</a>’, I share my experiences and opinions on <a href="{{ '/writing/tags/productmanagement/' | relative_url }}">#productmanagement</a> as well as the occassional <a href="{{ '/writing/tags/bookreviews/' | relative_url }}">#bookreviews</a>.</p><p class="" style="white-space:pre-wrap;">If you want to work with me or just say hi, hit me up at <a href="http://me@vcent.in" target="_blank">me@vcent.in</a>.&nbsp;</p>
-</div>
+<section class="section" aria-labelledby="also-h">
+  <div class="section-head">
+    <h2 id="also-h">Also.</h2>
+  </div>
+  <div class="section-body">
+    <p class="also-text">When I’m not thinking about product, I nerd out over guitar gear, <a href="{{ '/music-reviews/' | relative_url }}">review heavy music</a>, <a href="{{ '/photography/' | relative_url }}">shoot photographs</a>, read fantasy and sci‑fi, cry my eyes out supporting Arsenal (#coyg) and travel when there isn’t a pandemic.</p>
+  </div>
+</section>
 
-  
-  
-
-<div class="sqs-html-content" data-sqsp-text-block-content>
-  <h1 style="white-space:pre-wrap;"><strong>Latest posts</strong></h1>
-</div>
-
-<ul class="post-list">
-  {% assign latest = site.writing | sort: "date" | reverse | slice: 0, 5 %}
-  {% for post in latest %}
-  <li>
-    <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time>
-  </li>
-  {% endfor %}
-</ul>
-
-  
-  
-
-<div class="sqs-html-content" data-sqsp-text-block-content>
-  <h1 style="white-space:pre-wrap;">Also.</h1><p class="" style="white-space:pre-wrap;">When I'm not thinking about product management and technology, I like to nerd out to guitar gear, <a href="/music-reviews">review heavy music</a>, <a href="/photography">shoot photographs</a>, read fantasy/sci-fi, cry my eyes out supporting Arsenal (#coyg) and travel when there isn’t a pandemic. </p><p class="" style="white-space:pre-wrap;">Of late, I write for <a href="https://www.tempelores.com">Tempelores.com</a>, a quaint little website dedicated to heavy music based out of Netherlands and Finland. I also cross-post my reviews here. 👇</p>
-</div>
-
-<ul class="post-list">
-  {% assign latest_reviews = site["music-reviews"] | sort: "date" | reverse | slice: 0, 3 %}
-  {% for post in latest_reviews %}
-  <li>
-    <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time>
-  </li>
-  {% endfor %}
-</ul>
+{% include newsletter-band.html %}

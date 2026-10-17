@@ -1,16 +1,18 @@
 ---
-layout: default
+layout: page
 title: Music reviews
+kicker: Heavy music
+intro: Reviews of heavy music, cross-posted from Tempelores.com, plus a best-of list every December.
 permalink: "/music-reviews/"
 ---
-<h1>Music reviews</h1>
-<p class="section-intro">Reviews of heavy music, cross-posted from <a href="https://www.tempelores.com">Tempelores.com</a>, plus yearly best-of lists.</p>
-<ul class="post-list">
+<ol class="post-list with-covers">
   {% assign posts = site["music-reviews"] | sort: "date" | reverse %}
   {% for post in posts %}
+  {% include cover.html html=post.content %}
   <li>
+    {% if cover_src != "" %}<img class="thumb" src="{{ cover_src }}" alt="" loading="lazy">{% else %}<span class="thumb-empty" aria-hidden="true">AOTY</span>{% endif %}
     <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time>
+    <span class="meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time></span>
   </li>
   {% endfor %}
-</ul>
+</ol>

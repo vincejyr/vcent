@@ -1,0 +1,13 @@
+{%- comment -%}
+  Finds a lead album-cover image: reviews migrated from Squarespace start with
+  a bare <img src="..." alt=""/>. Sets cover_src and cover_tag (or leaves them
+  empty) for the caller. Usage: {% include cover.html html=post.content %}
+{%- endcomment -%}
+{%- assign cover_src = "" -%}
+{%- assign cover_tag = "" -%}
+{%- assign _cover_html = include.html | strip -%}
+{%- assign _cover_start = _cover_html | slice: 0, 10 -%}
+{%- if _cover_start == '<img src="' -%}
+  {%- assign cover_src = _cover_html | split: '"' | slice: 1 | first -%}
+  {%- assign cover_tag = _cover_html | split: '/>' | first | append: '/>' -%}
+{%- endif -%}

@@ -1,14 +1,42 @@
 ---
 layout: default
 ---
-<article class="post">
-  <p class="post-back"><a href="{{ '/writing/' | relative_url }}">&larr; Writing</a></p>
-  <h1>{{ page.title }}</h1>
-  <p class="post-meta">
-    <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>
-    {% include tag-list.html %}
-  </p>
-  <div class="post-content">
+<article class="wrap">
+  <header class="article-head">
+    <a class="back-link" href="{{ '/writing/' | relative_url }}">&larr; Writing</a>
+    <p class="kicker">{% include writing-label.html post=page long=true %}</p>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}<p class="dek">{{ page.description }}</p>{% endif %}
+    <div class="byline">
+      <span>{{ site.author }}</span>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>
+    </div>
+  </header>
+
+  <div class="prose">
     {{ content }}
   </div>
+
+  <footer class="article-foot">
+    {% include tag-list.html %}
+    <nav class="pager" aria-label="More posts">
+      {% if page.previous %}
+      <a class="prev" href="{{ page.previous.url | relative_url }}">
+        <span class="label">&larr; Previous</span>
+        <span class="title">{{ page.previous.title }}</span>
+      </a>
+      {% else %}<span></span>{% endif %}
+      {% if page.next %}
+      <a class="next" href="{{ page.next.url | relative_url }}">
+        <span class="label">Next &rarr;</span>
+        <span class="title">{{ page.next.title }}</span>
+      </a>
+      {% else %}
+      <a class="next" href="{{ '/writing/' | relative_url }}">
+        <span class="label">Back to</span>
+        <span class="title">All writing &rarr;</span>
+      </a>
+      {% endif %}
+    </nav>
+  </footer>
 </article>

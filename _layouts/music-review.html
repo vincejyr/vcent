@@ -1,14 +1,68 @@
 ---
 layout: default
 ---
-<article class="post music-review">
-  <p class="post-back"><a href="{{ '/music-reviews/' | relative_url }}">&larr; Music reviews</a></p>
-  <h1>{{ page.title }}</h1>
-  <p class="post-meta">
-    <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>
-    {% include tag-list.html %}
-  </p>
-  <div class="post-content">
+{%- include cover.html html=content -%}
+{%- assign is_list = false -%}
+{%- if page.tags contains "AOTY" -%}{%- assign is_list = true -%}{%- endif -%}
+{%- capture kicker -%}
+  {%- if is_list -%}Album of the year
+  {%- else -%}Review{% assign genres = page.tags | where_exp: "t", "t != 'reviews'" %}{% if genres.size > 0 %} &middot; {% for g in genres %}{{ g | replace: "-", " " | capitalize }}{% unless forloop.last %} / {% endunless %}{% endfor %}{% endif %}
+  {%- endif -%}
+{%- endcapture -%}
+<article class="wrap">
+  {% if cover_src != "" %}
+  <header class="review-head">
+    <img class="cover" src="{{ cover_src }}" alt="Album cover for {{ page.title | escape }}">
+    <div class="review-head-text">
+      <a class="back-link" href="{{ '/music-reviews/' | relative_url }}">&larr; Music reviews</a>
+      <p class="kicker">{{ kicker }}</p>
+      <h1>{{ page.title }}</h1>
+      <dl class="review-facts">
+        {% if page.format %}<div><dt>Format</dt><dd>{{ page.format }}</dd></div>{% endif %}
+        {% if page.runtime %}<div><dt>Runtime</dt><dd>{{ page.runtime }}</dd></div>{% endif %}
+        {% if page.origin %}<div><dt>From</dt><dd>{{ page.origin }}</dd></div>{% endif %}
+        <div><dt>Reviewed</dt><dd><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time></dd></div>
+      </dl>
+    </div>
+  </header>
+  <div class="prose">
+    {{ content | strip | remove_first: cover_tag }}
+  </div>
+  {% else %}
+  <header class="article-head">
+    <a class="back-link" href="{{ '/music-reviews/' | relative_url }}">&larr; Music reviews</a>
+    <p class="kicker">{{ kicker }}</p>
+    <h1>{{ page.title }}</h1>
+    <div class="byline">
+      <span>{{ site.author }}</span>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>
+    </div>
+  </header>
+  <div class="prose">
     {{ content }}
   </div>
+  {% endif %}
+
+  <footer class="article-foot">
+    {% include tag-list.html %}
+    <nav class="pager" aria-label="More reviews">
+      {% if page.previous %}
+      <a class="prev" href="{{ page.previous.url | relative_url }}">
+        <span class="label">&larr; Previous</span>
+        <span class="title">{{ page.previous.title }}</span>
+      </a>
+      {% else %}<span></span>{% endif %}
+      {% if page.next %}
+      <a class="next" href="{{ page.next.url | relative_url }}">
+        <span class="label">Next &rarr;</span>
+        <span class="title">{{ page.next.title }}</span>
+      </a>
+      {% else %}
+      <a class="next" href="{{ '/music-reviews/' | relative_url }}">
+        <span class="label">Back to</span>
+        <span class="title">All reviews &rarr;</span>
+      </a>
+      {% endif %}
+    </nav>
+  </footer>
 </article>

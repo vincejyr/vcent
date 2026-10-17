@@ -1,0 +1,14 @@
+<section class="newsletter-band" aria-labelledby="news-h">
+  <div>
+    <h2 id="news-h">{{ include.heading | default: "The occasional newsletter" }}</h2>
+    <p>{{ include.text | default: "Products, articles, comics and music I found interesting. Dormant since 2017 — maybe one day. Thou shalt not be spammed." }}</p>
+  </div>
+  <form class="subscribe-form" action="https://vcent.us13.list-manage.com/subscribe/post?u=13939345549a7d5be67090294&amp;id=bd8fc73756" method="post" target="_blank">
+    <div class="field">
+      <label for="nl-email{{ include.id }}">Email address</label>
+      <input id="nl-email{{ include.id }}" type="email" name="EMAIL" required placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="honeypot" aria-hidden="true"><input type="text" name="b_13939345549a7d5be67090294_bd8fc73756" tabindex="-1" value=""></div>
+    <button type="submit">Subscribe</button>
+  </form>
+</section>
