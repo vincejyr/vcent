@@ -153,12 +153,12 @@ img { max-width: 100%; height: auto; }
 .hero {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-  gap: 56px;
-  align-items: end;
-  padding: 88px 0 96px;
+  gap: 40px 56px;
+  align-items: start;
+  padding: 64px 0 96px;
 }
 
-.hero-text { display: flex; flex-direction: column; gap: 28px; }
+.hero-text { display: flex; flex-direction: column; gap: 20px; }
 
 .hero h1 {
   margin: 0;
@@ -185,8 +185,8 @@ img { max-width: 100%; height: auto; }
   max-width: 40ch;
 }
 
-.hero figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.hero figure img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
+.hero figure { margin: 0; grid-column: 1 / -1; display: flex; flex-direction: column; gap: 12px; }
+.hero figure img { width: 100%; aspect-ratio: 2500 / 1380; object-fit: cover; display: block; }
 
 figcaption,
 .hero figcaption {
@@ -202,6 +202,9 @@ figcaption,
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 40px 56px;
 }
+
+/* "Also." continues the intro, so it has no divider above it */
+.section--intro { border-top: 0; padding-top: 0; }
 
 .section-head { display: flex; flex-direction: column; gap: 14px; max-width: 300px; }
 
