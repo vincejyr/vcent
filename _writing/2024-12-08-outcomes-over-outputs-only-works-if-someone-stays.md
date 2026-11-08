@@ -1,10 +1,10 @@
 ---
 layout: writing-post
-title: "PMs Should Own Outcomes, Not Just Launches"
+title: "Outcomes over outputs only works if someone stays"
 description: "Staying with the work past launch is where the real product decisions happen."
 date: 2024-12-08 10:00:00 +0000
 tags: ["productmanagement"]
-permalink: "/writing/2024/12/8/pms-should-own-outcomes-not-just-launches/"
+permalink: "/writing/2024/12/8/outcomes-over-outputs-only-works-if-someone-stays/"
 ---
 
 Every PM has heard “outcomes over outputs.” We say it in interviews, put it on slides and repeat it in planning. Part of the appeal is that it sets us apart. A project manager ships the thing; a product manager makes sure the thing worked.
