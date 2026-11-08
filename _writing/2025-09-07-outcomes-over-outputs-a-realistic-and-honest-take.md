@@ -1,10 +1,10 @@
 ---
 layout: writing-post
-title: "Outcomes over outputs only works if someone stays"
+title: "Outcomes over outputs: A realistic and honest take"
 description: "Staying with the work past launch is where the real product decisions happen."
 date: 2025-09-07 10:00:00 +0000
 tags: ["productmanagement"]
-permalink: "/writing/2025/9/7/outcomes-over-outputs-only-works-if-someone-stays/"
+permalink: "/writing/2025/9/7/outcomes-over-outputs-a-realistic-and-honest-take/"
 ---
 
 Every PM has heard “outcomes over outputs.” We say it in interviews, put it on slides and repeat it in planning. Part of the appeal is that it sets us apart. A project manager ships the thing; a product manager makes sure the thing worked.
