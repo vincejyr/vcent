@@ -7,19 +7,19 @@ tags: ["productmanagement"]
 permalink: "/writing/2025/9/7/outcomes-over-outputs-a-realistic-take/"
 ---
 
-Every PM has heard “outcomes over outputs.” We say it in interviews, put it on slides and repeat it in planning. Part of the appeal is that it sets us apart. A project manager ships the thing; a product manager makes sure the thing worked.
+Every PM has heard “outcomes over outputs”. We say it in interviews, put it on slides and repeat it in planning. Part of the appeal is that it sets us apart. A project manager ships the thing; a product manager makes sure the thing has done its job.
 
-But look at how most product teams actually run. A feature ships, there's a launch post in Slack and a few emoji reactions, and the PM is on the next initiative by the following sprint. Sometimes it's a reorg, sometimes the roadmap moves, sometimes the incentives just reward launching. Either way, the results dashboard gets built and then nobody looks at it. The metrics come in and land on nobody's desk.
+But let’s take a real hard look at how most product teams work. A feature ships, there's a launch post in Slack and a few emoji reactions, and the PM is on the next initiative by the following sprint. Sometimes it's a reorg, sometimes the roadmap moves, sometimes the incentives just reward launching. Either way, the results dashboard gets built and then nobody looks at it. The metrics come in and land on nobody's desk.
 
 When that happens, there's no learning loop. Nobody iterates, nobody kills what didn't work, and the next team inherits the result without the context.
 
-## Start with a definition of done that isn't “shipped”
+## Start with a definition of done
 
 Owning an outcome starts before you write the first ticket. If “done” means “deployed to 100%,” you've already decided to walk away at launch.
 
 A better definition of done has three parts:
 
-- **The outcome you're trying to move,** stated as a change in user behaviour, not a feature: “new users set up a pipeline in their first session,” not “launch the pipeline wizard.”
+- **The outcome you're trying to move,** stated as a change in user behaviour, not a feature.
 - **The KPI that tells you it moved,** with a baseline and a target.
 - **The point at which you'll decide:** when you'll look at the data, and what each result will lead you to do.
 
@@ -53,7 +53,7 @@ You can't just ask PMs to be more accountable. Teams follow what leadership rewa
 
 - **It starts with you.** You don't need permission to look at your own feature's data three months later.
 - **Talk about outcomes, not just progress.** In standups, in roadmap reviews and when managing up, ask “did it work?” before “what's next?”
-- **Plan for missing the target.** Every roadmap bet should come with a contingency plan: kill criteria agreed before launch, a pivot-or-persevere checkpoint and the fallback you'll take if the KPI doesn't move. A pre-mortem is a cheap way to write these down.
+- **Plan for missing the target.** Every roadmap should come with a contingency plan: kill criteria agreed before launch, a pivot-or-persevere checkpoint and the fallback you'll take if the KPI doesn't move. A pre-mortem is a cheap way to write these down.
 - **Celebrate outcomes, including the honest ones.** Celebrate the experiment that moved the metric, and also the team that killed a feature because the data said so.
 
 Outcomes over outputs only means something if someone is still there when the outcomes arrive. Make sure that person is you.
