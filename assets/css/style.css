@@ -763,3 +763,26 @@ figcaption,
   line-height: 1.6;
   color: var(--ink-2);
 }
+
+/* ---------- Newsletter issues (converted from the original emails) ---------- */
+
+.nl-issue { padding-top: 24px; }
+.nl-issue h2 { font-size: 30px; }
+.nl-issue hr { border: 0; border-top: 1px solid var(--rule); margin: 48px 0 0; }
+.nl-issue hr + h2 { margin-top: 40px; }
+.nl-issue .nl-banner { margin: 0; }
+.nl-issue .nl-banner img { width: 100%; }
+.nl-issue blockquote p { font-size: 19px; }
+.nl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+.nl-item img { flex: 0 0 132px; width: 132px; margin: 4px 0 0; }
+.nl-item p { flex: 1; font-size: 19px; line-height: 1.6; }
+.nl-item-noimg { padding-left: 156px; }
+@media (max-width: 560px) {
+  .nl-item { flex-direction: column; gap: 12px; }
+  .nl-item img { flex-basis: auto; width: 160px; }
+  .nl-item-noimg { padding-left: 0; }
+}
