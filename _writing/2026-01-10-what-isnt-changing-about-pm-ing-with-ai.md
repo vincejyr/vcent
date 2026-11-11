@@ -1,10 +1,10 @@
 ---
 layout: writing-post
-title: "What Isn't Changing About Product Management with AI?"
+title: "What Isn't Changing About PM-ing with AI?"
 description: "AI makes building cheaper. Picking the right problem still matters as much as ever."
 date: 2026-01-10 10:00:00 +0000
 tags: ["productmanagement"]
-permalink: "/writing/2026/1/10/what-isnt-changing-about-product-management-with-ai/"
+permalink: "/writing/2026/1/10/what-isnt-changing-about-pm-ing-with-ai/"
 ---
 
 Every product team I talk to right now is being asked the same question in different words: where's the AI? It comes up in roadmap reviews, board decks, sales calls and all-hands. Most of what gets written about AI and product management is about what's changing. This post is about what isn't.
