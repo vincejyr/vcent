@@ -6,3 +6,6 @@ _site/
 vendor/
 Gemfile.lock
 .DS_Store
+
+# Source newsletter PDFs (contain personal email addresses)
+writing/newsletter/
