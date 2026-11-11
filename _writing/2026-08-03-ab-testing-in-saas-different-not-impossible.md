@@ -1,10 +1,10 @@
 ---
 layout: writing-post
-title: "A/B Testing in B2B SaaS: The Honest Version"
+title: "A/B Testing in SaaS: Different, Not Impossible"
 description: "Experimentation in B2B isn't the same as in B2C, but the same principles apply with a few tweaks."
 date: 2026-08-03 10:00:00 +0000
 tags: ["productmanagement"]
-permalink: "/writing/2026/8/3/ab-testing-in-b2b-saas-the-honest-version/"
+permalink: "/writing/2026/8/3/ab-testing-in-saas-different-not-impossible/"
 ---
 
 A friend of mine works at Meta, and they like to remind me that their A/B tests reach millions of users a day and get called within days. That isn't the world most of us in B2B SaaS live in.
