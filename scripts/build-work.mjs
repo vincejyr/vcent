@@ -59,7 +59,7 @@ sitemap: false
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex, nofollow">
-  <title>Private · Vince J</title>
+  <title>Work · Vince J</title>
   <link rel="icon" href="data:,">
 ${analytics}
   <style>
@@ -67,9 +67,15 @@ ${analytics}
     @media (prefers-color-scheme: dark) { :root { --bg:#17161a; --ink:#ece8e1; --muted:#9a958c; --rule:#34323a; --accent:#e0905f; } }
     * { box-sizing: border-box; }
     body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-    form { width:min(360px, calc(100vw - 32px)); }
-    h1 { font:500 28px/1.2 Georgia, serif; margin:0 0 6px; }
+    main { width:min(420px, calc(100vw - 32px)); padding:32px 0; }
+    h1 { font:500 28px/1.2 Georgia, serif; margin:0 0 12px; }
     p { margin:0 0 20px; color:var(--muted); font-size:15px; }
+    .access { margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--rule); }
+    .access p { color:var(--ink); }
+    .btn { display:block; text-align:center; text-decoration:none; padding:12px 14px; border-radius:4px; background:var(--ink); color:var(--bg); }
+    .alt { margin:14px 0 0; font-size:14px; color:var(--muted); }
+    .alt a { color:var(--ink); }
+    form p { margin-bottom:12px; }
     input, button { width:100%; font:inherit; padding:12px 14px; border-radius:4px; border:1px solid var(--rule); background:transparent; color:var(--ink); }
     button { margin-top:10px; background:var(--ink); color:var(--bg); border-color:var(--ink); cursor:pointer; }
     button:disabled { opacity:.6; cursor:wait; }
@@ -77,13 +83,20 @@ ${analytics}
   </style>
 </head>
 <body>
+  <main>
+  <div class="access">
+    <h1>Work</h1>
+    <p>This page contains my professional work experience, body of work and references. To get access, please reach out to me.</p>
+    <a class="btn" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
+    <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
+  </div>
   <form id="f" autocomplete="off">
-    <h1>Private page</h1>
-    <p>Enter the password to continue.</p>
+    <p>Already have the password?</p>
     <input id="pw" type="password" placeholder="Password" aria-label="Password" autofocus required>
     <button id="go" type="submit">Unlock</button>
     <div id="err" role="alert"></div>
   </form>
+  </main>
   <script>
     var D = ${JSON.stringify({ s: b64(salt), i: b64(iv), c: b64(ciphertext), n: ITERATIONS })};
     function u8(s) { var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
