@@ -62,40 +62,53 @@ sitemap: false
   <title>Work · Vince J</title>
   <link rel="icon" href="data:,">
 ${analytics}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    :root { --bg:#faf8f4; --ink:#1d1b18; --muted:#6b665e; --rule:#d9d4ca; --accent:#8a3b12; }
-    @media (prefers-color-scheme: dark) { :root { --bg:#17161a; --ink:#ece8e1; --muted:#9a958c; --rule:#34323a; --accent:#e0905f; } }
-    * { box-sizing: border-box; }
-    body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-    main { width:min(420px, calc(100vw - 32px)); padding:32px 0; }
-    h1 { font:500 28px/1.2 Georgia, serif; margin:0 0 12px; }
-    p { margin:0 0 20px; color:var(--muted); font-size:15px; }
-    .access { margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--rule); }
-    .access p { color:var(--ink); }
-    .btn { display:block; text-align:center; text-decoration:none; padding:12px 14px; border-radius:4px; background:var(--ink); color:var(--bg); }
-    .alt { margin:14px 0 0; font-size:14px; color:var(--muted); }
-    .alt a { color:var(--ink); }
-    form p { margin-bottom:12px; }
-    input, button { width:100%; font:inherit; padding:12px 14px; border-radius:4px; border:1px solid var(--rule); background:transparent; color:var(--ink); }
-    button { margin-top:10px; background:var(--ink); color:var(--bg); border-color:var(--ink); cursor:pointer; }
-    button:disabled { opacity:.6; cursor:wait; }
-    #err { margin:10px 0 0; color:var(--accent); min-height:1.5em; font-size:14px; }
+    a.button, a.button:hover { display:inline-flex; align-items:center; text-decoration:none; color:var(--paper); }
+    .alt { margin:16px 0 0; font-family:var(--sans); font-size:15px; color:var(--muted); }
+    .unlock { margin-top:48px; padding-top:32px; border-top:1px solid var(--rule); max-width:360px; }
+    .unlock p { margin:0 0 12px; font-family:var(--sans); font-size:15px; color:var(--muted); }
+    .unlock input { width:100%; height:48px; padding:0 14px; font:inherit; font-size:16px; border:1px solid var(--rule); background:transparent; color:var(--ink); }
+    .unlock button { width:100%; margin-top:10px; }
+    .unlock button:disabled { opacity:.6; cursor:wait; }
+    #err { margin:10px 0 0; min-height:1.5em; font-family:var(--sans); font-size:14px; color:var(--accent); }
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="site-title" href="/">Vince J</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="/writing/">Writing</a>
+        <a href="/music-reviews/">Music Reviews</a>
+        <a href="/photography/">Photography</a>
+        <a href="/newsletter/">Newsletter</a>
+        <a href="/work/" aria-current="page">Work</a>
+      </nav>
+    </div>
+  </header>
   <main>
-  <div class="access">
-    <h1>Work</h1>
-    <p>This page contains my professional work experience, body of work and references. To get access, please reach out to me.</p>
-    <a class="btn" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
-    <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
-  </div>
-  <form id="f" autocomplete="off">
-    <p>Already have the password?</p>
-    <input id="pw" type="password" placeholder="Password" aria-label="Password" autofocus required>
-    <button id="go" type="submit">Unlock</button>
-    <div id="err" role="alert"></div>
-  </form>
+    <div class="wrap">
+      <header class="page-head">
+        <div class="page-head-text">
+          <h1>Work</h1>
+        </div>
+        <p class="intro">This page contains my professional work experience, body of work and references. To get access to this page, please reach out to me.</p>
+      </header>
+      <div class="page-body">
+        <a class="button" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
+        <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
+        <form id="f" class="unlock" autocomplete="off">
+          <p>Already have the password?</p>
+          <input id="pw" type="password" placeholder="Password" aria-label="Password" required>
+          <button class="button" id="go" type="submit">Unlock</button>
+          <div id="err" role="alert"></div>
+        </form>
+      </div>
+    </div>
   </main>
   <script>
     var D = ${JSON.stringify({ s: b64(salt), i: b64(iv), c: b64(ciphertext), n: ITERATIONS })};
