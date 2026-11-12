@@ -1,0 +1,19 @@
+<script>
+  // PostHog (EU Cloud), cookieless: no cookies or local storage, no session replay, honours Do Not Track.
+  (function () {
+    var s = document.createElement("script");
+    s.async = true;
+    s.src = "https://eu-assets.i.posthog.com/static/array.js";
+    s.onload = function () {
+      window.posthog.init("phc_pbpwigYkE9jYQRdQPNfYRZZLGtCasXJ9oSLkv3Yb6g2X", {
+        api_host: "https://eu.i.posthog.com",
+        cookieless_mode: "always",
+        persistence: "memory",
+        person_profiles: "identified_only",
+        disable_session_recording: true,
+        respect_dnt: true
+      });
+    };
+    document.head.appendChild(s);
+  })();
+</script>

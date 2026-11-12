@@ -30,6 +30,9 @@ const plaintext = readFileSync(join(root, "_private/work.src.html"), "utf8").rep
   b64(pdf)
 );
 
+// Same PostHog snippet as the rest of the site, so visits to /work are counted.
+const analytics = readFileSync(join(root, "_includes/analytics.html"), "utf8");
+
 const salt = crypto.getRandomValues(new Uint8Array(16));
 const iv = crypto.getRandomValues(new Uint8Array(12));
 const baseKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
@@ -58,6 +61,7 @@ sitemap: false
   <meta name="robots" content="noindex, nofollow">
   <title>Private · Vince J</title>
   <link rel="icon" href="data:,">
+${analytics}
   <style>
     :root { --bg:#faf8f4; --ink:#1d1b18; --muted:#6b665e; --rule:#d9d4ca; --accent:#8a3b12; }
     @media (prefers-color-scheme: dark) { :root { --bg:#17161a; --ink:#ece8e1; --muted:#9a958c; --rule:#34323a; --accent:#e0905f; } }
