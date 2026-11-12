@@ -93,6 +93,20 @@ rows:
     lightbox.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     closeBtn.focus();
+
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      window.posthog.capture('photo_viewed', {
+        photo_number: currentIndex + 1,
+        gallery_size: images.length
+      });
+    }
+
+    if (window.posthog && window.posthog.logger && typeof window.posthog.logger.info === 'function') {
+      window.posthog.logger.info('photo_viewed', {
+        photo_number: currentIndex + 1,
+        gallery_size: images.length
+      });
+    }
   }
 
   function closeLightbox() {

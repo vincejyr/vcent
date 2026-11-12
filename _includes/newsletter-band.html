@@ -12,3 +12,20 @@
     <button type="submit">Subscribe</button>
   </form>
 </section>
+
+<script>
+(function () {
+  var form = document.querySelector('.subscribe-form');
+  if (!form) return;
+
+  form.addEventListener('submit', function () {
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      window.posthog.capture('newsletter_subscription_submitted');
+    }
+
+    if (window.posthog && window.posthog.logger && typeof window.posthog.logger.info === 'function') {
+      window.posthog.logger.info('newsletter_subscription_submitted');
+    }
+  });
+})();
+</script>
