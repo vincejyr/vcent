@@ -11,6 +11,35 @@
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   <link rel="alternate" type="application/atom+xml" title="{{ site.title }}: Writing" href="{{ '/feed/writing.xml' | relative_url }}">
   <link rel="alternate" type="application/atom+xml" title="{{ site.title }}: Music reviews" href="{{ '/feed/music-reviews.xml' | relative_url }}">
+  {% if site.posthog %}
+  <link rel="preconnect" href="{{ site.posthog.host }}">
+  <script>
+    (function () {
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = {{ site.posthog.host | append: '/static/array.js' | jsonify }};
+      script.onload = function () {
+        window.posthog.init({{ site.posthog.project_token | jsonify }}, {
+          api_host: {{ site.posthog.host | jsonify }},
+          capture_exceptions: {
+            capture_unhandled_errors: true,
+            capture_unhandled_rejections: true,
+            capture_console_errors: false
+          },
+          logs: {
+            serviceName: 'vcent-web',
+            environment: {{ jekyll.environment | jsonify }}
+          }
+        });
+
+        if (window.posthog.logger && typeof window.posthog.logger.info === 'function') {
+          window.posthog.logger.info('site_page_loaded');
+        }
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+  {% endif %}
   {% seo title=true %}
 </head>
 <body>

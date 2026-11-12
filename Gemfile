@@ -6,3 +6,6 @@ gem "github-pages", group: :jekyll_plugins
 
 # Needed for `jekyll serve` on Ruby 3+; harmless on older Rubies.
 gem "webrick"
+
+# Loads local PostHog build configuration for Jekyll.
+gem "dotenv", "~> 3.0"
