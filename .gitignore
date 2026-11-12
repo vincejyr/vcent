@@ -12,3 +12,4 @@ writing/newsletter/
 
 # Private source for the password-protected /work page (plaintext lives only on disk)
 _private/
+.env
