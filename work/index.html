@@ -38,6 +38,9 @@ sitemap: false
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
     a.button, a.button:hover { display:inline-flex; align-items:center; text-decoration:none; color:var(--paper); }
+    .page-head-aside { max-width:38ch; }
+    .page-head-aside .intro { max-width:none; }
+    .page-head-aside .button { margin-top:24px; }
     .alt { margin:16px 0 0; font-family:var(--sans); font-size:15px; color:var(--muted); }
     .unlock { margin-top:48px; padding-top:32px; border-top:1px solid var(--rule); max-width:360px; }
     .unlock p { margin:0 0 12px; font-family:var(--sans); font-size:15px; color:var(--muted); }
@@ -66,11 +69,13 @@ sitemap: false
         <div class="page-head-text">
           <h1>Work</h1>
         </div>
-        <p class="intro">This page contains my professional work experience, body of work and references. To get access to this page, please reach out to me.</p>
+        <div class="page-head-aside">
+          <p class="intro">This page contains my professional work experience, body of work and references. To get access to this page, please reach out to me.</p>
+          <a class="button" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
+          <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
+        </div>
       </header>
       <div class="page-body">
-        <a class="button" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
-        <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
         <form id="f" class="unlock" autocomplete="off">
           <p>Already have the password?</p>
           <input id="pw" type="password" placeholder="Password" aria-label="Password" required>
