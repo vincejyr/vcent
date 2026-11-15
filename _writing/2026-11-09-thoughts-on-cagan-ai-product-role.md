@@ -4,7 +4,7 @@ title: "Thoughts on Marty Cagan's article on 'AI and the Future of the Product R
 description: "Where Cagan gets it right, where I'd take it further, and why I think the role is heading from product manager to product operator."
 date: 2026-11-09 10:00:00 +0000
 tags: ["productmanagement"]
-permalink: "/writing/2026/11/9/thoughts-on-marty-cagans-article-on-ai-and-the-future-of-the-product-role/"
+permalink: "/writing/2026/11/9/thoughts-on-cagan-ai-product-role/"
 ---
 
 Marty Cagan needs no introduction. *Inspired* was instrumental in me becoming a PM. When I was moving from business development and marketing into product, the ideas in that book taught me how to think about building products, and they've stayed with me ever since.
