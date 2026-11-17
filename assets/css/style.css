@@ -148,16 +148,59 @@ img { max-width: 100%; height: auto; }
 .site-footer a { color: var(--muted); }
 .site-footer a:hover { color: var(--accent); }
 
-.site-footer .social {
-  flex-basis: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  font-size: 15px;
+.site-footer .social { flex-basis: 100%; margin-bottom: 8px; }
+
+.site-footer .social h2 {
+  margin: 0 0 12px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
 }
 
-.site-footer .social a { color: var(--ink); }
-.site-footer .social a:hover { color: var(--accent); }
+.site-footer .social ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer .social a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--ink);
+}
+
+.site-footer .social svg { width: 22px; height: 22px; fill: currentColor; }
+.site-footer .social a:hover,
+.site-footer .social a:focus-visible { color: var(--accent); }
+
+/* Name of the site on hover / keyboard focus */
+.site-footer .social a::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--paper);
+  background: var(--ink);
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+
+.site-footer .social a:hover::after,
+.site-footer .social a:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------- Home ---------- */
 
