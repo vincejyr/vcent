@@ -1,0 +1,558 @@
+---
+layout: null
+sitemap: false
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scheduled Rides Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f6f6f4; --ink:#0f1110; --ink2:#5b605d; --ink3:#9aa09c; --line:#e7e8e5;
+  --card:#ffffff; --brand:#1fa463; --brand-ink:#0e7a46; --brand-soft:#e7f6ee;
+  --amber-soft:#fff4e2; --amber-ink:#8a5200; --red-soft:#fdecec; --red-ink:#a32424;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --page:#121413; --ink:#f2f3f1; --ink2:#b4b9b5; --ink3:#7d837f; --line:#2a2d2b; }
+}
+:root[data-theme="dark"]{ --page:#121413; --ink:#f2f3f1; --ink2:#b4b9b5; --ink3:#7d837f; --line:#2a2d2b; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* ---------- page layout ---------- */
+.wrap{max-width:1040px;margin:0 auto;padding:48px 16px 56px;display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:56px;align-items:start}
+.intro .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.intro h1{font-size:30px;line-height:1.15;margin:8px 0 10px;letter-spacing:-.02em;font-weight:700}
+.intro p.lede{color:var(--ink2);margin:0 0 28px;max-width:440px}
+.steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.steps li{border-bottom:1px solid var(--line)}
+.steps button{all:unset;cursor:pointer;display:grid;grid-template-columns:28px 1fr;gap:12px;padding:12px 4px;width:100%;box-sizing:border-box}
+.steps .n{font-variant-numeric:tabular-nums;color:var(--ink3);font-size:13px;padding-top:1px}
+.steps .t{font-weight:600;font-size:14px}
+.steps .d{color:var(--ink2);font-size:13px;display:none;margin-top:3px;line-height:1.45}
+.steps li.on .n{color:var(--brand)}
+.steps li.on .d{display:block}
+.steps button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+.nav{display:flex;gap:8px;margin-top:20px;align-items:center}
+.nav button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600}
+.nav button:disabled{opacity:.35;cursor:default}
+.nav .hint{color:var(--ink3);font-size:12px;margin-left:6px}
+.foot{margin-top:28px;color:var(--ink3);font-size:12px}
+
+/* ---------- phone ---------- */
+.phone{width:392px;height:820px;border-radius:52px;background:#0b0c0b;padding:11px;box-shadow:0 30px 60px -20px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.06);position:sticky;top:24px}
+.screen-wrap{position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:#fff;color:#0f1110}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:32px;border-radius:20px;background:#0b0c0b;z-index:30}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .28s ease, transform .28s ease;transform:translateY(6px);background:#fff}
+.screen.on{opacity:1;pointer-events:auto;transform:none}
+.status{height:52px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:6px 30px 0;font-size:15px;font-weight:600}
+.status .icons{display:flex;gap:5px;align-items:center}
+.body{flex:1;display:flex;flex-direction:column;padding:4px 20px 22px;min-height:0}
+.topbar{display:flex;align-items:center;gap:12px;height:44px;margin-bottom:6px}
+.back{width:36px;height:36px;border-radius:50%;border:0;background:#f2f3f1;display:grid;place-items:center}
+.topbar .ttl{font-weight:600;font-size:16px}
+h2{font-size:24px;line-height:1.2;letter-spacing:-.02em;margin:6px 0 6px;font-weight:700}
+.sub{color:#5b605d;font-size:14px;margin:0}
+.muted{color:#5b605d;font-size:13px}
+.tiny{color:#9aa09c;font-size:12px}
+.spacer{flex:1}
+.cta{border:0;border-radius:14px;background:#1fa463;color:#fff;font-weight:600;font-size:16px;height:54px;width:100%}
+.cta:active{transform:scale(.99)}
+.ghost{border:0;background:transparent;color:#0f1110;font-weight:600;height:46px;width:100%;font-size:15px}
+.ghost.red{color:#a32424}
+.card{border:1px solid #e7e8e5;border-radius:16px;padding:14px 16px;background:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+.chip.green{background:#e7f6ee;color:#0e7a46}
+.chip.amber{background:#fff4e2;color:#8a5200}
+.chip.grey{background:#f2f3f1;color:#5b605d}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hr{height:1px;background:#eeefec;margin:12px 0}
+
+/* map */
+.map{position:relative;background:#eef1ee;overflow:hidden}
+.map svg{display:block;width:100%;height:100%}
+
+/* route block */
+.route{display:grid;grid-template-columns:14px 1fr;column-gap:12px;row-gap:14px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:#0f1110;justify-self:center}
+.sq{width:10px;height:10px;border-radius:2px;background:#1fa463;justify-self:center}
+.route .line{grid-column:1;width:2px;height:18px;background:#d7d9d5;justify-self:center;margin:-10px 0}
+.route .lbl{font-size:12px;color:#9aa09c}
+.route .val{font-weight:600;font-size:15px}
+
+/* home */
+.where{display:flex;align-items:center;gap:10px;background:#f2f3f1;border-radius:14px;height:54px;padding:0 8px 0 16px;font-weight:600;font-size:17px}
+.where .when{margin-left:auto;display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;border:0;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.where .when.pulse{box-shadow:0 0 0 0 rgba(31,164,99,.5);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,164,99,.45)}70%{box-shadow:0 0 0 10px rgba(31,164,99,0)}100%{box-shadow:0 0 0 0 rgba(31,164,99,0)}}
+.recent{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f0f1ee}
+.ic{width:36px;height:36px;border-radius:50%;background:#f2f3f1;display:grid;place-items:center;flex-shrink:0}
+.tabbar{display:flex;justify-content:space-around;border-top:1px solid #f0f1ee;padding:10px 0 22px;font-size:11px;color:#9aa09c}
+.tabbar div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tabbar .on{color:#0f1110;font-weight:600}
+.brand{font-weight:700;font-size:24px;letter-spacing:-.02em;color:#0f1110}
+
+/* sheet */
+.dim{position:absolute;inset:0;background:rgba(15,17,16,.38)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:10px 22px 26px}
+.grab{width:38px;height:5px;border-radius:3px;background:#dcded9;margin:0 auto 14px}
+.benefit{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start;padding:12px 0}
+.benefit .ic{background:#e7f6ee;width:40px;height:40px}
+.benefit b{display:block;font-size:15px}
+.benefit span{color:#5b605d;font-size:13px}
+
+/* date & time */
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin:0 -20px;padding-left:20px;padding-right:20px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 56px;height:68px;border-radius:14px;border:1px solid #e7e8e5;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.day .w{font-size:11px;color:#9aa09c;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.day .dn{font-size:18px;font-weight:700}
+.day.sel{background:#0f1110;border-color:#0f1110;color:#fff}
+.day.sel .w{color:#b4b9b5}
+.day.off{opacity:.35;pointer-events:none}
+/* time wheel: 5 visible rows of 40px, centre row selected */
+.wheel{position:relative;display:flex;justify-content:center;align-items:center;height:200px;user-select:none;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent 100%)}
+.wheel .band{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:12px;background:#f2f3f1;pointer-events:none}
+.wheel .col{position:relative;width:84px;height:200px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;padding:80px 0;box-sizing:border-box;overscroll-behavior:contain;cursor:grab}
+.wheel .col::-webkit-scrollbar{display:none}
+.wheel .it{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:20px;font-weight:500;color:#9aa09c;font-variant-numeric:tabular-nums;transition:color .15s,font-size .15s}
+.wheel .it.sel{color:#0f1110;font-weight:700;font-size:24px}
+.wheel .it.past{color:#d5d8d4}
+.wheel .colon{position:relative;font-size:24px;font-weight:700;width:14px;text-align:center}
+.cta:disabled{background:#c9ccc8}
+.tnc{align-self:flex-start;margin-top:14px;color:#0e7a46;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.sectionlbl{font-size:12px;color:#9aa09c;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px}
+
+/* address list */
+.field{display:flex;align-items:center;gap:12px;background:#f2f3f1;border-radius:12px;height:50px;padding:0 14px;font-weight:500}
+.field.active{background:#fff;border:1.5px solid #0f1110}
+.sugg{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #f0f1ee;width:100%;border-left:0;border-right:0;border-top:0;background:transparent;text-align:left}
+.sugg b{display:block;font-size:15px;font-weight:600}
+.sugg span{font-size:13px;color:#9aa09c}
+
+/* preview */
+.opt{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;border:1.5px solid #0f1110}
+.car{width:52px;height:32px;border-radius:8px;background:#f2f3f1;display:grid;place-items:center}
+.price{font-weight:700;font-size:17px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* confirmed */
+.check{width:72px;height:72px;border-radius:50%;background:#e7f6ee;display:grid;place-items:center;margin:28px 0 18px}
+.timeline{display:grid;grid-template-columns:20px 1fr;column-gap:12px}
+.timeline .tdot{width:10px;height:10px;border-radius:50%;border:2px solid #1fa463;background:#fff;margin:5px auto 0}
+.timeline .tdot.fill{background:#1fa463}
+.timeline .tline{width:2px;background:#e1e3df;margin:0 auto;height:100%}
+.timeline .tx{padding-bottom:14px}
+.timeline .tx b{font-size:14px;display:block}
+.timeline .tx span{font-size:13px;color:#5b605d}
+
+/* list */
+.tabs{display:flex;gap:6px;background:#f2f3f1;border-radius:12px;padding:4px;margin:6px 0 16px}
+.tabs div{flex:1;text-align:center;padding:8px 0;border-radius:9px;font-size:13px;font-weight:600;color:#5b605d}
+.tabs .on{background:#fff;color:#0f1110;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+/* lock screen */
+.lock{background:linear-gradient(180deg,#1b2a24 0%,#0f1613 100%);color:#fff}
+.lock .clock{text-align:center;margin-top:40px}
+.lock .clock .d{font-size:16px;opacity:.75;font-weight:500}
+.lock .clock .t{font-size:84px;font-weight:300;letter-spacing:-.03em;line-height:1}
+.notif{margin:28px 12px 0;background:rgba(255,255,255,.88);color:#0f1110;border-radius:20px;padding:12px 14px;backdrop-filter:blur(12px);box-shadow:0 6px 24px rgba(0,0,0,.2);cursor:pointer}
+.notif .h{display:flex;align-items:center;gap:8px;font-size:12px;color:#5b605d}
+.notif .appic{width:20px;height:20px;border-radius:5px;background:#1fa463;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}
+.notif b{display:block;font-size:14px;margin-top:6px}
+.notif p{margin:2px 0 0;font-size:13px;color:#2b2f2c}
+.lock .hint{margin-top:auto;text-align:center;font-size:12px;opacity:.6;padding-bottom:30px}
+
+.driver{display:flex;gap:12px;align-items:center}
+.avatar{width:48px;height:48px;border-radius:50%;background:#d9e7df;display:grid;place-items:center;font-weight:700;color:#0e7a46}
+.plate{display:inline-block;border:1.5px solid #0f1110;border-radius:6px;padding:1px 7px;font-weight:700;font-size:13px;letter-spacing:.04em}
+.lockrow{display:flex;align-items:center;gap:8px;background:#e7f6ee;color:#0e7a46;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600}
+.warnbox{background:#fff4e2;color:#8a5200;border-radius:12px;padding:12px 14px;font-size:13px}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:28px;padding-top:28px}
+  .phone{position:relative;top:0;margin:0 auto;width:min(392px,100%);height:auto;aspect-ratio:392/820}
+  .intro{order:2}
+}
+@media (max-width:420px){
+  .phone{border-radius:40px;padding:8px}
+  .screen-wrap{border-radius:33px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="intro">
+    <div class="eyebrow">Concept prototype · rider journey</div>
+    <h1>Scheduled rides</h1>
+    <p class="lede">An early airport ride, booked days ahead. Tap through the phone or pick a step.</p>
+    <ol class="steps" id="steps"></ol>
+    <div class="nav">
+      <button id="prev">Back</button>
+      <button id="next">Next</button>
+      <span class="hint">← → keys work too</span>
+    </div>
+    <p class="foot">Interview concept for a take-home task. Not an official app; names, places and prices are illustrative.</p>
+  </section>
+
+  <div class="phone" aria-label="Rider app prototype">
+    <div class="screen-wrap" id="phone">
+      <div class="island"></div>
+
+      <!-- 1 HOME -->
+      <div class="screen" data-s="0">
+        <div class="status"><span>21:12</span><span class="icons">●●● ▮</span></div>
+        <div class="map" style="height:300px">
+          <svg viewBox="0 0 370 300" preserveAspectRatio="xMidYMid slice"><rect width="370" height="300" fill="#eef1ee"/><path d="M-10 70 L380 40 M-10 190 L380 150 M60 -10 L110 310 M230 -10 L270 310 M-10 260 L380 240" stroke="#fff" stroke-width="12" fill="none"/><path d="M140 -10 L170 310 M-10 120 L380 100" stroke="#fff" stroke-width="6" fill="none"/><rect x="180" y="190" width="70" height="40" rx="6" fill="#dfe8e1"/><circle cx="160" cy="160" r="22" fill="#1fa463" opacity=".15"/><circle cx="160" cy="160" r="8" fill="#1fa463" stroke="#fff" stroke-width="3"/></svg>
+        </div>
+        <div class="body" style="margin-top:-24px;background:#fff;border-radius:24px 24px 0 0;padding-top:20px;position:relative">
+          <div class="row" style="margin-bottom:14px;align-items:flex-end"><span class="brand">Ready, set, ride</span><span class="chip green">New · Schedule</span></div>
+          <div class="where"><span>Where to?</span><button class="when pulse" data-go="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Later</button></div>
+          <div style="margin-top:8px">
+            <div class="recent"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f1110" stroke-width="2"><path d="M2 16l20-6-9 11-2-7z"/></svg></div><div><b style="font-size:15px">Tallinn Airport</b><div class="tiny">Lennujaama tee 2</div></div></div>
+            <div class="recent" style="border:0"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f1110" stroke-width="2"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V4h6v3"/></svg></div><div><b style="font-size:15px">Work</b><div class="tiny">Vana-Lõuna 15</div></div></div>
+          </div>
+          <div class="spacer"></div>
+        </div>
+        <div class="tabbar"><div class="on">●<span>Rides</span></div><div>○<span>Scheduled</span></div><div>○<span>Account</span></div></div>
+      </div>
+
+      <!-- 2 ONBOARDING -->
+      <div class="screen" data-s="1">
+        <div class="status"><span>21:12</span><span class="icons">●●● ▮</span></div>
+        <div class="map" style="flex:1"><svg viewBox="0 0 370 300" preserveAspectRatio="xMidYMid slice"><rect width="370" height="300" fill="#eef1ee"/><path d="M-10 70 L380 40 M-10 190 L380 150 M60 -10 L110 310 M230 -10 L270 310" stroke="#fff" stroke-width="12" fill="none"/></svg></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h2>Schedule a ride</h2>
+          <p class="sub">Book your early ride today and sleep easy.</p>
+          <div style="margin:10px 0 18px">
+            <div class="benefit"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0e7a46" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><b>Book up to 2 weeks ahead</b><span>Pick a day and time, we handle the rest.</span></div></div>
+            <div class="benefit"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0e7a46" stroke-width="2"><path d="M12 3l7 3v6c0 4-3 7.5-7 9-4-1.5-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><div><b>Driver and fare confirmed 1 hour before</b><span>We notify you once a driver is assigned and the fare is locked.</span></div></div>
+            <div class="benefit"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0e7a46" stroke-width="2"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg></div><div><b>Free cancellation until 1 hour before</b><span>€3 fee if you cancel within the last hour.</span></div></div>
+          </div>
+          <button class="cta" data-go="2">Choose a time</button>
+        </div>
+      </div>
+
+      <!-- 3 DATE & TIME -->
+      <div class="screen" data-s="2">
+        <div class="status"><span>21:13</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="topbar"><button class="back" data-go="0" aria-label="Back">‹</button><span class="ttl">Pickup time</span></div>
+          <h2>When should we pick you up?</h2>
+          <p class="sub">Up to 2 weeks ahead</p>
+          <div class="sectionlbl">Day</div>
+          <div class="days" id="days"></div>
+          <div class="sectionlbl">Time</div>
+          <div class="wheel">
+            <div class="band"></div>
+            <div class="col" id="hCol" aria-label="Hour"></div>
+            <div class="colon">:</div>
+            <div class="col" id="mCol" aria-label="Minutes"></div>
+          </div>
+          <p class="tiny" id="timeHint" style="text-align:center;margin:8px 0 0">Swipe to set the hour and minutes</p>
+          <div class="spacer"></div>
+          <div class="card" style="margin-bottom:12px;background:#f7f8f6;border:0"><div class="row"><span class="muted">Pickup</span><b id="dtSummary">Thu 20 Nov · <span data-time>04:30</span></b></div><div class="tiny" style="margin-top:4px">Your driver waits up to 5 minutes at no cost.</div></div>
+          <button class="cta" data-go="3">Set pickup time</button>
+        </div>
+      </div>
+
+      <!-- 4 PICKUP & DESTINATION -->
+      <div class="screen" data-s="3">
+        <div class="status"><span>21:13</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="topbar"><button class="back" data-go="2" aria-label="Back">‹</button><span class="ttl">Route</span><span class="chip grey" style="margin-left:auto" data-dt>Thu 20 Nov · <span data-time>04:30</span></span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+            <div class="field"><span class="dot" style="width:8px;height:8px"></span>Tartu mnt 42, Tallinn</div>
+            <div class="field active"><span class="sq" style="width:8px;height:8px"></span>Airp<span style="border-left:1.5px solid #1fa463;height:18px;margin-left:1px"></span></div>
+          </div>
+          <div style="margin-top:10px">
+            <button class="sugg" data-go="4"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f1110" stroke-width="2"><path d="M2 16l20-6-9 11-2-7z"/></svg></div><div><b>Tallinn Airport · Departures</b><span>Lennujaama tee 2 · 6.1 km</span></div></button>
+            <button class="sugg" data-go="4"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f1110" stroke-width="2"><path d="M4 20h16M6 20V8l6-4 6 4v12"/></svg></div><div><b>Tallinn Bus Station</b><span>Lastekodu 46 · 2.4 km</span></div></button>
+            <button class="sugg" data-go="4"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f1110" stroke-width="2"><path d="M4 20h16M6 20V8l6-4 6 4v12"/></svg></div><div><b>Tallinn Passenger Port, D-Terminal</b><span>Lootsi 13 · 2.9 km</span></div></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 PREVIEW -->
+      <div class="screen" data-s="4">
+        <div class="status"><span>21:14</span><span class="icons">●●● ▮</span></div>
+        <div class="map" style="height:300px;position:relative">
+          <svg viewBox="0 0 370 300" preserveAspectRatio="xMidYMid slice"><rect width="370" height="300" fill="#eef1ee"/><path d="M-10 70 L380 40 M-10 190 L380 150 M60 -10 L110 310 M230 -10 L270 310 M-10 260 L380 240" stroke="#fff" stroke-width="12" fill="none"/><path d="M90 92 C 140 120, 170 130, 200 170 S 260 220, 290 230" stroke="#0f1110" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="90" cy="92" r="7" fill="#0f1110" stroke="#fff" stroke-width="3"/><rect x="283" y="223" width="14" height="14" rx="3" fill="#1fa463" stroke="#fff" stroke-width="3"/></svg>
+          <button class="back" data-go="3" aria-label="Back" style="position:absolute;top:8px;left:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)">‹</button>
+        </div>
+        <div class="body" style="margin-top:-24px;background:#fff;border-radius:24px 24px 0 0;padding-top:20px;position:relative">
+          <div class="row"><b style="font-size:18px">Scheduled ride</b><span class="chip green" data-dt>Thu 20 Nov · <span data-time>04:30</span></span></div>
+          <div class="route" style="margin:16px 0 4px">
+            <span class="dot"></span><div><div class="lbl">Pickup</div><div class="val">Tartu mnt 42</div></div>
+            <span class="sq"></span><div><div class="lbl">Drop-off · arrive about <span data-arr>04:45</span></div><div class="val">Tallinn Airport · Departures</div></div>
+          </div>
+          <div class="hr"></div>
+          <div class="opt"><div class="car"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M3 11 L5 5 Q6 3 9 3 L21 3 Q24 3 25 5 L27 11 Z" fill="#0f1110"/><circle cx="8" cy="12" r="2.6" fill="#0f1110" stroke="#f2f3f1" stroke-width="1.5"/><circle cx="22" cy="12" r="2.6" fill="#0f1110" stroke="#f2f3f1" stroke-width="1.5"/></svg></div><div style="flex:1"><b>Bolt</b><div class="tiny">4 seats · room for luggage</div></div><div><div class="price">€11–13</div><div class="tiny" style="text-align:right">estimate</div></div></div>
+          <p class="tiny" style="margin:12px 0 0">Final fare is locked when your driver is confirmed, 1 hour before pickup. Free cancellation until <span data-conf>03:30</span>, then €3.</p>
+          <div class="spacer"></div>
+          <div class="row" style="margin-bottom:10px;font-size:14px"><span class="muted">Payment</span><b>Visa ·· 4821</b></div>
+          <button class="cta" data-go="5">Schedule ride</button>
+        </div>
+      </div>
+
+      <!-- 6 CONFIRMED -->
+      <div class="screen" data-s="5">
+        <div class="status"><span>21:14</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1fa463" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <h2>Your ride is scheduled</h2>
+          <p class="sub"><span data-dtlong>Thursday 20 November at <span data-time>04:30</span></span> from Tartu mnt 42 to Tallinn Airport.</p>
+          <div class="card" style="margin-top:22px">
+            <div class="timeline">
+              <div><div class="tdot fill"></div><div class="tline" style="height:calc(100% - 15px)"></div></div><div class="tx"><b>Now · Scheduled</b><span>We're lining up a driver for you.</span></div>
+              <div><div class="tdot"></div><div class="tline" style="height:calc(100% - 15px)"></div></div><div class="tx"><b><span data-conf>03:30</span> · Driver and fare confirmed</b><span>We'll notify you. Free cancellation ends.</span></div>
+              <div><div class="tdot"></div></div><div class="tx" style="padding-bottom:0"><b><span data-time>04:30</span> · Pickup</b><span>Your driver waits up to 5 minutes.</span></div>
+            </div>
+          </div>
+          <a class="tnc" href="#" onclick="return false">T&amp;Cs</a>
+          <div class="spacer"></div>
+          <button class="cta" data-go="6">View scheduled rides</button>
+          <button class="ghost" data-go="0">Done</button>
+        </div>
+      </div>
+
+      <!-- 7 LIST & CANCEL -->
+      <div class="screen" data-s="6">
+        <div class="status"><span>21:15</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="topbar"><button class="back" data-go="5" aria-label="Back">‹</button><span class="ttl">Scheduled rides</span></div>
+          <div class="tabs"><div class="on">Upcoming</div><div>Past</div></div>
+          <div class="card">
+            <div class="row"><b data-dtday>Thu 20 Nov</b><span class="chip green">Scheduled</span></div>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.02em;margin:4px 0 10px;font-variant-numeric:tabular-nums" data-time><span data-time>04:30</span></div>
+            <div class="route">
+              <span class="dot"></span><div class="val" style="font-weight:500;font-size:14px">Tartu mnt 42</div>
+              <span class="sq"></span><div class="val" style="font-weight:500;font-size:14px">Tallinn Airport · Departures</div>
+            </div>
+            <div class="hr"></div>
+            <div class="row"><span class="muted">Estimated fare</span><b>€11–13</b></div>
+            <div class="row" style="margin-top:12px;gap:8px"><button class="ghost" style="border:1px solid #e7e8e5;border-radius:12px;height:42px;font-size:14px">Edit</button><button class="ghost red" style="border:1px solid #e7e8e5;border-radius:12px;height:42px;font-size:14px" id="cancelBtn">Cancel ride</button></div>
+          </div>
+          <a class="tnc" href="#" onclick="return false">T&amp;Cs</a>
+          <div class="spacer"></div>
+          <p class="tiny" style="text-align:center">Tap ‘Cancel ride’ to see the cancellation terms.</p>
+        </div>
+        <div class="dim" id="cDim" style="display:none"></div>
+        <div class="sheet" id="cSheet" style="display:none">
+          <div class="grab"></div>
+          <h2 style="font-size:21px">Cancel this ride?</h2>
+          <div class="lockrow" style="margin:12px 0 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free to cancel until <span data-conf>03:30</span> on <span data-wd>Thursday</span></div>
+          <p class="muted" style="margin:0 0 18px">After that, cancelling costs €3 because your driver has already committed to the trip.</p>
+          <button class="cta" style="background:#a32424" id="cConfirm">Cancel for free</button>
+          <button class="ghost" id="cKeep">Keep my ride</button>
+        </div>
+      </div>
+
+      <!-- 8 CONFLICT -->
+      <div class="screen" data-s="7">
+        <div class="status"><span data-off="-48">03:42</span><span class="icons">●●● ▮</span></div>
+        <div class="map" style="flex:1"><svg viewBox="0 0 370 300" preserveAspectRatio="xMidYMid slice"><rect width="370" height="300" fill="#eef1ee"/><path d="M-10 70 L380 40 M-10 190 L380 150 M60 -10 L110 310 M230 -10 L270 310" stroke="#fff" stroke-width="12" fill="none"/></svg></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <span class="chip amber">Ride at <span data-time>04:30</span></span>
+          <h2 style="font-size:21px;margin-top:10px">You already have a ride booked</h2>
+          <p class="muted" style="margin:0 0 16px">Your scheduled ride to Tallinn Airport picks you up in 48 minutes. To request a ride now, cancel it first. A €3 fee applies.</p>
+          <button class="cta" data-go="8">Keep scheduled ride</button>
+          <button class="ghost red">Cancel it and ride now</button>
+        </div>
+      </div>
+
+      <!-- 9 CONFIRMED 1H BEFORE (lock screen) -->
+      <div class="screen lock" data-s="8">
+        <div class="status" style="color:#fff"><span></span><span class="icons">●●● ▮</span></div>
+        <div class="clock"><div class="d"><span data-lockdate>Thursday, 20 November</span></div><div class="t" data-lock>3:30</div></div>
+        <div class="notif" data-go="9">
+          <div class="h"><span class="appic">B</span>BOLT<span style="margin-left:auto">now</span></div>
+          <b>Your <span data-time>04:30</span> ride is confirmed</b>
+          <p>Marko is your driver. Toyota Prius, 482 BTR. Fare locked at €12.40.</p>
+        </div>
+        <div class="hint">Tap the notification</div>
+      </div>
+
+      <!-- 10 IN-APP CONFIRMED -->
+      <div class="screen" data-s="9">
+        <div class="status"><span data-off="-59">03:31</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="topbar"><button class="back" data-go="8" aria-label="Back">‹</button><span class="ttl" data-dt>Thu 20 Nov · 04:30</span></div>
+          <span class="chip green" style="align-self:flex-start">Driver confirmed</span>
+          <h2>Marko will pick you up at <span data-time>04:30</span></h2>
+          <p class="sub">You'll get a heads-up when he's on his way.</p>
+          <div class="card" style="margin-top:18px">
+            <div class="driver"><div class="avatar">M</div><div style="flex:1"><b>Marko</b><div class="tiny">★ 4.94 · 2,310 rides</div></div><div style="text-align:right"><span class="plate">482 BTR</span><div class="tiny" style="margin-top:4px">Grey Toyota Prius</div></div></div>
+          </div>
+          <div class="lockrow" style="margin-top:12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Fare locked at €12.40</div>
+          <div class="card" style="margin-top:12px">
+            <div class="route">
+              <span class="dot"></span><div class="val" style="font-size:14px">Tartu mnt 42</div>
+              <span class="sq"></span><div class="val" style="font-size:14px">Tallinn Airport · Departures</div>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          <p class="tiny" style="text-align:center;margin:0 0 10px">Cancelling now costs €3.</p>
+          <button class="ghost" style="border:1px solid #e7e8e5;border-radius:14px" data-go="10">See what happens if a driver drops out →</button>
+        </div>
+      </div>
+
+      <!-- 11 NO REPLACEMENT (lock) -->
+      <div class="screen lock" data-s="10">
+        <div class="status" style="color:#fff"><span></span><span class="icons">●●● ▮</span></div>
+        <div class="clock"><div class="d"><span data-lockdate>Thursday, 20 November</span></div><div class="t" data-lock2>3:40</div></div>
+        <div class="notif" data-go="11">
+          <div class="h"><span class="appic">B</span>BOLT<span style="margin-left:auto">now</span></div>
+          <b>We couldn't find a new driver</b>
+          <p>Your driver cancelled and no replacement is available for <span data-time>04:30</span>. Tap to see your options.</p>
+        </div>
+        <div class="hint">Tap the notification</div>
+      </div>
+
+      <!-- 12 NO REPLACEMENT IN APP -->
+      <div class="screen" data-s="11">
+        <div class="status"><span data-off="-49">03:41</span><span class="icons">●●● ▮</span></div>
+        <div class="body">
+          <div class="topbar"><button class="back" data-go="10" aria-label="Back">‹</button><span class="ttl" data-dt>Thu 20 Nov · 04:30</span></div>
+          <span class="chip amber" style="align-self:flex-start">No driver</span>
+          <h2>Sorry, we couldn't find a driver for <span data-time>04:30</span></h2>
+          <p class="sub">Your driver cancelled and nobody nearby accepted in time. Your ride has been cancelled at no cost to you.</p>
+          <div class="warnbox" style="margin-top:18px">We're telling you 50 minutes before pickup so you still have time to get to the airport.</div>
+          <div class="spacer"></div>
+          <button class="cta" data-go="0">Request a ride now</button>
+          <button class="ghost">Contact support</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS=[
+ ["Choose to schedule","On the home screen, the rider taps ‘Later’ next to ‘Where to?’."],
+ ["See how it works","First-time onboarding: book up to 2 weeks ahead, driver and fare confirmed 1 hour before, free cancellation until then."],
+ ["Pick date and time","Only the next 14 days are bookable during the pilot. Try picking a day and time."],
+ ["Pick the route","Pickup is pre-filled from location. Airport, bus station and port suggestions come first."],
+ ["Preview the ride","Estimated fare, arrival time, cancellation terms and payment, all before confirming."],
+ ["Ride is scheduled","Confirmation shows what happens next: driver and fare confirmed at 03:30, pickup at 04:30."],
+ ["Manage scheduled rides","Upcoming rides live under Scheduled. Tap ‘Cancel ride’: it's free until 1 hour before, then €3."],
+ ["One ride at a time","Within 1 hour of a scheduled ride, the rider can't request an on-demand ride without cancelling first."],
+ ["Driver confirmed, 1 hour before","Push notification at 03:30: driver assigned and fare locked."],
+ ["Ride details","The rider sees the driver, car and locked fare. Cancelling now costs €3."],
+ ["If no replacement is found","A driver cancelled and nobody accepted. The rider is told by 50 minutes before pickup."],
+ ["Fallback","The ride is cancelled at no cost and the rider can request an on-demand ride straight away."]
+];
+const screens=[...document.querySelectorAll('.screen')];
+const list=document.getElementById('steps');
+let cur=0;
+STEPS.forEach(([t,d],i)=>{
+  const li=document.createElement('li');
+  li.innerHTML=`<button><span class="n">${String(i+1).padStart(2,'0')}</span><span><span class="t">${t}</span><span class="d">${d}</span></span></button>`;
+  li.querySelector('button').onclick=()=>go(i);
+  list.appendChild(li);
+});
+function go(i){
+  cur=Math.max(0,Math.min(STEPS.length-1,i));
+  screens.forEach(s=>s.classList.toggle('on',+s.dataset.s===cur));
+  [...list.children].forEach((li,j)=>li.classList.toggle('on',j===cur));
+  document.getElementById('prev').disabled=cur===0;
+  document.getElementById('next').disabled=cur===STEPS.length-1;
+  hideCancel();
+  try{localStorage.setItem('sr-step',cur)}catch(e){}
+}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+document.getElementById('phone').addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t)go(+t.dataset.go)});
+
+/* cancel sheet */
+const cDim=document.getElementById('cDim'),cSheet=document.getElementById('cSheet');
+function hideCancel(){cDim.style.display=cSheet.style.display='none'}
+document.getElementById('cancelBtn').onclick=()=>{cDim.style.display=cSheet.style.display='block'};
+document.getElementById('cKeep').onclick=hideCancel;
+cDim.onclick=hideCancel;
+document.getElementById('cConfirm').onclick=()=>{hideCancel();go(7)};
+
+/* date & time picker: today is Tue 17 Nov 2026 */
+const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],WL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],ML=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today=new Date(2026,10,17);
+let selDay=3,selTime='04:30';
+const daysEl=document.getElementById('days');
+for(let i=0;i<17;i++){
+  const d=new Date(today);d.setDate(d.getDate()+i);
+  const b=document.createElement('button');
+  b.className='day'+(i>14?' off':'')+(i===selDay?' sel':'');
+  b.innerHTML=`<span class="w">${i===0?'Today':i===1?'Tmrw':W[d.getDay()]}</span><span class="dn">${d.getDate()}</span>`;
+  b.onclick=()=>{selDay=i;[...daysEl.children].forEach((c,j)=>c.classList.toggle('sel',j===i));sync()};
+  daysEl.appendChild(b);
+}
+/* scroll wheels: hours 00-23, minutes in 5-min steps */
+const ROW=40,NOW_MIN=21*60+13,LEAD=30; /* prototype clock: Tue 21:13; earliest pickup 30 min ahead */
+const hCol=document.getElementById('hCol'),mCol=document.getElementById('mCol');
+const HOURS=[...Array(24).keys()],MINS=[...Array(12).keys()].map(i=>i*5);
+let selH=4,selM=30;
+function fill(col,vals,onPick){
+  vals.forEach((v,i)=>{const d=document.createElement('div');d.className='it';d.textContent=String(v).padStart(2,'0');
+    d.onclick=()=>col.scrollTo({top:i*ROW,behavior:'smooth'});col.appendChild(d)});
+  let t;col.addEventListener('scroll',()=>{
+    const i=Math.max(0,Math.min(vals.length-1,Math.round(col.scrollTop/ROW)));
+    [...col.children].forEach((c,j)=>c.classList.toggle('sel',j===i));
+    clearTimeout(t);t=setTimeout(()=>onPick(vals[i]),80);
+  },{passive:true});
+}
+fill(hCol,HOURS,v=>{selH=v;pickTime()});
+fill(mCol,MINS,v=>{selM=v;pickTime()});
+/* mouse drag support for desktop viewers */
+[hCol,mCol].forEach(col=>{let y0=null,s0=0;
+  col.addEventListener('mousedown',e=>{y0=e.clientY;s0=col.scrollTop;col.style.scrollSnapType='none';col.style.cursor='grabbing'});
+  window.addEventListener('mousemove',e=>{if(y0!==null)col.scrollTop=s0-(e.clientY-y0)});
+  window.addEventListener('mouseup',()=>{if(y0===null)return;y0=null;col.style.cursor='';col.style.scrollSnapType='';
+    col.scrollTo({top:Math.round(col.scrollTop/ROW)*ROW,behavior:'smooth'})});
+});
+function setWheels(){hCol.scrollTop=HOURS.indexOf(selH)*ROW;mCol.scrollTop=MINS.indexOf(selM)*ROW;
+  [[hCol,HOURS.indexOf(selH)],[mCol,MINS.indexOf(selM)]].forEach(([c,i])=>[...c.children].forEach((x,j)=>x.classList.toggle('sel',j===i)))}
+function pickTime(){selTime=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0');sync()}
+/* "Today" only allows times at least 30 min from now */
+function checkToday(){
+  const tooSoon=selDay===0&&selH*60+selM<NOW_MIN+LEAD;
+  [...hCol.children].forEach((c,j)=>c.classList.toggle('past',selDay===0&&j*60+55<NOW_MIN+LEAD));
+  [...mCol.children].forEach((c,j)=>c.classList.toggle('past',selDay===0&&selH*60+j*5<NOW_MIN+LEAD));
+  const cta=document.querySelector('[data-s="2"] .cta');cta.disabled=tooSoon;
+  const hint=document.getElementById('timeHint');
+  hint.textContent=tooSoon?'Pick a time at least 30 minutes from now':'Swipe to set the hour and minutes';
+  hint.style.color=tooSoon?'#a32424':'';
+}
+function sync(){
+  checkToday();
+  const d=new Date(today);d.setDate(d.getDate()+selDay);
+  const short=`${W[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`;
+  document.getElementById('dtSummary').textContent=`${short} · ${selTime}`;
+  document.querySelectorAll('[data-dt]').forEach(e=>e.textContent=`${short} · ${selTime}`);
+  document.querySelectorAll('[data-dtday]').forEach(e=>e.textContent=short);
+  document.querySelectorAll('[data-time]').forEach(e=>e.textContent=selTime);
+  const [h,m]=selTime.split(':').map(Number),f=(x)=>{x=(x+1440)%1440;return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')},base=h*60+m;
+  const set=(sel,v)=>document.querySelectorAll(sel).forEach(e=>e.textContent=v);
+  set('[data-conf]',f(base-60));set('[data-arr]',f(base+15));
+  set('[data-lock]',f(base-60).replace(/^0/,''));set('[data-lock2]',f(base-50).replace(/^0/,''));
+  document.querySelectorAll('[data-off]').forEach(e=>e.textContent=f(base+ +e.dataset.off));set('[data-wd]',WL[d.getDay()]);set('[data-lockdate]',`${WL[d.getDay()]}, ${d.getDate()} ${ML[d.getMonth()]}`);
+  document.querySelectorAll('[data-dtlong]').forEach(e=>e.textContent=`${WL[d.getDay()]} ${d.getDate()} ${ML[d.getMonth()]} at ${selTime}`);
+}
+setWheels();sync();
+let start=0;try{start=+localStorage.getItem('sr-step')||0}catch(e){}
+go(start);
+</script>
+</body>
+</html>
