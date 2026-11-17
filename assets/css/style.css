@@ -148,6 +148,17 @@ img { max-width: 100%; height: auto; }
 .site-footer a { color: var(--muted); }
 .site-footer a:hover { color: var(--accent); }
 
+.site-footer .social {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 15px;
+}
+
+.site-footer .social a { color: var(--ink); }
+.site-footer .social a:hover { color: var(--accent); }
+
 /* ---------- Home ---------- */
 
 .hero {
