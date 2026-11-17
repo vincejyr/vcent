@@ -24,11 +24,27 @@ if (!password) {
 const ITERATIONS = 600000;
 const b64 = (buf) => Buffer.from(buf).toString("base64");
 
+// The site footer, rendered from the same include every other page uses so the
+// two stay in sync. Only the few Liquid expressions it contains are handled.
+const config = readFileSync(join(root, "_config.yml"), "utf8");
+const cfg = (k) => (config.match(new RegExp(`^${k}:\\s*(.+)$`, "m")) || [])[1]?.trim().replace(/^["']|["']$/g, "");
+const footer = readFileSync(join(root, "_includes/footer.html"), "utf8")
+  .replace(/\{\{\s*site\.time\s*\|\s*date:\s*"%Y"\s*\}\}/g, String(new Date().getFullYear()))
+  .replace(/\{\{\s*site\.author\s*\}\}/g, cfg("author"))
+  .replace(/\{\{\s*site\.email\s*\}\}/g, cfg("email"))
+  .replace(/\{\{\s*'([^']+)'\s*\|\s*relative_url\s*\}\}/g, "$1");
+if (/\{\{|\{%/.test(footer)) {
+  console.error("_includes/footer.html has Liquid this script does not render; update build-work.mjs.");
+  process.exit(1);
+}
+
 const pdf = readFileSync(join(root, "_private/resume.pdf"));
-const plaintext = readFileSync(join(root, "_private/work.src.html"), "utf8").replace(
-  "__RESUME_B64__",
-  b64(pdf)
-);
+const src = readFileSync(join(root, "_private/work.src.html"), "utf8");
+if (!src.includes("__FOOTER__")) {
+  console.error("_private/work.src.html is missing the __FOOTER__ placeholder.");
+  process.exit(1);
+}
+const plaintext = src.replace("__RESUME_B64__", b64(pdf)).replace("__FOOTER__", footer);
 
 // Same PostHog snippet as the rest of the site, so visits to /work are counted.
 const analytics = readFileSync(join(root, "_includes/analytics.html"), "utf8");
@@ -110,6 +126,7 @@ ${analytics}
       </div>
     </div>
   </main>
+${footer}
   <script>
     var D = ${JSON.stringify({ s: b64(salt), i: b64(iv), c: b64(ciphertext), n: ITERATIONS })};
     function u8(s) { var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
