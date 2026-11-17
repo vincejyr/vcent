@@ -444,10 +444,10 @@ const STEPS=[
  ["Pick date and time","Only the next 14 days are bookable during the pilot. Try picking a day and time."],
  ["Pick the route","Pickup is pre-filled from location. Airport, bus station and port suggestions come first."],
  ["Preview the ride","Estimated fare, arrival time, cancellation terms and payment, all before confirming."],
- ["Ride is scheduled","Confirmation shows what happens next: driver and fare confirmed at 03:30, pickup at 04:30."],
+ ["Ride is scheduled","Confirmation shows what happens next: driver and fare confirmed at {conf}, pickup at {time} on {day}."],
  ["Manage scheduled rides","Upcoming rides live under Scheduled. Tap ‘Cancel ride’: it's free until 1 hour before, then €3."],
  ["One ride at a time","Within 1 hour of a scheduled ride, the rider can't request an on-demand ride without cancelling first."],
- ["Driver confirmed, 1 hour before","Push notification at 03:30: driver assigned and fare locked."],
+ ["Driver confirmed, 1 hour before","Push notification at {conf} on {day}: driver assigned and fare locked."],
  ["Ride details","The rider sees the driver, car and locked fare. Cancelling now costs €3."],
  ["If no replacement is found","A driver cancelled and nobody accepted. The rider is told by 50 minutes before pickup."],
  ["Fallback","The ride is cancelled at no cost and the rider can request an on-demand ride straight away."]
@@ -546,6 +546,8 @@ function sync(){
   set('[data-conf]',f(base-60));set('[data-arr]',f(base+15));
   set('[data-lock]',f(base-60).replace(/^0/,''));set('[data-lock2]',f(base-50).replace(/^0/,''));
   document.querySelectorAll('[data-off]').forEach(e=>e.textContent=f(base+ +e.dataset.off));set('[data-wd]',WL[d.getDay()]);set('[data-lockdate]',`${WL[d.getDay()]}, ${d.getDate()} ${ML[d.getMonth()]}`);
+  const fill=s=>s.replace('{conf}',f(base-60)).replace('{time}',selTime).replace('{day}',`${W[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`);
+  [...list.children].forEach((li,j)=>li.querySelector('.d').textContent=fill(STEPS[j][1]));
   document.querySelectorAll('[data-dtlong]').forEach(e=>e.textContent=`${WL[d.getDay()]} ${d.getDate()} ${ML[d.getMonth()]} at ${selTime}`);
 }
 setWheels();sync();
