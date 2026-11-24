@@ -76,7 +76,9 @@ sitemap: false
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex, nofollow">
   <title>Work · Vince J</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 ${analytics}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,7 +87,9 @@ ${analytics}
   <style>
     a.button, a.button:hover { display:inline-flex; align-items:center; text-decoration:none; color:var(--paper); }
     .alt { margin:16px 0 0; font-family:var(--sans); font-size:15px; color:var(--muted); }
-    .unlock { margin-top:48px; padding-top:32px; border-top:1px solid var(--rule); max-width:360px; }
+    .unlock { max-width:360px; }
+    .reach { margin-top:24px; padding-top:32px; border-top:1px solid var(--rule); max-width:360px; }
+    .reach > p:first-child { margin:0 0 12px; font-family:var(--sans); font-size:15px; color:var(--muted); }
     .unlock p { margin:0 0 12px; font-family:var(--sans); font-size:15px; color:var(--muted); }
     .unlock input { width:100%; height:48px; padding:0 14px; font:inherit; font-size:16px; border:1px solid var(--rule); background:transparent; color:var(--ink); }
     .unlock button { width:100%; margin-top:10px; }
@@ -115,14 +119,17 @@ ${analytics}
         <p class="intro">This page contains my professional work experience, body of work and references. To get access to this page, please reach out to me.</p>
       </header>
       <div class="page-body">
-        <a class="button" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
-        <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
         <form id="f" class="unlock" autocomplete="off">
           <p>Already have the password?</p>
           <input id="pw" type="password" placeholder="Password" aria-label="Password" required>
           <button class="button" id="go" type="submit">Unlock</button>
           <div id="err" role="alert"></div>
         </form>
+        <div class="reach">
+          <p>Don’t have one yet?</p>
+          <a class="button" href="https://www.linkedin.com/in/vincentjyrwa/" target="_blank" rel="noopener">Message me on LinkedIn</a>
+          <p class="alt">Or email me at <a href="mailto:me@vcent.in">me@vcent.in</a></p>
+        </div>
       </div>
     </div>
   </main>
