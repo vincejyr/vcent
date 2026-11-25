@@ -1,0 +1,795 @@
+---
+layout: null
+title: GitHub Wrapped 2026
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GitHub Wrapped 2026</title>
+<meta name="description" content="Your year on GitHub, wrapped. Type any GitHub username to get a story-style recap and shareable cards.">
+<meta property="og:title" content="GitHub Wrapped 2026">
+<meta property="og:description" content="Your year on GitHub, wrapped. Type any username, get your story and a card to share.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#07080c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080c; --fg:#f5f5f7; --muted:rgba(245,245,247,.68); --line:rgba(255,255,255,.14);
+  --green:#39d353; --pink:#ff4f9a; --violet:#8b5cf6; --amber:#ffb224; --cyan:#22d3ee;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Space Grotesk',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+
+/* ---------- landing ---------- */
+.landing{min-height:100dvh;display:grid;place-items:center;padding:32px 16px;position:relative;overflow:hidden}
+.landing::before,.landing::after{content:"";position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;pointer-events:none}
+.landing::before{width:520px;height:520px;background:radial-gradient(circle,#1f6f3a,transparent 70%);top:-160px;left:-120px}
+.landing::after{width:560px;height:560px;background:radial-gradient(circle,#5b21b6,transparent 70%);bottom:-200px;right:-160px}
+.hero{position:relative;z-index:1;width:100%;max-width:560px;text-align:left}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
+.hero h1{font-size:clamp(44px,11vw,84px);line-height:.95;margin:14px 0 18px;letter-spacing:-.03em}
+.hero h1 span{background:linear-gradient(90deg,var(--green),var(--cyan) 45%,var(--violet) 75%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lede{font-size:18px;line-height:1.5;color:var(--muted);margin:0 0 28px;max-width:44ch}
+form.go{display:flex;gap:10px;flex-wrap:wrap}
+.field{flex:1 1 240px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;padding:0 16px;height:56px}
+.field:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(57,211,83,.22)}
+.field b{font-family:var(--mono);color:var(--muted);font-weight:500}
+.field input{flex:1;min-width:0;background:none;border:0;outline:0;font-size:18px;font-family:var(--mono)}
+.btn{height:56px;padding:0 26px;border-radius:14px;border:0;background:var(--fg);color:#07080c;font-weight:700;font-size:17px;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:wait}
+.err{min-height:24px;margin-top:14px;color:#ff8f8f;font-size:15px}
+.fine{margin-top:30px;font-size:13px;line-height:1.6;color:rgba(245,245,247,.5);max-width:52ch}
+.fine a{color:rgba(245,245,247,.75)}
+.loading{display:none;margin-top:14px;font-family:var(--mono);font-size:14px;color:var(--muted)}
+.loading.on{display:flex;align-items:center;gap:10px}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--green);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- story viewer ---------- */
+.viewer{position:fixed;inset:0;z-index:10;background:#000;display:none;place-items:center}
+.viewer.open{display:grid}
+.stage{position:relative;width:100vw;height:100dvh;overflow:hidden;container-type:size;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+@media (min-width:700px){
+  .stage{height:min(860px,calc(100dvh - 48px));width:calc(min(860px,calc(100dvh - 48px)) * 9 / 16);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+}
+.bars{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;gap:4px;padding:12px 12px 0}
+.bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.28);overflow:hidden}
+.bars i b{display:block;height:100%;width:0;background:#fff}
+.topbar{position:absolute;top:22px;left:12px;right:12px;z-index:5;display:flex;align-items:center;gap:10px;font-size:13px}
+.topbar img{width:28px;height:28px;border-radius:50%}
+.topbar .who{font-weight:700}
+.topbar .yr{color:var(--muted);font-family:var(--mono);font-size:12px}
+.topbar .sp{flex:1}
+.ib{width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer}
+.ib svg{width:18px;height:18px}
+
+.card{position:absolute;inset:0;padding:calc(76px + 3cqh) 7cqw 7cqh;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s, visibility .45s}
+.card.active{opacity:1;visibility:visible}
+.card .rise{opacity:0;transform:translateY(18px)}
+.card.active .rise{animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+.k{font-family:var(--mono);font-size:max(11px,3.1cqw);letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.h{font-size:8.6cqw;line-height:1.02;font-weight:700;letter-spacing:-.02em;margin:2.2cqh 0 0}
+.big{font-size:23cqw;line-height:.9;font-weight:700;letter-spacing:-.04em;margin:3cqh 0 1cqh;font-variant-numeric:tabular-nums}
+.mid{font-size:13cqw;line-height:.95;font-weight:700;letter-spacing:-.03em}
+.p{font-size:4.5cqw;line-height:1.4;opacity:.88;margin:2cqh 0 0;max-width:34ch}
+.grow{flex:1}
+.pill{display:inline-block;font-family:var(--mono);font-size:3.2cqw;padding:.6em 1em;border-radius:99px;background:rgba(0,0,0,.25);margin-top:2cqh}
+
+/* card themes */
+.t-intro{background:radial-gradient(120% 80% at 10% 0%,#1d4ed8 0%,transparent 55%),radial-gradient(90% 70% at 100% 100%,#7c3aed 0%,transparent 60%),#07080c}
+.t-contrib{background:linear-gradient(165deg,#062b14 0%,#0b4f24 55%,#39d353 140%)}
+.t-commits{background:linear-gradient(160deg,#ff4f9a 0%,#ff7a3d 100%);color:#1a0610}
+.t-months{background:linear-gradient(180deg,#081a3a 0%,#0e3a7a 100%)}
+.t-streak{background:linear-gradient(170deg,#ffb224 0%,#ff6a00 100%);color:#2a1300}
+.t-clock{background:radial-gradient(90% 60% at 50% 100%,#6d28d9 0%,transparent 70%),#0d0a1f}
+.t-langs{background:linear-gradient(165deg,#0f766e 0%,#042f2e 100%)}
+.t-repos{background:linear-gradient(165deg,#e11d48 0%,#7f1d1d 100%)}
+.t-collab{background:#0a0a0a;color:#d9ff3f}
+.t-new{background:linear-gradient(165deg,#2563eb 0%,#1e1b4b 100%)}
+.t-sum{background:radial-gradient(80% 50% at 0% 0%,rgba(57,211,83,.35),transparent 70%),radial-gradient(80% 50% at 100% 100%,rgba(255,79,154,.35),transparent 70%),#07080c}
+
+/* heatmap */
+.heat{display:grid;grid-template-rows:repeat(7,auto);grid-auto-flow:column;grid-auto-columns:1fr;gap:.45cqw;margin-top:2cqh}
+.heat i{aspect-ratio:1;border-radius:.4cqw;background:rgba(255,255,255,.08)}
+.heat i.l1{background:#0e4429}.heat i.l2{background:#006d32}.heat i.l3{background:#26a641}.heat i.l4{background:#39d353}
+.heat i.pad{background:none}
+
+/* bars chart */
+.chart{display:flex;align-items:flex-end;gap:1.4cqw;height:34cqh;margin-top:4cqh}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:1cqh}
+.chart s{display:block;width:100%;border-radius:1.2cqw 1.2cqw .3cqw .3cqw;background:rgba(255,255,255,.28);text-decoration:none;transform-origin:bottom;transform:scaleY(0)}
+.card.active .chart s{animation:grow .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.25s + var(--i) * .04s)}
+@keyframes grow{to{transform:none}}
+.chart s.hot{background:var(--cyan)}
+.chart span{font-family:var(--mono);font-size:2.6cqw;opacity:.7}
+.t-clock .chart{gap:.6cqw;height:26cqh}
+.t-clock .chart s.hot{background:#c4b5fd}
+
+/* lists */
+.list{display:flex;flex-direction:column;gap:2.4cqh;margin-top:4cqh}
+.row{display:flex;align-items:center;gap:3cqw}
+.row .n{font-family:var(--mono);font-size:4cqw;opacity:.6;width:5cqw}
+.row .nm{flex:1;min-width:0;font-size:5.2cqw;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .v{font-family:var(--mono);font-size:3.8cqw;opacity:.85}
+.lbar{height:2.4cqh;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:.8cqh}
+.lbar b{display:block;height:100%;border-radius:99px;transform-origin:left;transform:scaleX(0)}
+.card.active .lbar b{animation:growx 1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes growx{to{transform:none}}
+
+.trio{display:grid;gap:3.6cqh;margin-top:5cqh}
+.trio .mid{color:#fff}
+.trio .k{color:#d9ff3f}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:4cqh 4cqw;margin-top:4cqh}
+
+/* summary */
+.sumimg{width:100%;border-radius:2.4cqw;margin-top:2.5cqh;box-shadow:0 10px 40px rgba(0,0,0,.5);background:#111;aspect-ratio:4/5;object-fit:cover}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;margin-top:2.4cqh}
+.acts button{height:max(40px,6cqh);border-radius:2.4cqw;border:1px solid var(--line);background:rgba(255,255,255,.08);font-size:max(13px,3.4cqw);font-weight:700;cursor:pointer}
+.acts button.pri{background:#fff;color:#07080c;border-color:#fff}
+.acts button.wide{grid-column:1/-1}
+.toast{position:absolute;left:50%;bottom:4cqh;transform:translateX(-50%);z-index:6;background:#fff;color:#000;font-size:14px;font-weight:700;padding:10px 16px;border-radius:99px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+.hint{position:absolute;bottom:2.2cqh;left:0;right:0;text-align:center;font-size:12px;opacity:.55;z-index:4;pointer-events:none;font-family:var(--mono)}
+
+@media (prefers-reduced-motion:reduce){
+  .card .rise,.card.active .rise{animation:none;opacity:1;transform:none}
+  .chart s,.lbar b{animation:none!important;transform:none}
+}
+</style>
+</head>
+<body>
+
+<main class="landing" id="landing">
+  <div class="hero">
+    <div class="eyebrow" id="eyebrow">GitHub Wrapped · 2026</div>
+    <h1>Your year in code, <span>wrapped.</span></h1>
+    <p class="lede">Type any GitHub username to get a recap of their year: commits, streaks, languages, and when they actually write code. Ends with a card you can share.</p>
+    <form class="go" id="form" autocomplete="off">
+      <label class="field"><b>@</b><input id="u" name="u" placeholder="username" spellcheck="false" autocapitalize="off" aria-label="GitHub username" required maxlength="39"></label>
+      <button class="btn" id="goBtn" type="submit">Wrap it</button>
+    </form>
+    <div class="loading" id="loading"><div class="spin"></div><span id="loadMsg">Fetching profile…</span></div>
+    <div class="err" id="err" role="alert"></div>
+    <p class="fine">Uses public data only and runs in your browser; nothing is stored on a server. Private work shows up in the contribution count only if the user turned on “Include private contributions” on their GitHub profile. Contribution calendar from <a href="https://github.com/grubersjoe/github-contributions-api" target="_blank" rel="noopener">github-contributions-api</a>. Made by <a href="/">Vince J</a>.</p>
+  </div>
+</main>
+
+<div class="viewer" id="viewer" aria-modal="true" role="dialog" aria-label="GitHub Wrapped story">
+  <div class="stage" id="stage">
+    <div class="bars" id="bars"></div>
+    <div class="topbar">
+      <img id="tbAv" alt="">
+      <div><div class="who" id="tbWho"></div><div class="yr" id="tbYr"></div></div>
+      <div class="sp"></div>
+      <button class="ib" id="pauseBtn" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+      <button class="ib" id="closeBtn" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="cards"></div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ---------- config ----------
+const qs = new URLSearchParams(location.search);
+const NOW = new Date();
+const YEAR = (() => { const y = parseInt(qs.get('y'), 10); return y >= 2008 && y <= NOW.getFullYear() ? y : 2026; })();
+const IN_PROGRESS = NOW.getFullYear() === YEAR;
+const END_ISO = IN_PROGRESS ? iso(NOW) : `${YEAR}-12-31`;
+const RANGE = `${YEAR}-01-01..${YEAR}-12-31`;
+const SHARE_URL = location.origin + location.pathname;
+const DUR = 7000;
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const LANG_COLORS = {JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',Java:'#b07219',Go:'#00ADD8',Rust:'#dea584',Ruby:'#701516',PHP:'#4F5D95','C++':'#f34b7d',C:'#8b93a1','C#':'#178600',Swift:'#F05138',Kotlin:'#A97BFF',Dart:'#00B4AB',HTML:'#e34c26',CSS:'#663399',SCSS:'#c6538c',Shell:'#89e051',Vue:'#41b883',Svelte:'#ff3e00','Jupyter Notebook':'#DA5B0B',Lua:'#000080',Elixir:'#6e4a7e',Haskell:'#5e5086',Scala:'#c22d40',Zig:'#ec915c',Nix:'#7e7eff',Dockerfile:'#384d54',Makefile:'#427819',Astro:'#ff5a03',MDX:'#fcb32c',Clojure:'#db5855',OCaml:'#ef7a08','Objective-C':'#438eff',R:'#198CE7',Perl:'#0298c3',Julia:'#a270ba'};
+const langColor = n => LANG_COLORS[n] || '#a3a3a3';
+
+document.getElementById('eyebrow').textContent = `GitHub Wrapped · ${YEAR}`;
+if (YEAR !== 2026) document.title = `GitHub Wrapped ${YEAR}`;
+
+// ---------- helpers ----------
+function iso(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('en-US');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct = x => `${Math.round(x*100)}%`;
+const fmtDay = isoStr => { const [y,m,d] = isoStr.split('-').map(Number); return `${MONTHS[m-1].slice(0,3)} ${d}`; };
+const dowOf = isoStr => new Date(isoStr + 'T12:00:00Z').getUTCDay();
+const plural = (n, w) => `${fmt(n)} ${w}${n === 1 ? '' : 's'}`;
+
+class WrapError extends Error { constructor(kind, info){ super(kind); this.kind = kind; this.info = info; } }
+
+async function gh(path){
+  let r;
+  try { r = await fetch('https://api.github.com' + path, { headers: { Accept: 'application/vnd.github+json' } }); }
+  catch { throw new WrapError('network'); }
+  if (r.status === 404) throw new WrapError('notfound');
+  if (r.status === 403 || r.status === 429) {
+    const reset = parseInt(r.headers.get('x-ratelimit-reset'), 10);
+    throw new WrapError('ratelimit', reset);
+  }
+  if (r.status === 422) return null;
+  if (!r.ok) throw new WrapError('http', r.status);
+  return r.json();
+}
+// Non-essential call: on failure note it and return the fallback.
+async function soft(p, fallback, W){ try { const v = await p; return v ?? fallback; } catch (e) { if (W) W.partial = true; return fallback; } }
+
+const searchCount = async q => {
+  const r = await gh(`/search/issues?per_page=1&q=${encodeURIComponent(q)}`);
+  return r ? r.total_count : 0;
+};
+
+// ---------- data ----------
+async function buildWrap(login, onStep){
+  const cacheKey = `gw:${YEAR}:${login.toLowerCase()}`;
+  try {
+    const c = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (c && Date.now() - c.t < 6 * 3600e3) return c.w;
+  } catch {}
+
+  onStep('Fetching profile…');
+  const user = await gh(`/users/${encodeURIComponent(login)}`);
+  const W = { year: YEAR, partial: false, user: {
+    login: user.login, name: user.name || user.login, avatar: user.avatar_url, created: user.created_at,
+    followers: user.followers, publicRepos: user.public_repos, type: user.type } };
+  const L = user.login;
+
+  onStep('Reading the contribution calendar…');
+  const cal = await soft((async () => {
+    const r = await fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(L)}?y=${YEAR}`);
+    if (!r.ok) throw new Error('cal');
+    const j = await r.json();
+    const days = (j.contributions || []).filter(d => d.date <= END_ISO).map(d => ({ date: d.date, count: d.count }));
+    if (!days.length) return null;
+    return { days, total: days.reduce((a, d) => a + d.count, 0) };
+  })(), null, W);
+  W.cal = cal;
+
+  onStep('Listing repositories…');
+  const repos = await soft(gh(`/users/${encodeURIComponent(L)}/repos?per_page=100&type=owner&sort=pushed`), [], W);
+
+  onStep('Counting commits…');
+  const sample = [];
+  let commitTotal = null;
+  const seen = new Set();
+  for (let page = 1; page <= 2; page++) {
+    const r = await soft(gh(`/search/commits?per_page=100&page=${page}&sort=author-date&q=${encodeURIComponent(`author:${L} author-date:${RANGE}`)}`), null, W);
+    if (!r) break;
+    if (commitTotal === null) commitTotal = r.total_count;
+    for (const it of r.items || []) {
+      if (seen.has(it.sha)) continue; seen.add(it.sha);
+      const d = it.commit?.author?.date || '';
+      if (d.length < 13) continue;
+      sample.push({ date: d.slice(0, 10), hour: +d.slice(11, 13), repo: it.repository?.full_name || '?', owner: it.repository?.owner?.login || '' });
+    }
+    if ((r.items || []).length < 100 || page * 100 >= r.total_count) break;
+  }
+
+  onStep('Counting pull requests and issues…');
+  const prsOpened = await soft(searchCount(`author:${L} type:pr created:${RANGE}`), null, W);
+  const prsMerged = await soft(searchCount(`author:${L} type:pr is:merged created:${RANGE}`), null, W);
+  const issues = await soft(searchCount(`author:${L} type:issue created:${RANGE}`), null, W);
+  const reviews = await soft(searchCount(`reviewed-by:${L} -author:${L} type:pr created:${RANGE}`), null, W);
+
+  // top repos by commits in the sample
+  const byRepo = {};
+  for (const c of sample) byRepo[c.repo] = (byRepo[c.repo] || 0) + 1;
+  const topRepos = Object.entries(byRepo).sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([name, n]) => ({ name, commits: n, own: name.split('/')[0].toLowerCase() === L.toLowerCase() }));
+  const otherRepos = Object.keys(byRepo).filter(n => n.split('/')[0].toLowerCase() !== L.toLowerCase()).length;
+
+  onStep('Working out languages…');
+  const langAgg = {};
+  if (topRepos.length) {
+    for (const r of topRepos) {
+      const langs = await soft(gh(`/repos/${r.name.split('/').map(encodeURIComponent).join('/')}/languages`), {}, W);
+      const total = Object.values(langs).reduce((a, b) => a + b, 0);
+      if (!total) continue;
+      for (const [k, v] of Object.entries(langs)) langAgg[k] = (langAgg[k] || 0) + (v / total) * r.commits;
+    }
+  }
+  if (!Object.keys(langAgg).length) {
+    for (const r of repos) if (r.language && (r.pushed_at || '').startsWith(String(YEAR))) langAgg[r.language] = (langAgg[r.language] || 0) + 1;
+  }
+  const langSum = Object.values(langAgg).reduce((a, b) => a + b, 0);
+  const languages = Object.entries(langAgg).sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([name, v]) => ({ name, pct: v / langSum, color: langColor(name) }))
+    .filter((l, i) => i === 0 || l.pct >= 0.01);
+
+  const created = repos.filter(r => !r.fork && (r.created_at || '').startsWith(String(YEAR)));
+  W.repos = {
+    created: created.length,
+    createdNames: created.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 3).map(r => r.name),
+    starsOnNew: created.reduce((a, r) => a + r.stargazers_count, 0),
+    totalStars: repos.filter(r => !r.fork).reduce((a, r) => a + r.stargazers_count, 0),
+  };
+  W.commits = { total: commitTotal, sample };
+  W.collab = { prsOpened, prsMerged, issues, reviews, otherRepos };
+  W.topRepos = topRepos;
+  W.languages = languages;
+
+  try { localStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), w: W })); } catch {}
+  return W;
+}
+
+function derive(W){
+  const D = {};
+  const s = W.commits.sample;
+  // months
+  D.months = new Array(12).fill(0);
+  D.monthUnit = 'contributions';
+  if (W.cal) for (const d of W.cal.days) D.months[+d.date.slice(5, 7) - 1] += d.count;
+  else { for (const c of s) D.months[+c.date.slice(5, 7) - 1]++; D.monthUnit = 'commits'; }
+  const mMax = Math.max(...D.months);
+  D.topMonth = mMax > 0 ? D.months.indexOf(mMax) : -1;
+
+  // calendar stats
+  if (W.cal) {
+    let run = 0, best = 0, bestEnd = null, busiest = { date: null, count: 0 }, active = 0;
+    const dow = new Array(7).fill(0);
+    for (const d of W.cal.days) {
+      if (d.count > 0) { run++; active++; if (run > best) { best = run; bestEnd = d.date; } } else run = 0;
+      if (d.count > busiest.count) busiest = { date: d.date, count: d.count };
+      dow[dowOf(d.date)] += d.count;
+    }
+    let bestStart = null;
+    if (bestEnd) { const e = new Date(bestEnd + 'T12:00:00Z'); e.setUTCDate(e.getUTCDate() - best + 1); bestStart = e.toISOString().slice(0, 10); }
+    Object.assign(D, { streak: best, streakStart: bestStart, streakEnd: bestEnd, busiest, active, totalDays: W.cal.days.length, calDow: dow });
+  }
+
+  // clock
+  D.hours = new Array(24).fill(0);
+  D.dows = new Array(7).fill(0);
+  for (const c of s) { D.hours[c.hour]++; D.dows[dowOf(c.date)]++; }
+  D.sampleN = s.length;
+  D.peakHour = s.length ? D.hours.indexOf(Math.max(...D.hours)) : -1;
+  const dowSrc = W.cal ? D.calDow : D.dows;
+  D.topDow = dowSrc.some(x => x) ? dowSrc.indexOf(Math.max(...dowSrc)) : -1;
+  D.archetype = archetype(D.hours, D.dows, s.length, D);
+  return D;
+}
+
+function archetype(h, dw, n, D){
+  if (n >= 8) {
+    const share = hs => hs.reduce((a, x) => a + h[x], 0) / n;
+    const weekend = (dw[0] + dw[6]) / n;
+    if (weekend >= 0.4) return { name: 'Weekend Warrior', line: `${pct(weekend)} of your commits landed on a Saturday or Sunday.` };
+    const b = [
+      { name: 'Night Owl', v: share([22, 23, 0, 1, 2, 3, 4]), line: x => `${pct(x)} of your commits came between 10pm and 5am. The best ideas show up after dark.` },
+      { name: 'Early Bird', v: share([5, 6, 7, 8]), line: x => `${pct(x)} of your commits came before 9am. First coffee, first commit.` },
+      { name: 'Nine-to-Fiver', v: share([9, 10, 11, 12, 13, 14, 15, 16, 17]), line: x => `${pct(x)} of your commits came in office hours. Steady, sustainable, shipped.` },
+      { name: 'Twilight Hacker', v: share([18, 19, 20, 21]), line: x => `${pct(x)} of your commits came between 6 and 10pm. The day job ends, the side quest begins.` },
+    ];
+    // weight the office-hours bucket down a little: it is the biggest window, so it wins too easily
+    const scored = b.map(x => ({ ...x, s: x.name === 'Nine-to-Fiver' ? x.v * 0.75 : x.v * 1.25 }));
+    const top = scored.sort((a, c) => c.s - a.s)[0];
+    return { name: top.name, line: top.line(top.v) };
+  }
+  if (D.active) {
+    if (D.active / D.totalDays > 0.5) return { name: 'The Daily Committer', line: `You showed up on ${pct(D.active / D.totalDays)} of the days this year.` };
+    return { name: 'The Sprinter', line: 'Quiet stretches, then bursts of work. Ship when it matters.' };
+  }
+  return null;
+}
+
+// ---------- cards ----------
+function heatHTML(days){
+  if (!days || !days.length) return '';
+  const nz = days.map(d => d.count).filter(Boolean).sort((a, b) => a - b);
+  const q = p => nz.length ? nz[Math.min(nz.length - 1, Math.floor(p * nz.length))] : 1;
+  const t = [q(.25), q(.5), q(.75)];
+  const lvl = c => !c ? 0 : c <= t[0] ? 1 : c <= t[1] ? 2 : c <= t[2] ? 3 : 4;
+  let out = '';
+  for (let i = 0; i < dowOf(days[0].date); i++) out += '<i class="pad"></i>';
+  for (const d of days) out += `<i class="l${lvl(d.count)}" title="${d.date}: ${d.count}"></i>`;
+  return `<div class="heat rise" style="--d:.5s">${out}</div>`;
+}
+const num = (n, cls = 'big') => `<div class="${cls} rise" style="--d:.15s"><span class="cu" data-to="${n}">0</span></div>`;
+const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
+
+function buildCards(W, D){
+  const u = W.user, C = [];
+  const span = IN_PROGRESS ? `Jan 1 – ${fmtDay(END_ISO)}` : 'the whole year';
+  const yrs = Math.max(0, YEAR - +u.created.slice(0, 4));
+
+  C.push({ t: 'intro', html: `
+    <div class="grow"></div>
+    <img src="${esc(u.avatar)}&s=240" alt="" class="rise" style="width:26cqw;height:26cqw;border-radius:50%;border:3px solid rgba(255,255,255,.85)">
+    <div class="k rise" style="--d:.15s;margin-top:4cqh">GitHub Wrapped ${YEAR}</div>
+    <div class="h rise" style="--d:.25s;font-size:11cqw">Hey ${esc(u.name.split(' ')[0])}.<br>Let's look back.</div>
+    <p class="p rise" style="--d:.4s">${yrs > 0 ? `${yrs} year${yrs === 1 ? '' : 's'} on GitHub, and ` : ''}${IN_PROGRESS ? `${YEAR} isn't over yet. Here's ${span}.` : `here's all of ${YEAR}.`}</p>
+    <div class="grow"></div>` });
+
+  if (W.cal && W.cal.total > 0) C.push({ t: 'contrib', html: `
+    <div class="k rise">This year you made</div>
+    ${num(W.cal.total)}
+    <div class="h rise" style="--d:.3s">contributions</div>
+    <p class="p rise" style="--d:.4s">That's about ${fmt(Math.round(W.cal.total / Math.max(1, W.cal.days.length / 7)))} a week, across ${plural(D.active, 'active day')}.</p>
+    <div class="grow"></div>
+    <div class="k rise" style="--d:.45s">Every day of ${YEAR}${IN_PROGRESS ? ' so far' : ''}</div>
+    ${heatHTML(W.cal.days)}` });
+
+  if (W.commits.total) {
+    const perDay = W.commits.total / Math.max(1, (W.cal ? W.cal.days.length : 365));
+    C.push({ t: 'commits', html: `
+      <div class="k rise">You pushed</div>
+      ${num(W.commits.total)}
+      <div class="h rise" style="--d:.3s">public commits</div>
+      <p class="p rise" style="--d:.45s">${perDay >= 1 ? `That's ${perDay.toFixed(1)} a day, every day.` : `That's one every ${Math.round(1 / perDay)} days.`}${W.collab.otherRepos ? ` They landed in ${plural(W.collab.otherRepos, 'repo')} you don't own, too.` : ''}</p>
+      <div class="grow"></div>
+      <div class="pill rise" style="--d:.6s;align-self:flex-start">Counts commits on default branches of public repos</div>` });
+  }
+
+  if (D.topMonth >= 0) {
+    const mMax = Math.max(...D.months);
+    const bars = D.months.map((v, i) => `<div><s class="${i === D.topMonth ? 'hot' : ''}" style="height:${Math.max(2, v / mMax * 100)}%;--i:${i}"></s><span>${MONTHS[i][0]}</span></div>`).join('');
+    C.push({ t: 'months', html: `
+      <div class="k rise">Your loudest month</div>
+      <div class="mid rise" style="--d:.15s;margin-top:3cqh;color:var(--cyan)">${MONTHS[D.topMonth]}</div>
+      <p class="p rise" style="--d:.3s">${fmt(D.months[D.topMonth])} ${D.monthUnit}${D.monthUnit === 'commits' ? ' (from your latest commits)' : ''}. ${D.topDow >= 0 ? `Your favourite day to ship: <b>${DAYS[D.topDow]}</b>.` : ''}</p>
+      <div class="grow"></div>
+      <div class="chart">${bars}</div>` });
+  }
+
+  if (W.cal && D.streak > 0) C.push({ t: 'streak', html: `
+    <div class="k rise">Longest streak</div>
+    ${num(D.streak)}
+    <div class="h rise" style="--d:.3s">day${D.streak === 1 ? '' : 's'} in a row</div>
+    <p class="p rise" style="--d:.4s">${D.streak > 1 ? `${fmtDay(D.streakStart)} to ${fmtDay(D.streakEnd)}, without missing a day.` : 'Every day counts.'}</p>
+    <div class="grow"></div>
+    <div class="k rise" style="--d:.55s">Biggest single day</div>
+    <div class="mid rise" style="--d:.65s;margin-top:1.4cqh">${fmtDay(D.busiest.date)}</div>
+    <p class="p rise" style="--d:.75s;margin-top:.6cqh">${plural(D.busiest.count, 'contribution')} in one day.</p>` });
+
+  if (D.archetype) {
+    const hMax = Math.max(...D.hours, 1);
+    const clock = D.sampleN >= 8 ? `<div class="chart">${D.hours.map((v, i) => `<div><s class="${i === D.peakHour ? 'hot' : ''}" style="height:${Math.max(2, v / hMax * 100)}%;--i:${i}"></s><span>${i % 6 === 0 ? hourLabel(i) : ''}</span></div>`).join('')}</div>` : '';
+    C.push({ t: 'clock', html: `
+      <div class="k rise">Your coding personality</div>
+      <div class="h rise" style="--d:.15s;font-size:13cqw;margin-top:3cqh;color:#c4b5fd">${esc(D.archetype.name)}</div>
+      <p class="p rise" style="--d:.35s">${esc(D.archetype.line)}</p>
+      ${D.peakHour >= 0 && D.sampleN >= 8 ? `<p class="p rise" style="--d:.45s">Peak hour: <b>${hourLabel(D.peakHour)}</b>.</p>` : ''}
+      <div class="grow"></div>
+      ${clock}
+      ${D.sampleN >= 8 ? `<p class="p rise" style="--d:.6s;font-size:3.2cqw;opacity:.6">Based on ${plural(D.sampleN, 'recent commit')}, in each commit's own time zone.</p>` : ''}` });
+  }
+
+  if (W.languages.length) C.push({ t: 'langs', html: `
+    <div class="k rise">You spoke</div>
+    <div class="mid rise" style="--d:.15s;margin-top:3cqh;color:${W.languages[0].color}">${esc(W.languages[0].name)}</div>
+    <p class="p rise" style="--d:.3s">more than anything else${W.languages.length > 1 ? `, with ${W.languages.slice(1, 3).map(l => esc(l.name)).join(' and ')} close behind` : ''}.</p>
+    <div class="list">${W.languages.map((l, i) => `
+      <div class="rise" style="--d:${.4 + i * .08}s">
+        <div class="row"><span class="nm">${esc(l.name)}</span><span class="v">${pct(l.pct)}</span></div>
+        <div class="lbar"><b style="width:${l.pct * 100}%;background:${l.color};--d:${.5 + i * .08}s"></b></div>
+      </div>`).join('')}</div>` });
+
+  if (W.topRepos.length) C.push({ t: 'repos', html: `
+    <div class="k rise">Where you spent your time</div>
+    <div class="h rise" style="--d:.15s">Your top repos</div>
+    <div class="list">${W.topRepos.map((r, i) => `
+      <div class="row rise" style="--d:${.3 + i * .1}s"><span class="n">${i + 1}</span><span class="nm">${esc(r.own ? r.name.split('/')[1] : r.name)}</span><span class="v">${plural(r.commits, 'commit')}</span></div>`).join('')}</div>
+    <div class="grow"></div>
+    <p class="p rise" style="--d:.8s;font-size:3.2cqw;opacity:.7">Ranked by your ${plural(D.sampleN, 'most recent commit')} this year.</p>` });
+
+  const cb = W.collab;
+  if (cb.prsOpened || cb.issues || cb.reviews) {
+    const items = [];
+    if (cb.prsOpened) items.push(['Pull requests opened', cb.prsOpened, cb.prsMerged ? `${fmt(cb.prsMerged)} merged (${pct(cb.prsMerged / cb.prsOpened)})` : '']);
+    if (cb.reviews) items.push(['Pull requests reviewed', cb.reviews, 'other people’s code, made better']);
+    if (cb.issues) items.push(['Issues opened', cb.issues, '']);
+    C.push({ t: 'collab', html: `
+      <div class="k rise">Code is a team sport</div>
+      <div class="trio">${items.map(([k, v, s], i) => `
+        <div class="rise" style="--d:${.15 + i * .15}s"><div class="k">${k}</div><div class="mid"><span class="cu" data-to="${v}">0</span></div>${s ? `<p class="p" style="margin-top:.8cqh;color:#fff">${s}</p>` : ''}</div>`).join('')}</div>` });
+  }
+
+  if (W.repos.created || W.repos.totalStars || u.followers) C.push({ t: 'new', html: `
+    <div class="k rise">New this year</div>
+    <div class="duo">
+      <div class="rise" style="--d:.15s"><div class="mid"><span class="cu" data-to="${W.repos.created}">0</span></div><div class="k" style="margin-top:1cqh">new repos</div></div>
+      <div class="rise" style="--d:.25s"><div class="mid"><span class="cu" data-to="${W.repos.starsOnNew}">0</span></div><div class="k" style="margin-top:1cqh">stars on them</div></div>
+      <div class="rise" style="--d:.35s"><div class="mid"><span class="cu" data-to="${W.repos.totalStars}">0</span></div><div class="k" style="margin-top:1cqh">stars, all repos</div></div>
+      <div class="rise" style="--d:.45s"><div class="mid"><span class="cu" data-to="${u.followers}">0</span></div><div class="k" style="margin-top:1cqh">followers</div></div>
+    </div>
+    <div class="grow"></div>
+    ${W.repos.createdNames.length ? `<p class="p rise" style="--d:.6s">Born in ${YEAR}: ${W.repos.createdNames.map(n => `<b>${esc(n)}</b>`).join(', ')}.</p>` : ''}` });
+
+  C.push({ t: 'sum', html: `
+    <div class="k">That's a wrap</div>
+    <div class="h" style="font-size:7cqw">Your ${YEAR}, on one card</div>
+    <img class="sumimg" id="sumImg" alt="Summary card for @${esc(u.login)}">
+    <div class="acts">
+      <button class="pri" data-act="post">Save post · 4:5</button>
+      <button data-act="story">Save story · 9:16</button>
+      <button data-act="link">Copy link</button>
+      <button data-act="again">Wrap someone else</button>
+    </div>
+    ${W.partial ? '<p class="p" style="font-size:3cqw;opacity:.6;margin-top:1.6cqh">GitHub limited some requests, so a few stats are missing. Try again in a minute for the full story.</p>' : ''}` });
+
+  return C;
+}
+
+// ---------- share card (canvas) ----------
+function loadImg(src){
+  return new Promise(res => {
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    const t = setTimeout(() => res(null), 5000);
+    im.onload = () => { clearTimeout(t); res(im); };
+    im.onerror = () => { clearTimeout(t); res(null); };
+    im.src = src;
+  });
+}
+
+async function drawCard(W, D, format){
+  const w = 1080, h = format === 'story' ? 1920 : 1350, s = h / 1350;
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const x = cv.getContext('2d');
+  try { await document.fonts.ready; } catch {}
+  const SG = 'Space Grotesk, system-ui, sans-serif', JB = 'JetBrains Mono, Menlo, monospace';
+
+  x.fillStyle = '#07080c'; x.fillRect(0, 0, w, h);
+  const blob = (cx, cy, r, col) => { const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); };
+  blob(80, 60, 760 * s, 'rgba(57,211,83,.42)');
+  blob(w - 40, h - 60, 820 * s, 'rgba(255,79,154,.38)');
+  blob(w, 0, 520 * s, 'rgba(139,92,246,.30)');
+
+  const P = 84;
+  let y = 120 * s;
+  x.textBaseline = 'alphabetic';
+  x.font = `700 30px ${JB}`; x.fillStyle = '#39d353';
+  x.fillText(`GITHUB WRAPPED ${YEAR}`.split('').join(String.fromCharCode(8202)), P, y);
+  if (IN_PROGRESS) { x.font = `500 26px ${JB}`; x.fillStyle = 'rgba(245,245,247,.6)'; x.textAlign = 'right'; x.fillText(`JAN 1 – ${fmtDay(END_ISO).toUpperCase()}`, w - P, y); x.textAlign = 'left'; }
+
+  // avatar + handle
+  y += 70 * s;
+  const av = await loadImg(W.user.avatar + '&s=320');
+  const A = 150;
+  if (av) {
+    x.save(); x.beginPath(); x.arc(P + A / 2, y + A / 2, A / 2, 0, Math.PI * 2); x.clip(); x.drawImage(av, P, y, A, A); x.restore();
+    x.lineWidth = 5; x.strokeStyle = 'rgba(255,255,255,.9)'; x.beginPath(); x.arc(P + A / 2, y + A / 2, A / 2, 0, Math.PI * 2); x.stroke();
+  }
+  const tx = av ? P + A + 36 : P, maxW = w - tx - P;
+  let fs = 76; x.font = `700 ${fs}px ${SG}`;
+  const handle = '@' + W.user.login;
+  while (x.measureText(handle).width > maxW && fs > 36) { fs -= 4; x.font = `700 ${fs}px ${SG}`; }
+  x.fillStyle = '#f5f5f7'; x.fillText(handle, tx, y + 78);
+  x.font = `500 34px ${SG}`; x.fillStyle = 'rgba(245,245,247,.72)';
+  const sub = D.archetype ? D.archetype.name : (W.user.name !== W.user.login ? W.user.name : '');
+  if (sub) x.fillText(sub, tx, y + 128);
+
+  // hero number
+  y += A;
+  const heroN = W.cal && W.cal.total ? W.cal.total : (W.commits.total || 0);
+  const heroL = W.cal && W.cal.total ? 'contributions' : 'public commits';
+  x.font = `700 ${Math.round(210 * Math.min(1.15, s))}px ${SG}`; x.fillStyle = '#ffffff';
+  let hs = Math.round(210 * Math.min(1.15, s));
+  while (x.measureText(fmt(heroN)).width > w - 2 * P && hs > 100) { hs -= 10; x.font = `700 ${hs}px ${SG}`; }
+  y += 40 * s + hs * 0.74;
+  x.fillText(fmt(heroN), P - 6, y);
+  y += 70;
+  x.font = `500 44px ${SG}`; x.fillStyle = 'rgba(245,245,247,.85)'; x.fillText(heroL, P, y);
+
+  // stat grid
+  const stats = [];
+  if (W.commits.total && heroL !== 'public commits') stats.push(['Commits', fmt(W.commits.total)]);
+  if (W.cal && D.streak) stats.push(['Longest streak', `${D.streak} day${D.streak === 1 ? '' : 's'}`]);
+  if (W.languages.length) stats.push(['Top language', W.languages[0].name]);
+  if (D.topMonth >= 0) stats.push(['Loudest month', MONTHS[D.topMonth]]);
+  if (W.collab.prsOpened) stats.push(['PRs opened', fmt(W.collab.prsOpened)]);
+  if (D.peakHour >= 0 && D.sampleN >= 8) stats.push(['Peak hour', hourLabel(D.peakHour)]);
+  if (W.repos.created) stats.push(['New repos', fmt(W.repos.created)]);
+  if (W.collab.reviews) stats.push(['PRs reviewed', fmt(W.collab.reviews)]);
+  const grid = stats.slice(0, 6);
+  y += 76 * s;
+  const colW = (w - 2 * P - 40) / 2, rowH = 132 * Math.min(1.2, s);
+  grid.forEach(([k, v], i) => {
+    const cx = P + (i % 2) * (colW + 40), cy = y + Math.floor(i / 2) * rowH;
+    x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(cx, cy, colW, 2);
+    x.font = `500 24px ${JB}`; x.fillStyle = 'rgba(245,245,247,.6)'; x.fillText(k.toUpperCase(), cx, cy + 44);
+    let vs = 52; x.font = `700 ${vs}px ${SG}`;
+    while (x.measureText(v).width > colW && vs > 28) { vs -= 2; x.font = `700 ${vs}px ${SG}`; }
+    x.fillStyle = '#f5f5f7'; x.fillText(v, cx, cy + 44 + 62);
+  });
+  y += Math.ceil(grid.length / 2) * rowH + 30 * s;
+
+  // heatmap
+  if (W.cal && W.cal.days.length) {
+    const days = W.cal.days, pad = dowOf(days[0].date), cols = Math.ceil((days.length + pad) / 7);
+    const gap = 4, cell = Math.min(((w - 2 * P) - gap * 52) / 53, 20);
+    const nz = days.map(d => d.count).filter(Boolean).sort((a, b) => a - b);
+    const q = p => nz.length ? nz[Math.min(nz.length - 1, Math.floor(p * nz.length))] : 1;
+    const t = [q(.25), q(.5), q(.75)];
+    const colr = ['rgba(255,255,255,.08)', '#0e4429', '#006d32', '#26a641', '#39d353'];
+    days.forEach((d, i) => {
+      const k = i + pad, c = Math.floor(k / 7), r = k % 7;
+      const l = !d.count ? 0 : d.count <= t[0] ? 1 : d.count <= t[1] ? 2 : d.count <= t[2] ? 3 : 4;
+      x.fillStyle = colr[l];
+      x.beginPath(); x.roundRect ? x.roundRect(P + c * (cell + gap), y + r * (cell + gap), cell, cell, 3) : x.rect(P + c * (cell + gap), y + r * (cell + gap), cell, cell); x.fill();
+    });
+    void cols;
+  }
+
+  // footer
+  x.font = `500 28px ${JB}`; x.fillStyle = 'rgba(245,245,247,.7)';
+  x.fillText('Get yours →', P, h - 70 * s);
+  x.font = `700 28px ${JB}`; x.fillStyle = '#f5f5f7'; x.textAlign = 'right';
+  x.fillText(SHARE_URL.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), w - P, h - 70 * s);
+  x.textAlign = 'left';
+  return cv;
+}
+
+// ---------- story viewer ----------
+let W = null, D = null, cards = [], idx = 0, elapsed = 0, paused = false, last = 0, raf = 0, postBlob = null;
+
+function openStory(){
+  const C = buildCards(W, D);
+  $('cards').innerHTML = C.map(c => `<section class="card t-${c.t}">${c.html}</section>`).join('');
+  cards = [...document.querySelectorAll('#cards .card')];
+  $('bars').innerHTML = cards.map(() => '<i><b></b></i>').join('');
+  $('tbAv').src = W.user.avatar + '&s=64';
+  $('tbWho').textContent = '@' + W.user.login;
+  $('tbYr').textContent = `Wrapped ${YEAR}`;
+  $('viewer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  postBlob = null;
+  show(0);
+  last = performance.now();
+  cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
+  // render the share card in the background
+  drawCard(W, D, 'post').then(cv => cv.toBlob(b => { postBlob = b; const img = $('sumImg'); if (img && b) img.src = URL.createObjectURL(b); }, 'image/png'));
+}
+
+function closeStory(){
+  $('viewer').classList.remove('open');
+  document.body.style.overflow = '';
+  cancelAnimationFrame(raf);
+  $('u').focus();
+}
+
+function show(i){
+  idx = Math.max(0, Math.min(cards.length - 1, i));
+  elapsed = 0;
+  cards.forEach((c, j) => c.classList.toggle('active', j === idx));
+  [...$('bars').children].forEach((b, j) => b.firstChild.style.width = j < idx ? '100%' : '0%');
+  if (idx === cards.length - 1) $('bars').children[idx].firstChild.style.width = '100%';
+  countUp(cards[idx]);
+}
+
+function countUp(card){
+  card.querySelectorAll('.cu').forEach(el => {
+    const to = +el.dataset.to || 0, t0 = performance.now(), dur = 1300;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = fmt(to); return; }
+    const step = now => {
+      const p = Math.min(1, (now - t0 - 150) / dur);
+      el.textContent = fmt(Math.round(to * (p <= 0 ? 0 : 1 - Math.pow(1 - p, 3))));
+      if (p < 1 && card.classList.contains('active')) requestAnimationFrame(step); else el.textContent = fmt(to);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+function tick(now){
+  const dt = now - last; last = now;
+  if (!paused && idx < cards.length - 1 && !document.hidden) {
+    elapsed += dt;
+    const b = $('bars').children[idx];
+    if (b) b.firstChild.style.width = Math.min(100, elapsed / DUR * 100) + '%';
+    if (elapsed >= DUR) show(idx + 1);
+  }
+  raf = requestAnimationFrame(tick);
+}
+
+function setPaused(p){
+  paused = p;
+  $('pauseBtn').setAttribute('aria-label', p ? 'Play' : 'Pause');
+  $('pauseBtn').innerHTML = p
+    ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+}
+
+// tap left/right, press and hold to pause
+let holdT = 0, held = false, downX = 0;
+$('stage').addEventListener('pointerdown', e => {
+  if (e.target.closest('button, a, input')) return;
+  downX = e.clientX; held = false;
+  holdT = setTimeout(() => { held = true; paused = true; }, 220);
+});
+$('stage').addEventListener('pointerup', e => {
+  if (e.target.closest('button, a, input')) return;
+  clearTimeout(holdT);
+  if (held) { held = false; paused = $('pauseBtn').getAttribute('aria-label') === 'Play'; return; }
+  const r = $('stage').getBoundingClientRect();
+  if (downX - r.left < r.width * 0.3) show(idx - 1); else show(idx + 1);
+});
+$('stage').addEventListener('pointercancel', () => { clearTimeout(holdT); if (held) { held = false; paused = false; } });
+$('stage').addEventListener('contextmenu', e => { if (!e.target.closest('img.sumimg')) e.preventDefault(); });
+$('pauseBtn').addEventListener('click', () => setPaused(!paused));
+$('closeBtn').addEventListener('click', closeStory);
+document.addEventListener('keydown', e => {
+  if (!$('viewer').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') show(idx + 1);
+  else if (e.key === 'ArrowLeft') show(idx - 1);
+  else if (e.key === 'Escape') closeStory();
+  else if (e.key === ' ') { e.preventDefault(); setPaused(!paused); }
+});
+
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 1800); }
+
+async function saveCard(format){
+  let blob = format === 'post' ? postBlob : null;
+  if (!blob) { const cv = await drawCard(W, D, format); blob = await new Promise(r => cv.toBlob(r, 'image/png')); }
+  const name = `github-wrapped-${YEAR}-${W.user.login}-${format}.png`;
+  const file = new File([blob], name, { type: 'image/png' });
+  const touch = matchMedia('(pointer: coarse)').matches;
+  if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: `My ${YEAR} on GitHub. Get yours: ${SHARE_URL}` }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Saved');
+}
+
+$('cards').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'post' || act === 'story') { b.disabled = true; try { await saveCard(act); } finally { b.disabled = false; } }
+  else if (act === 'link') {
+    const link = `${SHARE_URL}?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`;
+    try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); }
+  }
+  else if (act === 'again') { closeStory(); $('u').value = ''; $('u').focus(); }
+});
+
+// ---------- landing ----------
+async function run(login){
+  login = login.trim().replace(/^@/, '').replace(/^https?:\/\/github\.com\//i, '').split('/')[0];
+  $('err').textContent = '';
+  if (!/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(login)) { $('err').textContent = 'That doesn’t look like a GitHub username.'; return; }
+  $('goBtn').disabled = true; $('loading').classList.add('on');
+  try {
+    W = await buildWrap(login, m => $('loadMsg').textContent = m);
+    D = derive(W);
+    if (!(W.cal && W.cal.total) && !W.commits.total && !W.collab.prsOpened && !W.collab.issues) {
+      $('err').textContent = `@${W.user.login} has no public activity in ${YEAR} yet. Nothing to wrap.`;
+      return;
+    }
+    history.replaceState(null, '', `?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`);
+    setPaused(false);
+    openStory();
+  } catch (e) {
+    const k = e.kind;
+    $('err').textContent =
+      k === 'notfound' ? `No GitHub user called @${login}.` :
+      k === 'ratelimit' ? `GitHub’s free API limit is used up for your network.${e.info ? ` Try again after ${new Date(e.info * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.` : ' Try again in a few minutes.'}` :
+      k === 'network' ? 'Couldn’t reach GitHub. Check your connection.' :
+      'Something went wrong talking to GitHub. Try again.';
+  } finally {
+    $('goBtn').disabled = false; $('loading').classList.remove('on');
+  }
+}
+
+if (qs.has('debug')) window.__gw = { drawCard: f => drawCard(W, D, f) };
+$('form').addEventListener('submit', e => { e.preventDefault(); run($('u').value); });
+const preset = qs.get('u');
+if (preset) { $('u').value = preset; run(preset); } else $('u').focus();
+})();
+</script>
+</body>
+</html>
