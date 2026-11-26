@@ -721,7 +721,7 @@ function buildCards(W, D){
     <button class="share" data-act="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share</button>
     <div class="acts">
       <button data-act="save">Save image</button>
-      <button data-act="link">Copy link</button>
+      <button data-act="link">Copy caption</button>
     </div>
     <button class="txt" data-act="again">Wrap someone else</button>
     ${W.partial ? '<p class="note" style="margin-top:.6cqh">GitHub limited some requests, so a few stats are missing. Try again in a minute for the full story.</p>' : ''}` });
@@ -1008,18 +1008,38 @@ function download(blob, name){
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 
+// The text that goes with the card: first person, the user's own numbers and persona,
+// then one plain line saying where to make one.
+function caption(){
+  const bits = [];
+  if (W.cal && W.cal.total) bits.push(plural(W.cal.total, 'contribution'));
+  else if (W.commits.total && !D.copies) bits.push(plural(W.commits.total, 'public commit'));
+  if (D.streak >= 7) bits.push(`a ${D.streak}-day streak`);
+  const who = D.archetype ? `apparently I'm ${D.archetype.name.replace(/^The /, 'the ')}` : '';
+  let s = `My ${YEAR} on GitHub`;
+  if (bits.length && who) s += `: ${bits.join(', ')}, and ${who}.`;
+  else if (bits.length) s += `: ${bits.join(' and ')}.`;
+  else if (who) s += `. Turns out ${who.replace('apparently ', '')}.`;
+  else s += ', wrapped.';
+  return `${s}\nGet your GitHub Wrapped at ${SHARE_URL.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}`;
+}
+
 // share: the native share sheet where it takes files; otherwise save the image
 async function shareCard(mode){
   const blob = await cardBlob();
   const name = `github-wrapped-${YEAR}-${W.user.login}.png`;
   const file = new File([blob], name, { type: 'image/png' });
   if (mode === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: `My ${YEAR} on GitHub. Get yours: ${SHARE_URL}` }); track('share_card_saved', { button: mode, method: 'share_sheet' }); return; }
+    try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: caption() }); track('share_card_saved', { button: mode, method: 'share_sheet' }); return; }
     catch (e) { if (e.name === 'AbortError') { track('share_sheet_cancelled'); return; } }
   }
   download(blob, name);
   track('share_card_saved', { button: mode, method: 'download' });
-  toast(mode === 'share' ? 'Image saved. Post it anywhere' : 'Saved');
+  if (mode === 'share') {
+    // no share sheet (most desktops): save the image and put the caption on the clipboard
+    let copied = false; try { await navigator.clipboard.writeText(caption()); copied = true; } catch {}
+    toast(copied ? 'Image saved, caption copied' : 'Image saved. Post it anywhere');
+  } else toast('Saved');
 }
 
 $('cards').addEventListener('click', async e => {
@@ -1027,9 +1047,9 @@ $('cards').addEventListener('click', async e => {
   const act = b.dataset.act;
   if (act === 'share' || act === 'save') { b.disabled = true; try { await shareCard(act); } finally { b.disabled = false; } }
   else if (act === 'link') {
-    const link = `${SHARE_URL}?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`;
-    try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); }
-    track('link_copied');
+    const text = caption();
+    try { await navigator.clipboard.writeText(text); toast('Caption copied'); } catch { prompt('Copy this caption', text); }
+    track('link_copied', { with_caption: true });
   }
   else if (act === 'again') { track('wrap_again_clicked'); closeStory(); $('u').value = ''; $('u').focus(); }
 });
