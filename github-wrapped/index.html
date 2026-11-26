@@ -719,6 +719,7 @@ function buildCards(W, D){
     <div class="h" style="font-size:7cqw;margin-top:1cqh">Your ${YEAR}, on one card</div>
     <div class="sumwrap"><img class="sumimg" id="sumImg" alt="Summary card for @${esc(u.login)}"></div>
     <button class="share" data-act="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share</button>
+    <p class="note" style="margin-top:1cqh;text-align:center;max-width:none">The caption is copied too, so paste it if the app leaves it out.</p>
     <div class="acts">
       <button data-act="save">Save image</button>
       <button data-act="link">Copy caption</button>
@@ -1030,6 +1031,9 @@ async function shareCard(mode){
   const name = `github-wrapped-${YEAR}-${W.user.login}.png`;
   const file = new File([blob], name, { type: 'image/png' });
   if (mode === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
+    // Some apps (Instagram DMs and Stories) keep the image and drop the text, and the page can't
+    // tell which app gets picked. So the caption also goes to the clipboard, one paste away.
+    try { navigator.clipboard.writeText(caption()).catch(() => {}); } catch {}
     try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: caption() }); track('share_card_saved', { button: mode, method: 'share_sheet' }); return; }
     catch (e) { if (e.name === 'AbortError') { track('share_sheet_cancelled'); return; } }
   }
