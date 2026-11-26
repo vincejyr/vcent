@@ -194,7 +194,7 @@ button:disabled{opacity:.5;cursor:wait}
   <div class="hero">
     <div class="eyebrow" id="eyebrow">GitHub Wrapped · 2026</div>
     <h1>Your year in code, <span>wrapped.</span></h1>
-    <p class="lede">Type any GitHub username. Get a two-minute story of their year (streaks, languages, when they actually write code) and a card to share.</p>
+    <p class="lede">Night Owl, Marathoner or Bug Hunter? Your GitHub year knows. See the streak you kept, the language you lived in and the hour you really ship, then share it as one card.</p>
     <form class="go" id="form" autocomplete="off">
       <label class="field"><b>@</b><input id="u" name="u" placeholder="username" spellcheck="false" autocapitalize="off" aria-label="GitHub username" required maxlength="39"></label>
       <button class="btn" id="goBtn" type="submit">Wrap it</button>
@@ -431,26 +431,64 @@ function derive(W){
   D.peakHour = s.length ? D.hours.indexOf(Math.max(...D.hours)) : -1;
   const dowSrc = W.cal ? D.calDow : D.dows;
   D.topDow = dowSrc.some(x => x) ? dowSrc.indexOf(Math.max(...dowSrc)) : -1;
-  D.archetype = archetype(D.hours, D.dows, s.length, D);
+  D.archetype = archetype(W, D);
   return D;
 }
 
-function archetype(h, dw, n, D){
+// One persona per person: every candidate gets a strength (its signal divided by
+// the level where it starts to stand out, so 1 = notable). The strongest wins.
+const times = x => x >= 2 ? `${Math.round(x)}×` : `${x.toFixed(1)}×`;
+function archetype(W, D){
+  const h = D.hours, dw = D.dows, n = D.sampleN, cb = W.collab || {}, C = [];
+  const add = (name, v, at, line) => { if (v >= at) C.push({ name, s: Math.min(3, v / at), line }); };
+
+  // when: from the most recent commits (needs a few to mean anything)
   if (n >= 8) {
     const share = hs => hs.reduce((a, x) => a + h[x], 0) / n;
-    const weekend = (dw[0] + dw[6]) / n;
-    if (weekend >= 0.4) return { name: 'Weekend Warrior', line: `${pct(weekend)} of your commits landed on a Saturday or Sunday.` };
-    const b = [
-      { name: 'Night Owl', v: share([22, 23, 0, 1, 2, 3, 4]), line: x => `${pct(x)} of your commits came between 10pm and 5am. The best ideas show up after dark.` },
-      { name: 'Early Bird', v: share([5, 6, 7, 8]), line: x => `${pct(x)} of your commits came before 9am. First coffee, first commit.` },
-      { name: 'Nine-to-Fiver', v: share([9, 10, 11, 12, 13, 14, 15, 16, 17]), line: x => `${pct(x)} of your commits came in office hours. Steady, sustainable, shipped.` },
-      { name: 'Twilight Hacker', v: share([18, 19, 20, 21]), line: x => `${pct(x)} of your commits came between 6 and 10pm. The day job ends, the side quest begins.` },
-    ];
-    // weight the office-hours bucket down a little: it is the biggest window, so it wins too easily
-    const scored = b.map(x => ({ ...x, s: x.name === 'Nine-to-Fiver' ? x.v * 0.75 : x.v * 1.25 }));
-    const top = scored.sort((a, c) => c.s - a.s)[0];
-    return { name: top.name, line: top.line(top.v) };
+    const night = share([22, 23, 0, 1, 2, 3, 4]), early = share([5, 6, 7, 8]), lunch = share([12, 13]);
+    const eve = share([18, 19, 20, 21]), office = share([9, 10, 11, 12, 13, 14, 15, 16, 17]), weekend = (dw[0] + dw[6]) / n;
+    add('The Night Owl', night, .35, `${pct(night)} of your commits landed between 10pm and 5am. The best ideas show up after dark.`);
+    add('The Early Bird', early, .25, `${pct(early)} of your commits landed before 9am. First coffee, first commit.`);
+    add('The Lunch-Break Coder', lunch, .3, `${pct(lunch)} of your commits landed between noon and 2pm. Who needs lunch?`);
+    add('The Twilight Hacker', eve, .4, `${pct(eve)} of your commits landed between 6 and 10pm. The day job ends, the side quest begins.`);
+    add('The Nine-to-Fiver', office, .7, `${pct(office)} of your commits landed in office hours. Steady, sustainable, shipped.`);
+    add('The Weekend Warrior', weekend, .4, `${pct(weekend)} of your commits landed on a Saturday or Sunday.`);
+    const away = n ? W.commits.sample.filter(c => c.owner.toLowerCase() !== W.user.login.toLowerCase()).length / n : 0;
+    add('The Open-Source Citizen', away, .5, `${pct(away)} of your recent commits went to repos you don't own.`);
   }
+
+  // how: from the full contribution calendar
+  if (W.cal && D.totalDays) {
+    const activeShare = D.active / D.totalDays;
+    if (D.streak >= 60 || activeShare >= .8) C.push({ name: 'The Marathoner', s: Math.min(3, Math.max(D.streak / 60, activeShare / .8)),
+      line: D.streak >= 60 ? `${fmt(D.streak)} days in a row without a break.` : `You showed up on ${pct(activeShare)} of the days this year.` });
+    const mid = `${YEAR}-07-01`, half = a => ({ sum: a.reduce((t, d) => t + d.count, 0), days: a.length || 1 });
+    const h1 = half(W.cal.days.filter(d => d.date < mid)), h2 = half(W.cal.days.filter(d => d.date >= mid));
+    if (W.cal.total >= 50 && h2.days >= 30) {
+      const r1 = h1.sum / h1.days, r2 = h2.sum / h2.days;
+      if (r1 > 0) add('The Comeback Kid', r2 / r1, 2, `You did ${times(r2 / r1)} more per day in the second half of the year than the first.`);
+      if (r2 > 0) add('The Strong Starter', r1 / r2, 2, `You did ${times(r1 / r2)} more per day in the first half of the year than the second.`);
+    }
+    const summer = (D.months[5] + D.months[6] + D.months[7]) / Math.max(1, W.cal.total);
+    if (W.cal.total >= 50) add('The Summer Coder', summer, .4, `${pct(summer)} of your year landed in June, July and August.`);
+  }
+
+  // who you work with: pull requests, reviews, issues
+  const prs = cb.prsOpened || 0;
+  if (cb.reviews >= 10) add('The Reviewer', cb.reviews / Math.max(1, prs), 1.5, `You reviewed ${plural(cb.reviews, 'pull request')} and opened ${fmt(prs)}. Other people's code got better because of you.`);
+  if (prs >= 10 && cb.prsMerged != null) add('The Closer', cb.prsMerged / prs, .9, `${pct(cb.prsMerged / prs)} of your ${fmt(prs)} pull requests got merged.`);
+  if (cb.issues >= 10) add('The Bug Hunter', cb.issues / Math.max(1, prs), 1.5, `You opened ${plural(cb.issues, 'issue')}, more than your ${plural(prs, 'pull request')}. Somebody has to find them.`);
+
+  // what you build: repos and languages
+  const rp = W.repos || {};
+  add('The Builder', rp.created || 0, 5, `You started ${plural(rp.created || 0, 'new repo')} this year.`);
+  add('The Rising Star', rp.starsOnNew || 0, 100, `Your new repos picked up ${plural(rp.starsOnNew || 0, 'star')} this year.`);
+  const langs = W.languages || [], big = langs.filter(l => l.pct >= .1).length;
+  add('The Polyglot', big, 4, `You wrote real code in ${big} languages this year.`);
+  if (langs[0]) add('The Loyalist', langs[0].pct, .8, `${pct(langs[0].pct)} of your code was ${langs[0].name}. You know what you like.`);
+
+  if (C.length) return C.sort((a, b) => b.s - a.s)[0];
+  // nothing stands out: fall back on the calendar
   if (D.active) {
     if (D.active / D.totalDays > 0.5) return { name: 'The Daily Committer', line: `You showed up on ${pct(D.active / D.totalDays)} of the days this year.` };
     return { name: 'The Sprinter', line: 'Quiet stretches, then bursts of work. Ship when it matters.' };
@@ -509,7 +547,7 @@ const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' 
 // story chapters: one accent each
 const CHAPTER_OF = { intro: 'activity', contrib: 'activity', commits: 'activity', months: 'activity', streak: 'activity', clock: 'rhythm', langs: 'craft', repos: 'craft', new: 'craft', collab: 'people', sum: 'share' };
 const CHAPTERS = ['activity', 'rhythm', 'craft', 'people', 'share'];
-const CHAPTER_NAME = { activity: 'Activity', rhythm: 'Rhythm', craft: 'Craft', people: 'People', share: 'Your card' };
+const CHAPTER_NAME = { activity: 'Activity', rhythm: 'Personality', craft: 'Craft', people: 'People', share: 'Your card' };
 const CHAPTER_BG = { activity: '#06120a', rhythm: '#0d0a1f', craft: '#041417', people: '#141006', share: '#07080c' };
 
 function buildCards(W, D){
@@ -571,10 +609,12 @@ function buildCards(W, D){
     const stats = [];
     if (hasClock) stats.push(['Peak hour', hourLabel(D.peakHour)]);
     if (D.topDow >= 0) stats.push(['Favourite day', DAYS[D.topDow]]);
+    const nm = D.archetype.name, len = nm.replace(/^The /, '').length;
+    const title = nm.startsWith('The ') ? `<span style="color:#fff">The</span> ${esc(nm.slice(4))}` : esc(nm);
     C.push({ t: 'clock', html: `
-      <div class="k eb rise">When you code</div>
-      <p class="p rise" style="--d:.1s;margin-top:2.6cqh">Your coding personality:</p>
-      <div class="h rise" style="--d:.25s;font-size:${D.archetype.name.length > 14 ? 11 : 14}cqw;margin-top:.4cqh;color:var(--ac)">${esc(D.archetype.name)}</div>
+      <div class="k eb rise">Your coding personality</div>
+      <p class="p rise" style="--d:.1s;margin-top:2.6cqh">This year you were</p>
+      <div class="h rise" style="--d:.25s;font-size:${len > 16 ? 9.5 : len > 11 ? 11 : 14}cqw;margin-top:.4cqh;color:var(--ac)">${title}</div>
       <p class="p rise" style="--d:.4s">${esc(D.archetype.line)}</p>
       <div class="grow"></div>
       ${hasClock ? clockHTML(D.hours, D.peakHour) : ''}
@@ -693,13 +733,21 @@ async function drawCard(W, D){
 
   // personality headline
   const A_ = D.archetype;
-  const facts = [];
-  if (D.sampleN >= 8 && D.peakHour >= 0) facts.push(`Busiest hour: ${hourLabel(D.peakHour)}.`);
-  if (D.topDow >= 0) facts.push(`Busiest day: ${DAYS[D.topDow]}.`);
+  // the persona's own line explains why; wrap it to at most two lines
+  const why = [];
+  if (A_ && A_.line) {
+    x.font = `500 32px ${SG}`;
+    let cur = '';
+    for (const word of A_.line.split(' ')) {
+      const t = cur ? cur + ' ' + word : word;
+      if (x.measureText(t).width > w - 2 * P && cur) { why.push(cur); cur = word; } else cur = t;
+    }
+    if (cur) why.push(cur);
+    if (why.length > 2) { why.length = 2; why[1] = why[1].replace(/\s*\S*$/, '') + '…'; }
+  }
   const headline = A_ ? A_.name : `${YEAR} in code`;
-  x.font = `700 108px ${SG}`;
   const ns = fit(headline, 700, 120, 56, w - 2 * P);
-  const archH = 22 + 22 + ns * 0.76 + (facts.length ? 52 : 0) + 8;
+  const archH = 22 + 22 + ns * 0.76 + why.length * 44 + 16;
   blocks.push({ h: archH, draw(y){
     x.font = `500 22px ${JB}`; x.fillStyle = MU; x.fillText(spaced(A_ ? 'THIS YEAR YOU WERE' : 'YOUR YEAR'), P, y + 20);
     const by = y + 44 + ns * 0.76;
@@ -708,7 +756,8 @@ async function drawCard(W, D){
       x.fillStyle = FG; x.fillText('The ', P, by);
       const off = x.measureText('The ').width; x.fillStyle = AC; x.fillText(headline.slice(4), P + off, by);
     } else { x.fillStyle = A_ ? AC : FG; x.fillText(headline, P, by); }
-    if (facts.length) { x.font = `500 30px ${SG}`; x.fillStyle = 'rgba(245,245,247,.75)'; x.fillText(facts.join(' '), P, by + 52); }
+    x.font = `500 32px ${SG}`; x.fillStyle = 'rgba(245,245,247,.78)';
+    why.forEach((ln, i) => x.fillText(ln, P, by + 58 + i * 44));
   } });
 
   // calendar: the whole year, days still to come drawn faint
@@ -999,7 +1048,7 @@ function sampleWrap(){
     cal: { days, total: days.reduce((a, d) => a + d.count, 0) }, commits: { total: null, sample: [] },
     collab: {}, repos: { created: 0 }, topRepos: [], languages: [{ name: 'TypeScript', pct: .6, color: langColor('TypeScript') }] };
   const SD = derive(SW);
-  Object.assign(SD, { archetype: { name: 'Night Owl', line: '' }, peakHour: 22, sampleN: 160, topDow: 2 });
+  Object.assign(SD, { archetype: { name: 'The Night Owl', line: '41% of your commits landed between 10pm and 5am. The best ideas show up after dark.' }, peakHour: 22, sampleN: 160, topDow: 2 });
   return [SW, SD];
 }
 drawCard(...sampleWrap()).then(cv => cv.toBlob(b => { if (b) $('sampleImg').src = URL.createObjectURL(b); }, 'image/png')).catch(e => console.warn('sample card', e));
