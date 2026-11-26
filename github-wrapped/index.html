@@ -444,63 +444,82 @@ function derive(W){
   return D;
 }
 
-// One persona per person: every candidate gets a strength (its signal divided by
-// the level where it starts to stand out, so 1 = notable). The strongest wins.
+// One persona per person. Every candidate has a "notable" level (where it starts to count)
+// and a "strong" level (as extreme as it gets), and is scored from 1 to 3 between them.
+// Putting all of them on the same scale stops ratio-style signals (which can grow without
+// limit) from beating share-style ones (which can't go past 100%). The highest score wins.
 const times = x => x >= 2 ? `${Math.round(x)}×` : `${x.toFixed(1)}×`;
+const scale = (v, at, strong) => 1 + 2 * Math.min(1, Math.max(0, (v - at) / (strong - at)));
 function archetype(W, D){
   const h = D.hours, dw = D.dows, n = D.sampleN, cb = W.collab || {}, C = [];
-  const add = (name, v, at, line) => { if (v >= at) C.push({ name, s: Math.min(3, v / at), line }); };
+  const add = (name, v, at, strong, line) => { if (v >= at) C.push({ name, s: scale(v, at, strong), line }); };
 
   // when: from the most recent commits (needs a few to mean anything)
   if (n >= 8) {
     const share = hs => hs.reduce((a, x) => a + h[x], 0) / n;
     const night = share([22, 23, 0, 1, 2, 3, 4]), early = share([5, 6, 7, 8]), lunch = share([12, 13]);
     const eve = share([18, 19, 20, 21]), office = share([9, 10, 11, 12, 13, 14, 15, 16, 17]), weekend = (dw[0] + dw[6]) / n;
-    add('The Night Owl', night, .35, `${pct(night)} of your commits landed between 10pm and 5am. The best ideas show up after dark.`);
-    add('The Early Bird', early, .25, `${pct(early)} of your commits landed before 9am. First coffee, first commit.`);
-    add('The Lunch-Break Coder', lunch, .3, `${pct(lunch)} of your commits landed between noon and 2pm. Who needs lunch?`);
-    add('The Twilight Hacker', eve, .4, `${pct(eve)} of your commits landed between 6 and 10pm. The day job ends, the side quest begins.`);
-    add('The Nine-to-Fiver', office, .7, `${pct(office)} of your commits landed in office hours. Steady, sustainable, shipped.`);
-    add('The Weekend Warrior', weekend, .4, `${pct(weekend)} of your commits landed on a Saturday or Sunday.`);
+    add('The Night Owl', night, .35, .6, `${pct(night)} of your commits landed between 10pm and 5am. The best ideas show up after dark.`);
+    add('The Early Bird', early, .25, .5, `${pct(early)} of your commits landed before 9am. First coffee, first commit.`);
+    add('The Lunch-Break Coder', lunch, .3, .5, `${pct(lunch)} of your commits landed between noon and 2pm. Who needs lunch?`);
+    add('The Twilight Hacker', eve, .4, .65, `${pct(eve)} of your commits landed between 6 and 10pm. The day job ends, the side quest begins.`);
+    add('The Nine-to-Fiver', office, .7, .95, `${pct(office)} of your commits landed in office hours. Steady, sustainable, shipped.`);
+    add('The Weekend Warrior', weekend, .4, .7, `${pct(weekend)} of your commits landed on a Saturday or Sunday.`);
   }
 
   // how: from the full contribution calendar
   if (W.cal && D.totalDays) {
-    const activeShare = D.active / D.totalDays;
-    if (D.streak >= 60 || activeShare >= .8) C.push({ name: 'The Marathoner', s: Math.min(3, Math.max(D.streak / 60, activeShare / .8)),
+    const days = W.cal.days, activeShare = D.active / D.totalDays;
+    const act = a => a.filter(d => d.count).length, rate = a => a.reduce((t, d) => t + d.count, 0) / Math.max(1, a.length);
+    if (D.streak >= 60 || activeShare >= .8) C.push({ name: 'The Marathoner', s: Math.max(D.streak >= 60 ? scale(D.streak, 60, 180) : 0, activeShare >= .8 ? scale(activeShare, .8, .97) : 0),
       line: D.streak >= 60 ? `${fmt(D.streak)} days in a row without a break.` : `You showed up on ${pct(activeShare)} of the days this year.` });
-    const mid = `${YEAR}-07-01`, half = a => ({ sum: a.reduce((t, d) => t + d.count, 0), days: a.length || 1 });
-    const h1 = half(W.cal.days.filter(d => d.date < mid)), h2 = half(W.cal.days.filter(d => d.date >= mid));
-    if (W.cal.total >= 50 && h2.days >= 30) {
-      const r1 = h1.sum / h1.days, r2 = h2.sum / h2.days;
-      if (r1 > 0) add('The Comeback Kid', r2 / r1, 2, `You did ${times(r2 / r1)} more per day in the second half of the year than the first.`);
-      if (r2 > 0) add('The Strong Starter', r1 / r2, 2, `You did ${times(r1 / r2)} more per day in the first half of the year than the second.`);
+
+    // a real comeback: active, then 30+ quiet days, then a stronger finish
+    // (someone who simply started mid-year has nothing to come back from)
+    let gap = null;
+    for (let i = 0; i < days.length;) {
+      if (days[i].count) { i++; continue; }
+      let j = i; while (j < days.length && !days[j].count) j++;
+      if (j - i >= 30 && (!gap || j - i > gap.j - gap.i)) gap = { i, j };
+      i = j;
     }
+    if (gap) {
+      const before = days.slice(0, gap.i), after = days.slice(gap.j);
+      if (act(before) >= 20 && after.length >= 30 && act(after) >= 15) {
+        const r = rate(after) / Math.max(rate(before), 1e-9);
+        add('The Comeback Kid', r, 1.5, 5, `You went quiet from ${fmtDay(days[gap.i].date)} to ${fmtDay(days[gap.j - 1].date)}, then came back doing ${times(r)} as much per day.`);
+      }
+    }
+
+    // front-loaded year: busy first half (with real activity in it), much quieter since
+    const mid = `${YEAR}-07-01`, h1 = days.filter(d => d.date < mid), h2 = days.filter(d => d.date >= mid);
+    if (W.cal.total >= 50 && h2.length >= 30 && act(h1) >= 20 && rate(h2) > 0)
+      add('The Strong Starter', rate(h1) / rate(h2), 2, 8, `You did ${times(rate(h1) / rate(h2))} more per day in the first half of the year than the second.`);
+
     const summer = (D.months[5] + D.months[6] + D.months[7]) / Math.max(1, W.cal.total);
-    if (W.cal.total >= 50) add('The Summer Coder', summer, .4, `${pct(summer)} of your year landed in June, July and August.`);
+    if (W.cal.total >= 50) add('The Summer Coder', summer, .4, .7, `${pct(summer)} of your year landed in June, July and August.`);
   }
 
   // who you work with: pull requests, reviews, issues
   const prs = cb.prsOpened || 0;
-  if (cb.reviews >= 10) add('The Reviewer', cb.reviews / Math.max(1, prs), 1.5, `You reviewed ${plural(cb.reviews, 'pull request')} and opened ${fmt(prs)}. Other people's code got better because of you.`);
+  if (cb.reviews >= 10) add('The Reviewer', cb.reviews / Math.max(1, prs), 1.5, 5, `You reviewed ${plural(cb.reviews, 'pull request')} and opened ${fmt(prs)}. Other people's code got better because of you.`);
   // contributing to other people's projects, measured by pull requests (commit search also finds
   // copies of your commits in mirrors, which made maintainers look like outside contributors)
   const elsewhere = cb.prsElsewhere || 0;
-  if (elsewhere >= 5 && prs) add('The Open-Source Citizen', elsewhere / prs, .5, `${fmt(elsewhere)} of your ${plural(prs, 'pull request')} went to projects you don't own.`);
-  if (prs >= 10 && cb.prsMerged != null) add('The Closer', cb.prsMerged / prs, .9, `${pct(cb.prsMerged / prs)} of your ${fmt(prs)} pull requests got merged.`);
-  if (cb.issues >= 10) add('The Bug Hunter', cb.issues / Math.max(1, prs), 1.5, `You opened ${plural(cb.issues, 'issue')}, more than your ${plural(prs, 'pull request')}. Somebody has to find them.`);
+  if (elsewhere >= 5 && prs) add('The Open-Source Citizen', elsewhere / prs, .5, .9, `${fmt(elsewhere)} of your ${plural(prs, 'pull request')} went to projects you don't own.`);
+  if (prs >= 20 && cb.prsMerged != null) add('The Closer', cb.prsMerged / prs, .9, 1, `${pct(cb.prsMerged / prs)} of your ${fmt(prs)} pull requests got merged.`);
+  if (cb.issues >= 10) add('The Bug Hunter', cb.issues / Math.max(1, prs), 1.5, 5, `You opened ${plural(cb.issues, 'issue')}, more than your ${plural(prs, 'pull request')}. Somebody has to find them.`);
 
   // what you build: repos and languages
   const rp = W.repos || {};
-  add('The Builder', rp.created || 0, 5, `You started ${plural(rp.created || 0, 'new repo')} this year.`);
+  add('The Builder', rp.created || 0, 5, 20, `You started ${plural(rp.created || 0, 'new repo')} this year.`);
   // a breakout year: 1,000+ stars on new repos, and at least as many as all older repos have
   // (so it rewards this year's work, not being famous already)
   const fresh = rp.starsOnNew || 0, older = Math.max(0, (rp.totalStars || 0) - fresh);
-  if (fresh >= 1000 && fresh >= older) C.push({ name: 'The Rising Star', s: Math.min(3, fresh / 1000, fresh / Math.max(1, older)),
-    line: `Your new repos picked up ${plural(fresh, 'star')} this year${older ? ', more than all your older repos combined' : ''}.` });
+  if (fresh >= older) add('The Rising Star', fresh, 1000, 10000, `Your new repos picked up ${plural(fresh, 'star')} this year${older ? ', more than all your older repos combined' : ''}.`);
   const langs = W.languages || [], big = langs.filter(l => l.pct >= .1).length;
-  add('The Polyglot', big, 4, `You wrote real code in ${big} languages this year.`);
-  if (langs[0]) add('The Loyalist', langs[0].pct, .8, `${pct(langs[0].pct)} of your code was ${langs[0].name}. You know what you like.`);
+  add('The Polyglot', big, 4, 5, `You wrote real code in ${big} languages this year.`);
+  if (langs[0]) add('The Loyalist', langs[0].pct, .8, .98, `${pct(langs[0].pct)} of your code was ${langs[0].name}. You know what you like.`);
 
   if (C.length) return C.sort((a, b) => b.s - a.s)[0];
   // nothing stands out: fall back on the calendar
