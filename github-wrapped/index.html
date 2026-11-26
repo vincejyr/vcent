@@ -266,6 +266,22 @@ const fmtDay = isoStr => { const [y,m,d] = isoStr.split('-').map(Number); return
 const dowOf = isoStr => new Date(isoStr + 'T12:00:00Z').getUTCDay();
 const plural = (n, w) => `${fmt(n)} ${w}${n === 1 ? '' : 's'}`;
 
+// Analytics: no-op unless the host page loads PostHog (vcent.in does; forks don't).
+// Events wait in a queue until the async PostHog script is ready. Usernames are never sent.
+const evQ = [];
+let evTimer = 0, evGiveUp = 0;
+function track(name, props = {}){
+  evQ.push([name, { year: YEAR, ...props }]);
+  flushEv();
+  if (evQ.length && !evTimer) { evTimer = setInterval(flushEv, 400); evGiveUp = setTimeout(() => { clearInterval(evTimer); evTimer = 0; }, 30000); }
+}
+function flushEv(){
+  const ph = window.posthog;
+  if (!ph || typeof ph.capture !== 'function') return;
+  while (evQ.length) { const [n, p] = evQ.shift(); try { ph.capture(n, p); } catch {} }
+  clearInterval(evTimer); clearTimeout(evGiveUp); evTimer = 0;
+}
+
 class WrapError extends Error { constructor(kind, info){ super(kind); this.kind = kind; this.info = info; } }
 
 async function gh(path){
@@ -768,6 +784,7 @@ async function drawCard(W, D){
 }
 
 // ---------- story viewer ----------
+let viewed = new Set();
 let W = null, D = null, cards = [], chs = [], barFills = [], idx = 0, elapsed = 0, paused = false, last = 0, raf = 0;
 // One card format: 9:16, sized for phone stories.
 let cardPng = null;
@@ -784,6 +801,7 @@ function openStory(){
   $('viewer').classList.add('open');
   document.body.style.overflow = 'hidden';
   cardPng = null;
+  viewed = new Set();
   show(0);
   last = performance.now();
   cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
@@ -821,6 +839,10 @@ function show(i){
   $('prevBtn').disabled = idx === 0;
   $('nextBtn').disabled = idx === cards.length - 1;
   countUp(cards[idx]);
+  if (!viewed.has(idx)) {
+    viewed.add(idx);
+    track('story_card_viewed', { card: (cards[idx].className.match(/\bt-(\w+)/) || [])[1], chapter: chs[idx], position: idx + 1, total: cards.length });
+  }
 }
 
 function countUp(card){
@@ -897,10 +919,11 @@ async function shareCard(mode){
   const name = `github-wrapped-${YEAR}-${W.user.login}.png`;
   const file = new File([blob], name, { type: 'image/png' });
   if (mode === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: `My ${YEAR} on GitHub. Get yours: ${SHARE_URL}` }); return; }
-    catch (e) { if (e.name === 'AbortError') return; }
+    try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: `My ${YEAR} on GitHub. Get yours: ${SHARE_URL}` }); track('share_card_saved', { button: mode, method: 'share_sheet' }); return; }
+    catch (e) { if (e.name === 'AbortError') { track('share_sheet_cancelled'); return; } }
   }
   download(blob, name);
+  track('share_card_saved', { button: mode, method: 'download' });
   toast(mode === 'share' ? 'Image saved. Post it anywhere' : 'Saved');
 }
 
@@ -911,8 +934,9 @@ $('cards').addEventListener('click', async e => {
   else if (act === 'link') {
     const link = `${SHARE_URL}?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`;
     try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); }
+    track('link_copied');
   }
-  else if (act === 'again') { closeStory(); $('u').value = ''; $('u').focus(); }
+  else if (act === 'again') { track('wrap_again_clicked'); closeStory(); $('u').value = ''; $('u').focus(); }
 });
 
 // ---------- landing ----------
@@ -921,25 +945,33 @@ function renderSteps(at){
   $('steps').innerHTML = STEPS.map((l, i) => `<li class="${i < at ? 'done' : i === at ? 'on' : ''}"><i></i><span>${l}</span></li>`).join('');
 }
 
-async function run(login){
+async function run(login, source = 'form'){
   login = login.trim().replace(/^@/, '').replace(/^https?:\/\/github\.com\//i, '').split('/')[0];
   $('err').textContent = '';
   if (!/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(login)) { $('err').textContent = 'That doesn’t look like a GitHub username.'; return; }
   $('goBtn').disabled = true; $('loading').classList.add('on'); $('landing').classList.add('busy');
   renderSteps(0);
+  const t0 = performance.now();
+  track('wrap_started', { source });
   try {
     W = await buildWrap(login, renderSteps);
     D = derive(W);
     if (!(W.cal && W.cal.total) && !W.commits.total && !W.collab.prsOpened && !W.collab.issues) {
       $('err').textContent = `@${W.user.login} has no public activity in ${YEAR} yet. Nothing to wrap.`;
+      track('wrap_failed', { source, reason: 'no_activity' });
       return;
     }
-    history.replaceState(null, '', `?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`);
     setPaused(false);
     openStory();
+    track('wrap_completed', {
+      source, cards: cards.length, partial: !!W.partial, has_calendar: !!W.cal,
+      personality: D.archetype ? D.archetype.name : null, top_language: W.languages[0] ? W.languages[0].name : null,
+      load_ms: Math.round(performance.now() - t0),
+    });
   } catch (e) {
     const k = e.kind;
     if (!k) console.error(e);
+    track('wrap_failed', { source, reason: k || 'error' });
     $('err').textContent =
       k === 'notfound' ? `No GitHub user called @${login}.` :
       k === 'ratelimit' ? `GitHub’s free API limit is used up for your network.${e.info ? ` Try again after ${new Date(e.info * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.` : ' Try again in a few minutes.'}` :
@@ -974,14 +1006,20 @@ drawCard(...sampleWrap()).then(cv => cv.toBlob(b => { if (b) $('sampleImg').src 
 
 $('try').addEventListener('click', e => {
   const b = e.target.closest('button[data-u]'); if (!b) return;
-  $('u').value = b.dataset.u; run(b.dataset.u);
+  $('u').value = b.dataset.u; run(b.dataset.u, 'example');
 });
 
 if (qs.has('debug')) window.__gw = { drawCard: () => drawCard(W, D) };
 $('form').addEventListener('submit', e => { e.preventDefault(); run($('u').value); });
 const preset = qs.get('u');
-if (preset) { $('u').value = preset; run(preset); } else $('u').focus();
+// Take the username out of the address bar before analytics loads, so it never lands in recorded page URLs.
+if (preset) {
+  qs.delete('u');
+  history.replaceState(null, '', location.pathname + (qs.toString() ? `?${qs}` : '') + location.hash);
+  $('u').value = preset; run(preset, 'link');
+} else $('u').focus();
 })();
 </script>
+{% include analytics.html %}
 </body>
 </html>
