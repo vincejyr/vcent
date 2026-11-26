@@ -55,17 +55,22 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .err{min-height:24px;margin-top:14px;color:#ff8f8f;font-size:15px}
 .fine{margin-top:30px;font-size:13px;line-height:1.6;color:rgba(245,245,247,.5);max-width:52ch}
 .fine a{color:rgba(245,245,247,.75)}
-.loading{display:none;margin-top:22px;padding:18px 20px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+.loading{display:none;margin-top:28px;padding:20px 18px;border-radius:16px;background:#06120a;border:1px solid rgba(57,211,83,.18)}
 .loading.on{display:block}
 .landing.busy .try{display:none}
-.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px}
-.steps li{display:flex;align-items:center;gap:12px;color:rgba(245,245,247,.55)}
-.steps li.done,.steps li.on{color:var(--fg)}
-.steps li i{width:18px;height:18px;display:grid;place-items:center;flex:none}
-.steps li i::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.3)}
-.steps li.done i::before{width:5px;height:10px;border:solid var(--green);border-width:0 2.5px 2.5px 0;border-radius:0;transform:rotate(45deg) translate(-1px,-2px)}
-.steps li.on i::before{width:12px;height:12px;border-color:var(--line);border-top-color:var(--green);animation:sp .8s linear infinite}
-.loading p{margin:12px 0 0;font-size:13px;line-height:1.5;color:rgba(245,245,247,.6)}
+.lhead{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,245,247,.62)}
+.lhead span:last-child{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.35}}
+.lgrid{margin-top:14px;display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;grid-auto-columns:1fr;gap:2px}
+.lgrid i{aspect-ratio:1;border-radius:1.5px;background:rgba(255,255,255,.06)}
+.lgrid.wait i{animation:pulse 1.6s ease-in-out infinite;animation-delay:calc(var(--c) * 30ms)}
+@keyframes pulse{50%{background:rgba(255,255,255,.14)}}
+.lgrid i.in{animation:cellIn .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--c) * 22ms)}
+@keyframes cellIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+.lgrid i.f{background:rgba(255,255,255,.03)}
+.lgrid i.x{background:none}
+.loading h3{margin:18px 0 0;font-size:22px;letter-spacing:-.02em}
+.loading p{margin:6px 0 0;font-size:14px;line-height:1.5;color:rgba(245,245,247,.7)}
 .spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--green);animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -89,7 +94,6 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .topbar{position:absolute;top:18px;left:12px;right:12px;z-index:5;display:flex;align-items:center;gap:10px;font-size:13px}
 .topbar img{width:28px;height:28px;border-radius:50%}
 .topbar .who{font-weight:700}
-.topbar .yr{color:rgba(245,245,247,.65);font-family:var(--mono);font-size:11px}
 .topbar .sp{flex:1}
 .ib{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.08);display:grid;place-items:center;cursor:pointer}
 .ib svg{width:16px;height:16px}
@@ -204,9 +208,11 @@ button:disabled{opacity:.5;cursor:wait}
       <button type="button" data-u="sindresorhus">@sindresorhus</button>
       <button type="button" data-u="gaearon">@gaearon</button>
     </div>
-    <div class="loading" id="loading" role="status">
-      <ol class="steps" id="steps"></ol>
-      <p>Usually about 10 seconds. GitHub allows 10 searches a minute, so back-to-back wraps can come up short.</p>
+    <div class="loading" id="loading" role="status" aria-live="polite">
+      <div class="lhead"><span id="lWho"></span><span>Reading…</span></div>
+      <div class="lgrid wait" id="lgrid" aria-hidden="true"></div>
+      <h3>Reading your year…</h3>
+      <p id="lMsg"></p>
     </div>
     <div class="err" id="err" role="alert"></div>
     <p class="fine">Uses public data only and runs in your browser; nothing is stored on a server. Private work shows up in the contribution count only if the user turned on “Include private contributions” on their GitHub profile. Contribution calendar from <a href="https://github.com/grubersjoe/github-contributions-api" target="_blank" rel="noopener">github-contributions-api</a>. Made by <a href="https://www.vcent.in/">Vince J</a> · <a href="https://github.com/vincejyr/github-wrapped" target="_blank" rel="noopener">Source on GitHub</a> (fork it).</p>
@@ -225,7 +231,7 @@ button:disabled{opacity:.5;cursor:wait}
     <div class="bars" id="bars"></div>
     <div class="topbar">
       <img id="tbAv" alt="">
-      <div><div class="who" id="tbWho"></div><div class="yr" id="tbYr"></div></div>
+      <div class="who" id="tbWho"></div>
       <div class="sp"></div>
       <button class="ib" id="pauseBtn" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
       <button class="ib" id="closeBtn" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -320,7 +326,7 @@ async function buildWrap(login, onStep){
     followers: user.followers, publicRepos: user.public_repos, type: user.type } };
   const L = user.login;
 
-  onStep(1);
+  onStep(1, W);
   const cal = await soft((async () => {
     const r = await fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(L)}?y=${YEAR}`);
     if (!r.ok) throw new Error('cal');
@@ -331,10 +337,10 @@ async function buildWrap(login, onStep){
   })(), null, W);
   W.cal = cal;
 
-  onStep(2);
+  onStep(2, W);
   const repos = await soft(gh(`/users/${encodeURIComponent(L)}/repos?per_page=100&type=owner&sort=pushed`), [], W);
 
-  onStep(3);
+  onStep(3, W);
   const sample = [];
   let commitTotal = null;
   const seen = new Set();
@@ -351,7 +357,7 @@ async function buildWrap(login, onStep){
     if ((r.items || []).length < 100 || page * 100 >= r.total_count) break;
   }
 
-  onStep(4);
+  onStep(4, W);
   const prsOpened = await soft(searchCount(`author:${L} type:pr created:${RANGE}`), null, W);
   const prsMerged = await soft(searchCount(`author:${L} type:pr is:merged created:${RANGE}`), null, W);
   const issues = await soft(searchCount(`author:${L} type:issue created:${RANGE}`), null, W);
@@ -364,7 +370,7 @@ async function buildWrap(login, onStep){
     .map(([name, n]) => ({ name, commits: n, own: name.split('/')[0].toLowerCase() === L.toLowerCase() }));
   const otherRepos = Object.keys(byRepo).filter(n => n.split('/')[0].toLowerCase() !== L.toLowerCase()).length;
 
-  onStep(5);
+  onStep(5, W);
   const langAgg = {};
   if (topRepos.length) {
     for (const r of topRepos) {
@@ -482,7 +488,11 @@ function archetype(W, D){
   // what you build: repos and languages
   const rp = W.repos || {};
   add('The Builder', rp.created || 0, 5, `You started ${plural(rp.created || 0, 'new repo')} this year.`);
-  add('The Rising Star', rp.starsOnNew || 0, 100, `Your new repos picked up ${plural(rp.starsOnNew || 0, 'star')} this year.`);
+  // a breakout year: 1,000+ stars on new repos, and at least as many as all older repos have
+  // (so it rewards this year's work, not being famous already)
+  const fresh = rp.starsOnNew || 0, older = Math.max(0, (rp.totalStars || 0) - fresh);
+  if (fresh >= 1000 && fresh >= older) C.push({ name: 'The Rising Star', s: Math.min(3, fresh / 1000, fresh / Math.max(1, older)),
+    line: `Your new repos picked up ${plural(fresh, 'star')} this year${older ? ', more than all your older repos combined' : ''}.` });
   const langs = W.languages || [], big = langs.filter(l => l.pct >= .1).length;
   add('The Polyglot', big, 4, `You wrote real code in ${big} languages this year.`);
   if (langs[0]) add('The Loyalist', langs[0].pct, .8, `${pct(langs[0].pct)} of your code was ${langs[0].name}. You know what you like.`);
@@ -547,7 +557,6 @@ const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' 
 // story chapters: one accent each
 const CHAPTER_OF = { intro: 'activity', contrib: 'activity', commits: 'activity', months: 'activity', streak: 'activity', clock: 'rhythm', langs: 'craft', repos: 'craft', new: 'craft', collab: 'people', sum: 'share' };
 const CHAPTERS = ['activity', 'rhythm', 'craft', 'people', 'share'];
-const CHAPTER_NAME = { activity: 'Activity', rhythm: 'Personality', craft: 'Craft', people: 'People', share: 'Your card' };
 const CHAPTER_BG = { activity: '#06120a', rhythm: '#0d0a1f', craft: '#041417', people: '#141006', share: '#07080c' };
 
 function buildCards(W, D){
@@ -870,20 +879,12 @@ function closeStory(){
   $('u').focus();
 }
 
-function chapterLabel(i){
-  const ch = chs[i];
-  if (ch === 'share') return CHAPTER_NAME.share;
-  const order = [...new Set(chs.filter(c => c !== 'share'))];
-  return `${CHAPTER_NAME[ch]} · ${order.indexOf(ch) + 1} of ${order.length}`;
-}
-
 function show(i){
   idx = Math.max(0, Math.min(cards.length - 1, i));
   elapsed = 0;
   cards.forEach((c, j) => c.classList.toggle('active', j === idx));
   barFills.forEach((b, j) => b.style.width = j < idx ? '100%' : '0%');
   if (idx === cards.length - 1) barFills[idx].style.width = '100%';
-  $('tbYr').textContent = chapterLabel(idx);
   $('viewer').style.setProperty('--vbg', CHAPTER_BG[chs[idx]] || '#000');
   $('prevBtn').disabled = idx === 0;
   $('nextBtn').disabled = idx === cards.length - 1;
@@ -989,9 +990,32 @@ $('cards').addEventListener('click', async e => {
 });
 
 // ---------- landing ----------
-const STEPS = ['Profile', 'Contribution calendar', 'Repositories', 'Commits', 'Pull requests and issues', 'Languages'];
-function renderSteps(at){
-  $('steps').innerHTML = STEPS.map((l, i) => `<li class="${i < at ? 'done' : i === at ? 'on' : ''}"><i></i><span>${l}</span></li>`).join('');
+// Loading: an empty year that pulses, then fills in with the real calendar as soon as it arrives.
+const STEP_MSG = [u => `Finding @${u}…`, () => `Reading ${YEAR}, day by day…`, () => 'Next: commits, pull requests and languages.',
+  () => 'Counting commits…', () => 'Counting pull requests and reviews…', () => 'Working out your personality…'];
+let loadingFor = '', gridFilled = false;
+function emptyGrid(){
+  const pad = dowOf(`${YEAR}-01-01`);
+  let out = '';
+  for (let i = 0; i < pad; i++) out += '<i class="x"></i>';
+  for (let m = 0, k = pad; m < 12; m++) for (let d = 1; d <= daysIn(YEAR, m); d++, k++) out += `<i data-d="${isoOf(m, d)}" style="--c:${Math.floor(k / 7)}"></i>`;
+  $('lgrid').innerHTML = out; $('lgrid').classList.add('wait'); gridFilled = false;
+}
+function fillGrid(cal){
+  gridFilled = true;
+  $('lgrid').classList.remove('wait');
+  if (!cal) return;
+  const lvl = levelFn(cal.days), byDate = {};
+  for (const d of cal.days) byDate[d.date] = d.count;
+  $('lgrid').querySelectorAll('i[data-d]').forEach(el => {
+    const d = el.dataset.d;
+    el.className = d > END_ISO || !(d in byDate) ? 'f' : byDate[d] ? `in l${lvl(byDate[d])}` : 'in';
+  });
+}
+function renderStep(i, Wp){
+  $('lMsg').textContent = STEP_MSG[i](loadingFor);
+  if (Wp) $('lWho').textContent = `@${Wp.user.login} · ${YEAR}`;
+  if (i >= 2 && Wp && !gridFilled) fillGrid(Wp.cal);
 }
 
 async function run(login, source = 'form'){
@@ -999,11 +1023,11 @@ async function run(login, source = 'form'){
   $('err').textContent = '';
   if (!/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(login)) { $('err').textContent = 'That doesn’t look like a GitHub username.'; return; }
   $('goBtn').disabled = true; $('loading').classList.add('on'); $('landing').classList.add('busy');
-  renderSteps(0);
+  loadingFor = login; $('lWho').textContent = `@${login} · ${YEAR}`; emptyGrid(); renderStep(0);
   const t0 = performance.now();
   track('wrap_started', { source });
   try {
-    W = await buildWrap(login, renderSteps);
+    W = await buildWrap(login, renderStep);
     D = derive(W);
     if (!(W.cal && W.cal.total) && !W.commits.total && !W.collab.prsOpened && !W.collab.issues) {
       $('err').textContent = `@${W.user.login} has no public activity in ${YEAR} yet. Nothing to wrap.`;
