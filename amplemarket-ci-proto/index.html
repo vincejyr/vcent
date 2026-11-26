@@ -91,6 +91,7 @@ table{width:100%;border-collapse:collapse}
 th{font-size:11px;text-align:left;color:var(--ink3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--soft);white-space:nowrap}
 td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tr.lead{cursor:pointer}
+.feedt td,.feedt th{padding-left:7px;padding-right:7px}
 tr.lead td:nth-child(2) .b,tr.lead td:nth-child(2) .faint{white-space:nowrap}
 tr.lead td:nth-child(2) .faint{max-width:170px;overflow:hidden;text-overflow:ellipsis}
 tr.lead:hover td{background:var(--soft)}
@@ -116,7 +117,7 @@ input[type=checkbox]{accent-color:var(--ink);width:14px;height:14px}
 .drawer{position:absolute;top:0;right:0;bottom:0;width:560px;background:var(--card);border-left:1px solid var(--line);z-index:30;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
 .drawer.show{transform:none}
 .drawer .body{flex:1;overflow:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
-.drawer .foot2{border-top:1px solid var(--line);padding:12px 22px;display:flex;align-items:center;gap:8px}
+.drawer .foot2{border-top:1px solid var(--line);padding:10px 22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:8px}
 .modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:900px;max-height:720px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);z-index:40;display:none;flex-direction:column}
 .modal.show{display:flex}
 .modal .body{padding:18px 22px;overflow:auto;display:flex;flex-direction:column;gap:12px}
@@ -141,13 +142,18 @@ input[type=checkbox]{accent-color:var(--ink);width:14px;height:14px}
 .funnel .t{width:110px;font-size:12px}
 .funnel .track{flex:1;height:20px;border-radius:4px;background:var(--soft)}
 .funnel .fill{height:100%;border-radius:4px;background:var(--ink2)}
-.grid td.cell{cursor:pointer;height:58px;border-left:1px solid var(--line)}
+.grid{min-width:640px}
+.grid th{white-space:normal;vertical-align:bottom}
+.grid .chip{font-size:11px;padding:0 6px}
+.grid td.cell{cursor:pointer;height:58px;border-left:1px solid var(--line);padding:6px 8px}
 .grid td.cell:hover{background:var(--soft)}
 .grid td.cell.sel{box-shadow:inset 0 0 0 2px var(--ink)}
 .hl{animation:hl 1.6s ease 2}
 @keyframes hl{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 3px var(--mid)}}
 
 .seg .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stname{width:100%;resize:none;border:1px solid transparent;border-radius:6px;background:transparent;font-family:inherit;font-weight:600;font-size:13.5px;line-height:1.25;padding:2px 4px;margin:-2px -4px 0;color:var(--ink)}
+.stname:hover,.stname:focus{border-color:var(--mid);outline:none}
 .mob{display:none}
 @media (max-width:980px){
   .mob{display:inline}
@@ -336,7 +342,7 @@ function setup3(){
   const ch = {"Problem aware":["LinkedIn","Search"],"Solution search":["G2","AI assistants","Search"],"Shortlist":["Paid ads","G2","LinkedIn"],"Evaluation":["Events","LinkedIn"],"Decision":["Search","LinkedIn"]};
   const seqOpts = [...new Set(Object.values(SEQS))];
   const cols = S.stages.map((s,i)=>`<div class="card" style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0">
-     <div class="row"><span class="num" style="background:var(--ink);color:var(--accent-ink);border-color:var(--ink)">${i+1}</span><input type="text" value="${esc(s.name)}" data-act="rename" data-i="${i}" style="flex:1;min-width:0;font-weight:600;border-color:transparent;padding:3px 4px" aria-label="Stage name"></div>
+     <div class="kick">Stage ${i+1}</div><textarea rows="2" data-act="rename" data-i="${i}" class="stname" aria-label="Stage ${i+1} name">${esc(s.name)}</textarea>
      <div class="small muted" style="min-height:52px">${sig[STAGES[i]]}</div>
      <div class="kick">Channels</div><div>${ch[STAGES[i]].map(c=>`<span class="chip" style="margin:0 3px 3px 0">${c}</span>`).join("")}</div>
      <div class="kick">Sequence</div><select data-act="seq" data-i="${i}">${seqOpts.map(o=>`<option ${o===s.seq?"selected":""}>${o}</option>`).join("")}</select></div>`).join("");
@@ -393,14 +399,14 @@ function feed(){
     if (l.status) act = `<span class="chip out">${l.status==="actioned"?"Actioned":l.status==="snoozed"?"Snoozed":"Not relevant"}</span>`;
     else if (isOwner(l)) act = `<span class="chip out" title="${esc(l.owner)} was alerted instead">Owner alerted</span>`;
     else if (l.crm==="In sequence") act = `<button class="btn sm" disabled title="Already in a sequence">In a sequence</button>`;
-    else act = `<button class="btn sm" data-act="add1" data-id="${l.id}">Add to sequence</button>`;
+    else act = `<button class="btn sm" data-act="add1" data-id="${l.id}" title="Add to sequence">+ Sequence</button>`;
     const canSel = !l.status && !isOwner(l) && l.crm!=="In sequence";
     return `<tr class="lead" data-open="${l.id}">
       <td style="width:28px"><input type="checkbox" data-selrow="${l.id}" ${S.sel.has(l.id)?"checked":""} ${canSel?"":"disabled"} aria-label="Select ${esc(l.name)}"></td>
       <td><div class="row"><span class="av">${l.name.split(" ").map(x=>x[0]).join("")}</span><div><div class="b">${l.name}</div><div class="small faint">${l.title}, ${l.co}</div></div></div></td>
       <td><span class="chip">${l.comp}</span></td><td>${scoreHtml(l.score)}</td>
       <td>${stageChip(l.stage)} ${l.moved?'<span class="chip out">↑ moved</span>':""}</td>
-      <td class="small" style="max-width:200px">${l.sig}</td>
+      <td class="small" style="max-width:150px">${l.sig}</td>
       <td><span class="chip ${l.crm==="Open deal"?"dark":l.crm==="Customer"?"mid":l.crm==="In sequence"?"out":""}">${l.crm}</span></td>
       <td style="white-space:nowrap">${act}</td></tr>`;
   }).join("") || `<tr><td colspan="8" class="muted" style="padding:28px;text-align:center">Nothing here yet.</td></tr>`;
@@ -411,7 +417,7 @@ function feed(){
     <div class="row"><select data-act="compF">${["All","Datacove","Pipewise","Sightline"].map(c=>`<option ${S.compF===c?"selected":""} value="${c}">Competitor: ${c}</option>`).join("")}</select>
       <span class="btn sm">Score: High + Med</span><span class="btn sm">My territory</span><div class="sp"></div><span class="small faint">Sort: stage, score, recency</span></div>
     ${n?`<div class="card row" style="padding:8px 12px;background:var(--soft)"><b>${n} selected</b><button class="btn sm pri" data-act="bulk">Add to sequence</button><button class="btn sm" data-act="bsnooze">Snooze</button><button class="btn sm" data-act="bclear">Clear</button></div>`:""}
-    <div class="card" style="overflow:hidden"><table><tr><th></th><th>Person</th><th>Competitor</th><th>Intent</th><th>Stage</th><th>Latest signal</th><th>In CRM</th><th></th></tr>${rows}</table></div>
+    <div class="card feedt" style="overflow-x:auto"><table><tr><th></th><th>Person</th><th>Competitor</th><th>Intent</th><th>Stage</th><th>Latest signal</th><th>In CRM</th><th></th></tr>${rows}</table></div>
   </div>`;
 }
 
@@ -434,8 +440,8 @@ function openLead(id){
     ${l.team.length?`<div><div class="b" style="margin-bottom:6px">Buying committee at ${l.co}</div><div class="row">${l.team.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`:""}
   </div>
   <div class="foot2"><button class="btn pri" data-act="add1" data-id="${l.id}" ${blocked?"disabled":""}>Add to sequence</button><button class="btn" data-act="task" ${l.status?"disabled":""}>Create task</button><button class="btn" data-act="pushcrm">Push to CRM</button><div class="sp"></div>
-    <span class="small faint">Useful?</span><button class="btn sm" data-act="up" aria-label="Useful">👍</button>
-    <select data-act="notrel" aria-label="Not relevant reason"><option value="">👎 Not relevant…</option><option>Wrong person</option><option>Not in market</option><option>Wrong stage</option><option>Already a customer</option><option>Wrong competitor</option></select></div>`;
+    <div class="row" style="gap:6px"><span class="small faint">Useful?</span><button class="btn sm" data-act="up" aria-label="Useful">👍</button>
+    <select data-act="notrel" aria-label="Not relevant reason"><option value="">👎 Not relevant</option><option>Wrong person</option><option>Not in market</option><option>Wrong stage</option><option>Already a customer</option><option>Wrong competitor</option></select></div></div>`;
   $("#drawer").classList.add("show"); $("#scrim").classList.add("show");
   renderGuide();
 }
@@ -547,18 +553,20 @@ function evidence(k){
    <div class="row" style="margin-top:10px">${si>=3?`<button class="btn sm" data-act="toast" data-msg="Battlecard update drafted for review">Update battlecard</button>`:""}<button class="btn sm" data-act="toast" data-msg="Shared with marketing">Share with marketing</button></div>`;
 }
 function journey(){
-  const g = `<table class="grid" style="table-layout:fixed"><tr><th style="width:140px">Channel ↓ / Stage →</th>${STAGES.map(s=>`<th>${s}</th>`).join("")}</tr>
+  const g = `<table class="grid" style="table-layout:fixed"><tr><th style="width:130px">Channel ↓ / Stage →</th>${STAGES.map(s=>`<th>${s}</th>`).join("")}</tr>
    ${CH.map((ch,ci)=>`<tr><td class="small b">${ch}</td>${STAGES.map((_,si)=>{const k=ci+","+si,c=CELLS[k]||[];
      return `<td class="cell ${S.cell===k?"sel":""}" data-cell="${k}">${c.map(x=>`<span class="chip ${x.startsWith("Datacove")?"dark":x==="Pipewise"?"mid":""}" style="margin:2px">${x}</span>`).join("")}${YOU.has(k)?'<span class="chip out" style="margin:2px">Lumen</span>':""}${!c.length&&!YOU.has(k)?'<span class="small faint">gap</span>':""}</td>`}).join("")}</tr>`).join("")}</table>`;
-  return `<div class="row" style="gap:14px;align-items:flex-start"><div class="col" style="flex:1;min-width:0">
+  return `<div class="col" style="gap:12px">
     <div><div class="b" style="font-size:15px">Where competitors meet your buyers</div><div class="small faint">Persona: VP Data, 200–2,000 FTE, EU · last run 1 Dec</div></div>
-    <div class="card" style="overflow:hidden">${g}</div>
-    <div class="row small"><span class="chip dark">Datacove</span><span class="chip mid">Pipewise</span><span class="chip">Sightline</span><span class="chip out">Lumen (you)</span><span class="faint">* new this month · click a cell for evidence</span></div>
-    <div class="card small" style="padding:10px 14px;background:var(--soft)"><b>How this is built:</b> a synthetic-buyer agent runs this persona’s searches and AI-assistant prompts, reads G2 and comparison pages, and checks public ad libraries. Observation only: no ad clicks, no sign-ups.</div></div>
-   <div class="col" style="width:300px;flex:none">
-    <div class="card" style="padding:14px" id="evid">${S.cell?evidence(S.cell):`<div class="kick">Evidence</div><div class="small muted" style="margin-top:6px">Click any cell in the map to see the queries run, AI answers, ads and claims seen.</div>`}</div>
-    <div class="card" style="padding:14px"><div class="kick">Play for Sam</div><div style="margin-top:6px">Evaluation leads vs Datacove → “Competitor comparison” sequence + TCO one-pager.</div><div style="margin-top:8px"><button class="btn sm" data-view="setup3">Edit stage plays</button></div></div>
-   </div></div>`;
+    <div class="card" style="overflow-x:auto">${g}</div>
+    <div class="row small" style="flex-wrap:wrap"><span class="chip dark">Datacove</span><span class="chip mid">Pipewise</span><span class="chip">Sightline</span><span class="chip out">Lumen (you)</span><span class="faint">* new this month · click a cell for evidence</span></div>
+    <div class="row" style="gap:12px;align-items:stretch">
+     <div class="card" style="padding:14px;flex:1;min-width:0" id="evid">${S.cell?evidence(S.cell):`<div class="kick">Evidence</div><div class="small muted" style="margin-top:6px">Click any cell in the map to see the queries run, AI answers, ads and claims seen.</div>`}</div>
+     <div class="col" style="width:300px;flex:none;gap:12px">
+      <div class="card" style="padding:14px"><div class="kick">Play for Sam</div><div style="margin-top:6px">Evaluation leads vs Datacove → “Competitor comparison” sequence + TCO one-pager.</div><div style="margin-top:8px"><button class="btn sm" data-view="setup3">Edit stage plays</button></div></div>
+      <div class="card small" style="padding:12px 14px;background:var(--soft)"><b>How this is built:</b> a synthetic-buyer agent runs this persona’s searches and AI-assistant prompts, reads G2 and comparison pages, and checks public ad libraries. Observation only: no ad clicks, no sign-ups.</div>
+     </div>
+    </div></div>`;
 }
 
 /* ---------- render + events ---------- */
@@ -625,7 +633,13 @@ document.addEventListener("change", e=>{
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); });
 
-init(); render();
+function fit(){
+  const f = $(".frame"), app = $("#app"), W = f.clientWidth;
+  const z = W >= 1080 ? 1 : (W/1080 >= 0.7 ? W/1080 : 1);
+  app.style.zoom = z === 1 ? "" : z.toFixed(3);
+}
+window.addEventListener("resize", fit);
+init(); render(); fit();
 </script>
 </body>
 </html>
