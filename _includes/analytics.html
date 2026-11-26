@@ -11,9 +11,22 @@
         persistence: "memory",
         person_profiles: "identified_only",
         disable_session_recording: true,
-        respect_dnt: true
+        respect_dnt: true,
+        before_send: scrub
       });
     };
+    // Drop the ?u= username (GitHub Wrapped) from every URL-valued property, whichever code path captured it.
+    function scrubUrl(v) {
+      if (typeof v !== "string" || v.indexOf("u=") < 0 || v.indexOf("vcent.in") < 0) return v;
+      try { var u = new URL(v); u.searchParams.delete("u"); return u.toString(); } catch (e) { return v; }
+    }
+    function scrub(ev) {
+      if (!ev) return ev;
+      [ev.properties, ev.$set, ev.$set_once].forEach(function (o) {
+        if (o) for (var k in o) o[k] = scrubUrl(o[k]);
+      });
+      return ev;
+    }
     document.head.appendChild(s);
   })();
 </script>
