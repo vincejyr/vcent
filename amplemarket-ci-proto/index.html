@@ -1,0 +1,617 @@
+---
+layout: null
+sitemap: false
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Competitive Intelligence Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#efefec; --app:#fafaf9; --card:#ffffff; --side:#ececea; --ink:#1b1d1c; --ink2:#5b605d; --ink3:#9a9f9c;
+  --line:#e2e3e0; --soft:#f3f3f1; --chip:#f5f5f3; --mid:#cfd1cd; --accent:#1b1d1c; --accent-ink:#ffffff;
+  --shadow:0 10px 40px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --page:#0f1110; --app:#151716; --card:#1c1f1e; --side:#121413; --ink:#eef0ee; --ink2:#b3b8b4; --ink3:#7c827e;
+    --line:#2b2f2d; --soft:#222524; --chip:#242826; --mid:#3b403d; --accent:#eef0ee; --accent-ink:#121413; --shadow:0 10px 40px rgba(0,0,0,.5); }
+}
+:root[data-theme="dark"]{ --page:#0f1110; --app:#151716; --card:#1c1f1e; --side:#121413; --ink:#eef0ee; --ink2:#b3b8b4; --ink3:#7c827e;
+    --line:#2b2f2d; --soft:#222524; --chip:#242826; --mid:#3b403d; --accent:#eef0ee; --accent-ink:#121413; --shadow:0 10px 40px rgba(0,0,0,.5); }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* page */
+.wrap{max-width:1560px;margin:0 auto;padding:32px 16px 48px;display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start}
+.guide{position:sticky;top:24px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.guide h1{font-size:24px;line-height:1.2;margin:8px 0 8px;letter-spacing:-.02em}
+.guide .lede{color:var(--ink2);margin:0 0 18px;font-size:13.5px}
+.steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.steps li{border-bottom:1px solid var(--line)}
+.steps button{all:unset;cursor:pointer;display:grid;grid-template-columns:24px 1fr;gap:8px;padding:10px 2px;width:100%;box-sizing:border-box}
+.steps .n{color:var(--ink3);font-size:12.5px;font-variant-numeric:tabular-nums;padding-top:1px}
+.steps .t{font-weight:600;font-size:13.5px}
+.steps .d{color:var(--ink2);font-size:12.5px;display:none;margin-top:3px}
+.steps li.on .n,.steps li.on .t{color:var(--ink)}
+.steps li.on .n{font-weight:700}
+.steps li.on .d{display:block}
+.steps button:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+.foot{margin-top:16px;font-size:12px;color:var(--ink3)}
+.foot button{all:unset;cursor:pointer;text-decoration:underline}
+
+/* app frame */
+.frame{overflow-x:auto;border-radius:14px;box-shadow:var(--shadow);background:var(--app);border:1px solid var(--line)}
+.app{position:relative;display:flex;min-width:1080px;height:780px;overflow:hidden;background:var(--app)}
+.side{width:196px;background:var(--side);border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:1px;flex:none}
+.logo{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;margin:2px 6px 14px}
+.logo i{width:20px;height:20px;border-radius:5px;background:var(--ink);display:inline-block}
+.nv{all:unset;cursor:default;padding:6px 10px;border-radius:7px;color:var(--ink2);display:flex;align-items:center;gap:8px;font-size:13px}
+.nv i{width:13px;height:13px;border:1.5px solid var(--ink3);border-radius:3px;display:inline-block}
+.nv.link{cursor:pointer}
+.nv.link:hover{background:var(--soft)}
+.nv.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.nv.sub{padding-left:31px;font-size:12.5px}
+.nv.grp{color:var(--ink);font-weight:600}
+.user{margin-top:auto;display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--mid);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--ink2);flex:none}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:58px;border-bottom:1px solid var(--line);background:var(--card);display:flex;align-items:center;padding:0 20px;gap:10px;flex:none}
+.top h2{font-size:17px;margin:0;font-weight:650}
+.crumb{font-size:11.5px;color:var(--ink3)}
+.sp{flex:1}
+.content{flex:1;overflow:auto;padding:18px 20px}
+.btn{border:1px solid var(--mid);background:var(--card);border-radius:7px;padding:6px 12px;font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--mid);border-radius:999px;padding:1px 8px;font-size:11.5px;background:var(--chip);white-space:nowrap}
+.chip.dark{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip.mid{background:var(--mid);border-color:var(--mid)}
+.chip.out{background:transparent;border-style:dashed}
+.muted{color:var(--ink2)}
+.faint{color:var(--ink3)}
+.small{font-size:12px}
+.b{font-weight:600}
+.row{display:flex;align-items:center;gap:8px}
+.col{display:flex;flex-direction:column;gap:10px}
+.kick{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-align:left;color:var(--ink3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--soft);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.lead{cursor:pointer}
+tr.lead td:nth-child(2) .b,tr.lead td:nth-child(2) .faint{white-space:nowrap}
+tr.lead td:nth-child(2) .faint{max-width:170px;overflow:hidden;text-overflow:ellipsis}
+tr.lead:hover td{background:var(--soft)}
+.score{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12px}
+.bar{display:inline-block;width:36px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+.tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);padding:0 20px;background:var(--card);flex:none}
+.tab{all:unset;cursor:pointer;padding:10px 0;color:var(--ink2);font-weight:500;font-size:13px}
+.tab.on{color:var(--ink);border-bottom:2px solid var(--ink);font-weight:650}
+.tile{all:unset;cursor:pointer;flex:1;padding:10px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px}
+.tile.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.tile .v{font-size:20px;font-weight:700;margin-top:2px}
+input[type=text],input[type=number],select{border:1px solid var(--mid);border-radius:7px;padding:6px 9px;background:var(--card);font-size:12.5px}
+input[type=checkbox]{accent-color:var(--ink);width:14px;height:14px}
+.step{all:unset;cursor:pointer;display:block;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.step.on{background:var(--card);border-color:var(--ink)}
+.num{display:inline-flex;width:20px;height:20px;border-radius:50%;border:1px solid var(--mid);align-items:center;justify-content:center;font-size:11px;font-weight:600;margin-right:6px}
+.step.on .num{background:var(--ink);color:var(--accent-ink);border-color:var(--ink)}
+
+/* overlays */
+.scrim{position:absolute;inset:0;background:rgba(20,22,21,.35);display:none;z-index:20}
+.scrim.show{display:block}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:560px;background:var(--card);border-left:1px solid var(--line);z-index:30;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer.show{transform:none}
+.drawer .body{flex:1;overflow:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.drawer .foot2{border-top:1px solid var(--line);padding:12px 22px;display:flex;align-items:center;gap:8px}
+.modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:900px;max-height:720px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);z-index:40;display:none;flex-direction:column}
+.modal.show{display:flex}
+.modal .body{padding:18px 22px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.pop{position:absolute;top:52px;right:16px;width:400px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:35;display:none}
+.pop.show{display:block}
+.note{padding:12px 14px;border-bottom:1px solid var(--line)}
+.note:last-child{border-bottom:0}
+.bell{position:relative}
+.badge{position:absolute;top:-5px;right:-5px;background:var(--ink);color:var(--accent-ink);border-radius:999px;font-size:10px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:9px;font-size:13px;opacity:0;transition:.2s;z-index:50;pointer-events:none;max-width:620px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.seq{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}
+.seq.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink2);flex:none}
+.seq.on .dot{background:var(--ink);border-color:var(--ink)}
+.journey{display:flex;gap:4px}
+.journey > div{flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 8px;min-height:54px}
+.journey > div.cur{border-color:var(--ink);background:var(--soft)}
+.tl{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.tl i{width:9px;height:9px;border-radius:50%;background:var(--ink2);margin-top:5px;flex:none}
+.funnel .r{display:flex;align-items:center;gap:10px;margin:7px 0}
+.funnel .t{width:110px;font-size:12px}
+.funnel .track{flex:1;height:20px;border-radius:4px;background:var(--soft)}
+.funnel .fill{height:100%;border-radius:4px;background:var(--ink2)}
+.grid td.cell{cursor:pointer;height:58px;border-left:1px solid var(--line)}
+.grid td.cell:hover{background:var(--soft)}
+.grid td.cell.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.hl{animation:hl 1.6s ease 2}
+@keyframes hl{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 3px var(--mid)}}
+
+.mob{display:none}
+@media (max-width:980px){
+  .mob{display:inline}
+  .wrap{grid-template-columns:1fr;gap:18px}
+  .guide{position:static}
+}
+@media (prefers-reduced-motion:reduce){ .drawer,.toast{transition:none} .hl{animation:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="guide">
+    <div class="eyebrow">Amplemarket PM challenge · prototype</div>
+    <h1>Competitive Intelligence</h1>
+    <p class="lede">A clickable version of the wireframes. Persona: Sam, an SDR, from setup to results. Fictional customer “Lumen” competing with Datacove, Pipewise and Sightline. Numbers are illustrative.</p>
+    <ol class="steps" id="steps"></ol>
+    <div class="foot">Everything in the app is clickable. <button id="reset">Start over</button><span class="mob"> Best viewed on a laptop; on a phone, scroll the app sideways.</span></div>
+  </aside>
+  <div class="frame"><div class="app" id="app">
+    <nav class="side" id="side"></nav>
+    <div class="main">
+      <header class="top" id="top"></header>
+      <div id="tabs"></div>
+      <div class="content" id="content"></div>
+    </div>
+    <div class="scrim" id="scrim"></div>
+    <aside class="drawer" id="drawer" aria-label="Lead details"></aside>
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+    <div class="pop" id="pop"></div>
+    <div class="toast" id="toast" role="status"></div>
+  </div></div>
+</div>
+
+<script>
+const STAGES = ["Problem aware","Solution search","Shortlist","Evaluation","Decision"];
+const RANK = s => STAGES.indexOf(s);
+const SEQS = {
+  "Problem aware":"Point of view · 6 steps",
+  "Solution search":"Point of view · 6 steps",
+  "Shortlist":"Proof & case studies · 4 steps",
+  "Evaluation":"Competitor comparison · 5 steps",
+  "Decision":"Hand to AE · proof + pricing"
+};
+const LEADS0 = [
+ {id:"maya",name:"Maya Chen",title:"VP Data",co:"Brightbank",comp:"Datacove",score:92,stage:"Evaluation",moved:true,sig:"Attended Datacove pricing webinar · 2h",crm:"New prospect",
+  sum:"Likely evaluating <b>Datacove</b> to replace in-house monitoring. In the <b>evaluation</b> stage: pricing webinar and direct contact with Datacove’s sales team this week. 2 colleagues also active.",
+  why:"Rule v1.3: pricing content + sales-team contact within 14 days → Evaluation",
+  seen:{"Problem aware":"LinkedIn content","Solution search":"G2","Shortlist":"Comparison ad","Evaluation":"Webinar, AE contact"},
+  tl:[["2h","Attended “Datacove pricing & packaging” webinar","Event · Datacove"],["1d","Replied to a Datacove AE’s post about migration","LinkedIn · sales-team interaction"],["3d","Engaged with “Datacove vs. Lumen” comparison ad","Paid social · Datacove"],["6d","Followed Datacove + 2 Datacove employees","LinkedIn"]],
+  team:["Ravi K. · Data Eng Mgr","Elle P. · CFO office"]},
+ {id:"tom",name:"Tom Okafor",title:"Head of Analytics",co:"Fluxo",comp:"Pipewise",score:88,stage:"Evaluation",sig:"Commented on Pipewise AE post · 5h",crm:"Open deal",owner:"Alex D.",deal:"Fluxo – Annual (USD 48K)",
+  sum:"On an open deal owned by <b>Alex D.</b> and engaging with <b>Pipewise</b>. Alex has the alert and the battlecard.",
+  why:"Rule v1.3: sales-team interaction + demo day → Evaluation",
+  seen:{"Shortlist":"G2","Evaluation":"AE post, demo day"},
+  tl:[["5h","Commented on a Pipewise AE post","LinkedIn · sales-team interaction"],["2d","Attended Pipewise demo day","Event · Pipewise"]],team:[]},
+ {id:"priya",name:"Priya Nair",title:"Data Eng Lead",co:"Kitewell",comp:"Datacove",score:81,stage:"Shortlist",sig:"Clicked Datacove vs. Lumen ad · 1d",crm:"New prospect",
+  sum:"Comparing <b>Datacove</b> and Lumen. In the <b>shortlist</b> stage. 2 colleagues also active.",
+  why:"Rule v1.3: comparison content within 7 days → Shortlist",
+  seen:{"Solution search":"AI assistants","Shortlist":"Comparison ad"},
+  tl:[["1d","Clicked the “Datacove vs. Lumen” comparison ad","Paid social · Datacove"],["4d","Read Datacove’s G2 page","Review site"]],team:["Omar S. · Platform Eng","June L. · Analytics"]},
+ {id:"sara",name:"Sara Lind",title:"Head of Data",co:"Polaris",comp:"Sightline",score:58,stage:"Shortlist",moved:true,sig:"Registered for Sightline event · 3d",crm:"New prospect",
+  sum:"Moved from solution search to <b>shortlist</b> after registering for a Sightline event.",
+  why:"Rule v1.3: vendor event registration → Shortlist",
+  seen:{"Solution search":"Search","Shortlist":"Event"},
+  tl:[["3d","Registered for “Sightline live” event","Event · Sightline"],["9d","Liked a post on observability tools","LinkedIn · category content"]],team:[]},
+ {id:"jonas",name:"Jonas Berg",title:"CTO",co:"Nordlys",comp:"Sightline",score:74,stage:"Shortlist",sig:"Followed Sightline + 3 employees · 1d",crm:"New prospect",
+  sum:"Following <b>Sightline</b> and three of its people. In the <b>shortlist</b> stage.",
+  why:"Rule v1.3: vendor follows + G2 visit → Shortlist",
+  seen:{"Solution search":"G2","Shortlist":"LinkedIn follows"},
+  tl:[["1d","Followed Sightline + 3 Sightline employees","LinkedIn"],["5d","Visited Sightline’s G2 page","Review site"]],team:[]},
+ {id:"ana",name:"Ana Ruiz",title:"Director BI",co:"Capsula",comp:"Pipewise",score:69,stage:"Solution search",sig:"Engaged with ‘observability tools’ posts · 2d",crm:"Customer",owner:"Casey L. (CSM)",
+  sum:"<b>Capsula is a customer</b> (renews in 74 days). Casey L. has a churn-risk alert. Never sequenced.",
+  why:"Rule v1.3: category content, no vendor contact → Solution search",
+  seen:{"Problem aware":"LinkedIn content","Solution search":"Pipewise content"},
+  tl:[["2d","Engaged with posts about observability tools","LinkedIn · category content"]],team:[]},
+ {id:"leo",name:"Leo Martin",title:"Analytics Mgr",co:"Ostra",comp:"Datacove",score:66,stage:"Solution search",sig:"Liked Datacove case study · 3d",crm:"In sequence",
+  sum:"Already in your “Point of view” sequence (step 2 of 6).",
+  why:"Rule v1.3: vendor case study, no sales contact → Solution search",
+  seen:{"Solution search":"Case study"},
+  tl:[["3d","Liked a Datacove case study","LinkedIn · Datacove"]],team:[]}
+];
+const DRAFTS = {
+ "Evaluation":[n=>`Subject: Monitoring at ${n.co}’s scale\n\nHi ${n.name.split(" ")[0]},\n\nTeams moving off in-house monitoring usually hit the same wall: alert noise grows faster than the data team. When teams like yours compare tools, the questions that decide it are lineage depth and cost at 10x volume.\n\nHere’s a one-page comparison other data leaders have used to structure that evaluation. Worth a look before your next vendor call?\n\nSam`,
+   n=>`Subject: The two questions that decide observability tools\n\nHi ${n.name.split(" ")[0]},\n\nMost data teams we talk to narrow it down to lineage depth and what it costs once data volume grows. I put both into a short side-by-side you can use with your team.\n\nOpen to a 20-minute walkthrough this week?\n\nSam`],
+ "Shortlist":[n=>`Subject: How ${n.co}-size teams picked their observability tool\n\nHi ${n.name.split(" ")[0]},\n\nWhen data teams get down to a shortlist, proof from similar teams tends to matter most. Here are two short stories from teams your size, including what they measured in the first 30 days.\n\nHappy to share the details if useful.\n\nSam`,
+   n=>`Subject: A shortlist checklist\n\nHi ${n.name.split(" ")[0]},\n\nA checklist we see data leads use to compare observability tools: coverage, lineage, alert quality and cost at scale. Want me to send it over?\n\nSam`],
+ "Solution search":[n=>`Subject: Alert fatigue in data teams\n\nHi ${n.name.split(" ")[0]},\n\nA pattern we keep seeing: data teams add checks faster than they can act on alerts. Here’s a short point of view on how teams cut the noise without losing coverage.\n\nSam`,
+   n=>`Subject: What good data monitoring looks like\n\nHi ${n.name.split(" ")[0]},\n\nShort read on how leading data teams decide what to monitor first. No pitch, just the framework.\n\nSam`]
+};
+const PRIVACY = /(webinar|ad\b|clicked|liked|followed|registered|saw you)/i;
+
+let S;
+function init(){
+  S = {view:"setup1", tab:"todo", tile:null, compF:"All", leads:JSON.parse(JSON.stringify(LEADS0)), sel:new Set(), open:null,
+       comps:[{n:"Datacove",d:"datacove.io",why:"Same G2 category · named in 14 lost deals",s:"on"},{n:"Pipewise",d:"pipewise.com",why:"Same G2 category · named in 9 lost deals",s:"on"},
+              {n:"Sightline",d:"sightline.ai",why:"Overlapping keywords + G2 ‘alternatives’",s:"on"},{n:"Close",d:"Several companies match this name",why:"Ambiguous name",s:"pick"},
+              {n:"Metricly",d:"metricly.com",why:"Partner (integration). Suggest exclude",s:"ex"}],
+       stages:STAGES.map(s=>({name:s, seq:SEQS[s]})), cycle:47, alerts:{hi:true,moved:true,inapp:true,slack:true,email:false,max:10},
+       actions:0, unread:3, team:false, cell:null, draftIx:0, modalSeq:null, modalIds:[]};
+}
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lead = id => S.leads.find(l=>l.id===id);
+const isOwner = l => l.crm==="Open deal" || l.crm==="Customer";
+const scoreHtml = v => `<span class="score"><span class="bar"><i style="width:${v}%"></i></span>${v>=80?"High":"Med"}</span>`;
+const stageChip = s => `<span class="chip ${RANK(s)>=3?"dark":RANK(s)==2?"mid":""}">${s}</span>`;
+
+/* ---------- guide ---------- */
+const GUIDE = [
+ {t:"Set up competitors", d:"Duo suggests competitors. Pick the right “Close”, exclude a partner, continue.", go:()=>go("setup1"), on:()=>S.view==="setup1"||S.view==="setup2"},
+ {t:"Map the buying journey", d:"Duo drafts stages from won deals. Rename a stage, change a sequence, set the sales cycle.", go:()=>go("setup3"), on:()=>S.view==="setup3"||S.view==="setup4"},
+ {t:"Leads ranked by stage", d:"Closest to a decision first. Click the “Moved stage” tile, or a deal row that’s routed to its owner.", go:()=>go("feed"), on:()=>S.view==="feed"&&!S.open&&!$("#modal").classList.contains("show")&&!$("#pop").classList.contains("show")},
+ {t:"Why this lead", d:"Evidence, why this stage, and a mini journey of where Maya has been seen.", go:()=>{go("feed");openLead("maya")}, on:()=>!!S.open&&!$("#modal").classList.contains("show")},
+ {t:"Act in one click", d:"Sequence matched to the stage, Duo draft, privacy check. Add, and watch Maya move to Actioned.", go:()=>{go("feed");openModal(["maya"])}, on:()=>$("#modal").classList.contains("show")&&S.modalIds.length>0},
+ {t:"Alerts and routing", d:"Moved stage, high intent, and leads routed to a colleague who owns the deal.", go:()=>{go("feed");togglePop(true)}, on:()=>$("#pop").classList.contains("show")},
+ {t:"Results", d:"High-value actions, 7-day action rate and meeting rate by stage. Switch to the team view.", go:()=>go("results"), on:()=>S.view==="results"},
+ {t:"Journey map (phase 2)", d:"Where each competitor shows up by stage and channel. Click a cell for the evidence.", go:()=>go("journey"), on:()=>S.view==="journey"}
+];
+function renderGuide(){
+  $("#steps").innerHTML = GUIDE.map((g,i)=>`<li class="${g.on()?"on":""}"><button data-g="${i}"><span class="n">${i+1}</span><span><div class="t">${g.t}</div><div class="d">${g.d}</div></span></button></li>`).join("");
+}
+
+/* ---------- side nav ---------- */
+function renderSide(){
+  const ci = ["feed","journey","results","setup1","setup2","setup3","setup4"].includes(S.view);
+  const sub = (v,label,also=[]) => `<button class="nv sub link ${S.view===v||also.includes(S.view)?"on":""}" data-view="${v}">${label}</button>`;
+  $("#side").innerHTML = `<div class="logo"><i></i>Amplemarket</div>
+    ${["Home","Searcher","Duo"].map(x=>`<div class="nv"><i></i>${x}</div>`).join("")}
+    <div class="nv"><i></i>Signals</div>
+    <div class="nv sub grp">Competitive intel</div>
+    ${sub("feed","Leads")}${sub("journey","Journey map")}${sub("results","Results")}${sub("setup1","Setup",["setup2","setup3","setup4"])}
+    ${["Sequences","Inbox","Dialer","Analytics","Settings"].map(x=>`<div class="nv"><i></i>${x}</div>`).join("")}
+    <div class="user"><span class="av">SR</span>Sam Reyes</div>`;
+}
+
+/* ---------- top bar ---------- */
+function bell(){ return `<button class="btn ghost bell" data-act="bell" aria-label="Notifications">🔔${S.unread?`<span class="badge">${S.unread}</span>`:""}</button>`; }
+function renderTop(){
+  const T = {
+    setup1:["Competitive intel › Setup","Set up competitive intelligence"], setup2:["Competitive intel › Setup","Set up competitive intelligence"],
+    setup3:["Competitive intel › Setup","Set up competitive intelligence"], setup4:["Competitive intel › Setup","Set up competitive intelligence"],
+    feed:["Duo › Competitive intel","People evaluating your competitors"], results:["Competitive intel › Results","Is CI paying off?"],
+    journey:["Competitive intel › Journey map · phase 2 beta","Where competitors meet your buyers"]};
+  const [c,h] = T[S.view];
+  let right = "";
+  if (S.view==="results") right = `<select data-act="view"><option ${!S.team?"selected":""}>View: Me</option><option ${S.team?"selected":""}>View: Team</option></select><span class="btn sm">Last 90 days</span>`;
+  if (S.view==="journey") right = `<span class="btn sm">Persona: VP Data, 200–2,000 FTE, EU</span><span class="btn sm">Last run 1 Dec</span>`;
+  if (S.view.startsWith("setup")) right = `<span class="small faint">Draft saved</span>`;
+  $("#top").innerHTML = `<div><div class="crumb">${c}</div><h2>${h}</h2></div><div class="sp"></div>${right}${S.view.startsWith("setup")?"":bell()}`;
+}
+
+/* ---------- setup ---------- */
+function stepper(a){
+  const items = [["Competitors","Duo-suggested"],["ICP and territory","Saved Searcher filters"],["Buying journey","Stages, sequence per stage"],["Alerts","Threshold, channel, digest"]];
+  return `<div class="col" style="width:200px;flex:none">${items.map((it,i)=>`<button class="step ${a===i+1?"on":""}" data-view="setup${i+1}"><span class="num">${i+1<a?"✓":i+1}</span><b>${it[0]}</b><div class="small faint" style="margin:3px 0 0 26px">${it[1]}</div></button>`).join("")}</div>`;
+}
+function setup1(){
+  const on = S.comps.filter(c=>c.s==="on").length;
+  const rows = S.comps.map((c,i)=>{
+    let r;
+    if (c.s==="pick") r = `<select data-act="pick" data-i="${i}"><option value="">Pick the right company…</option><option>close.com</option><option>close.io</option><option>closeai.dev</option></select>`;
+    else if (c.s==="on") r = `<span class="chip">✓ Added</span><button class="btn sm ghost" data-act="comp" data-i="${i}" data-s="off">Remove</button>`;
+    else if (c.s==="ex") r = `<span class="chip out">Excluded: partner</span><button class="btn sm" data-act="comp" data-i="${i}" data-s="on">Add anyway</button>`;
+    else r = `<button class="btn sm" data-act="comp" data-i="${i}" data-s="on">Add</button>`;
+    return `<div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><span class="av" style="border-radius:7px">${c.n[0]}</span><div style="flex:1"><div class="b">${esc(c.n)}</div><div class="small faint">${esc(c.d)}</div></div><div class="small muted" style="width:260px">${esc(c.why)}</div><div class="row" style="width:230px;justify-content:flex-end">${r}</div></div>`;
+  }).join("");
+  return `<div class="row" style="gap:18px;align-items:flex-start">${stepper(1)}<div class="col" style="flex:1">
+    <div class="card" style="padding:14px 16px"><div class="row"><div style="flex:1"><div class="b" style="font-size:15px">Who do you compete with?</div><div class="small muted">Duo suggested these from lumen.dev, your G2 category and lost-deal reasons in Salesforce.</div></div><span class="chip">${on} of 5 on your plan</span></div>
+    <div class="row" style="margin-top:12px"><input type="text" id="newcomp" placeholder="Add a competitor by domain or LinkedIn company page" style="flex:1"><button class="btn" data-act="addcomp">Add</button></div></div>
+    <div class="card">${rows}</div>
+    <label class="card row" style="padding:12px 16px;cursor:pointer"><input type="checkbox" checked><div><b>Exclude partners and current customers from competitor tracking</b><div class="small faint">Matched from CRM account type = Partner / Customer</div></div></label>
+    <div class="row"><span class="small faint">First signals usually appear within 24–48h. We’ll show the last 30 days of history now if available.</span><div class="sp"></div><button class="btn pri" data-view="setup2">Continue to ICP and territory →</button></div>
+  </div></div>`;
+}
+function setup2(){
+  return `<div class="row" style="gap:18px;align-items:flex-start">${stepper(2)}<div class="col" style="flex:1">
+    <div class="card" style="padding:16px"><div class="b" style="font-size:15px">Who should CI look for?</div><div class="small muted">Reuse a saved Searcher filter, so CI leads match the rest of your prospecting.</div>
+      <div class="row" style="margin-top:12px;gap:12px"><label class="col" style="gap:4px;flex:1"><span class="kick">ICP</span><select><option>VP / Head of Data · 200–2,000 FTE · fintech + SaaS</option><option>Data engineering leads · 50–500 FTE</option></select></label>
+      <label class="col" style="gap:4px;flex:1"><span class="kick">My territory</span><select><option>UK, Ireland and the Nordics</option><option>DACH</option><option>All EMEA</option></select></label></div></div>
+    <div class="card" style="padding:12px 16px;background:var(--soft)"><div class="small"><b>Accounts a colleague owns in the CRM</b> go to that owner, so you don’t step on their deals. You’ll still see them, flagged.</div></div>
+    <div class="row"><div class="sp"></div><button class="btn" data-view="setup1">Back</button><button class="btn pri" data-view="setup3">Continue to buying journey →</button></div>
+  </div></div>`;
+}
+function setup3(){
+  const sig = {"Problem aware":"Category content, “how to” posts","Solution search":"Lists, G2 category pages, AI-assistant questions","Shortlist":"Comparison pages and ads, vendor follows","Evaluation":"Pricing content, webinars, contact with a vendor’s sales team","Decision":"Security reviews, references, procurement content"};
+  const ch = {"Problem aware":["LinkedIn","Search"],"Solution search":["G2","AI assistants","Search"],"Shortlist":["Paid ads","G2","LinkedIn"],"Evaluation":["Events","LinkedIn"],"Decision":["Search","LinkedIn"]};
+  const seqOpts = [...new Set(Object.values(SEQS))];
+  const cols = S.stages.map((s,i)=>`<div class="card" style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0">
+     <div class="row"><span class="num" style="background:var(--ink);color:var(--accent-ink);border-color:var(--ink)">${i+1}</span><input type="text" value="${esc(s.name)}" data-act="rename" data-i="${i}" style="flex:1;min-width:0;font-weight:600;border-color:transparent;padding:3px 4px" aria-label="Stage name"></div>
+     <div class="small muted" style="min-height:52px">${sig[STAGES[i]]}</div>
+     <div class="kick">Channels</div><div>${ch[STAGES[i]].map(c=>`<span class="chip" style="margin:0 3px 3px 0">${c}</span>`).join("")}</div>
+     <div class="kick">Sequence</div><select data-act="seq" data-i="${i}">${seqOpts.map(o=>`<option ${o===s.seq?"selected":""}>${o}</option>`).join("")}</select></div>`).join("");
+  return `<div class="row" style="gap:18px;align-items:flex-start">${stepper(3)}<div class="col" style="flex:1;min-width:0">
+    <div class="card" style="padding:14px 16px"><div class="b" style="font-size:15px">How do your buyers buy?</div><div class="small muted">Duo drafted these stages from your category (data observability) and 212 won deals in Salesforce. Rename a stage or change its sequence.</div></div>
+    <div class="card row" style="padding:10px 16px"><span class="kick" style="width:150px">Expected sales cycle</span><input type="number" min="7" max="365" value="${S.cycle}" data-act="cycle" style="width:70px"> <b>days</b><span class="small faint">median from first touch to closed-won (212 deals) · used to judge how close a lead is to a decision</span></div>
+    <div class="row" style="gap:8px;align-items:stretch">${cols}</div>
+    <div class="card" style="padding:10px 16px;background:var(--soft)"><span class="kick">Phase 2</span> <span class="small muted">The journey map agent replaces this draft with what it observes for your buyers.</span></div>
+    <div class="row"><div class="sp"></div><button class="btn" data-view="setup2">Back</button><button class="btn pri" data-view="setup4">Continue to alerts →</button></div>
+  </div></div>`;
+}
+function setup4(){
+  const a=S.alerts, cb=(k,l)=>`<label class="row" style="cursor:pointer"><input type="checkbox" data-act="al" data-k="${k}" ${a[k]?"checked":""}>${l}</label>`;
+  return `<div class="row" style="gap:18px;align-items:flex-start">${stepper(4)}<div class="col" style="flex:1">
+    <div class="card" style="padding:16px" ><div class="b" style="font-size:15px">When should we tell you?</div>
+      <div class="kick" style="margin-top:12px">Real time</div><div class="col" style="gap:6px;margin-top:6px">${cb("hi","High-intent lead in my territory")}${cb("moved","A lead moves into evaluation or decision")}</div>
+      <div class="kick" style="margin-top:12px">Where</div><div class="row" style="gap:16px;margin-top:6px">${cb("inapp","In-app")}${cb("slack","Slack")}${cb("email","Email")}</div>
+      <div class="kick" style="margin-top:12px">Everything else</div><div class="small" style="margin-top:6px">Weekly digest, Monday 8:00, for medium intent</div>
+      <div class="row small" style="margin-top:12px">Max <input type="number" value="${a.max}" min="1" max="50" data-act="max" style="width:60px"> real-time alerts per day · one alert per person per 7 days</div></div>
+    <div class="row"><div class="sp"></div><button class="btn" data-view="setup3">Back</button><button class="btn pri" data-act="finish">Finish setup</button></div>
+  </div></div>`;
+}
+
+/* ---------- feed ---------- */
+function visible(){
+  let L = S.leads.filter(l => (S.tab==="todo" ? l.status==null : l.status===S.tab));
+  if (S.compF!=="All") L = L.filter(l=>l.comp===S.compF);
+  if (S.tile==="moved") L = L.filter(l=>l.moved);
+  if (S.tile==="late") L = L.filter(l=>RANK(l.stage)>=3);
+  if (S.tile==="owner") L = L.filter(isOwner);
+  return L.sort((a,b)=> RANK(b.stage)-RANK(a.stage) || b.score-a.score);
+}
+function renderTabs(){
+  if (S.view!=="feed"){ $("#tabs").innerHTML=""; return; }
+  const c = k => S.leads.filter(l => k==="todo"? l.status==null : l.status===k).length;
+  $("#tabs").innerHTML = `<div class="tabs">${[["todo","To do"],["actioned","Actioned"],["snoozed","Snoozed"],["notrel","Not relevant"]].map(([k,t])=>`<button class="tab ${S.tab===k?"on":""}" data-tab="${k}">${t} (${c(k)})</button>`).join("")}</div>`;
+}
+function feed(){
+  const todo = S.leads.filter(l=>l.status==null);
+  const tile = (k,label,v) => `<button class="tile ${S.tile===k?"on":""}" data-tile="${k}"><div class="kick">${label}</div><div class="v">${v}</div></button>`;
+  const L = visible();
+  const rows = L.map(l=>{
+    let act;
+    if (l.status) act = `<span class="chip out">${l.status==="actioned"?"Actioned":l.status==="snoozed"?"Snoozed":"Not relevant"}</span>`;
+    else if (isOwner(l)) act = `<span class="chip out" title="${esc(l.owner)} was alerted instead">Owner alerted</span>`;
+    else if (l.crm==="In sequence") act = `<button class="btn sm" disabled title="Already in a sequence">In a sequence</button>`;
+    else act = `<button class="btn sm" data-act="add1" data-id="${l.id}">Add to sequence</button>`;
+    const canSel = !l.status && !isOwner(l) && l.crm!=="In sequence";
+    return `<tr class="lead" data-open="${l.id}">
+      <td style="width:28px"><input type="checkbox" data-selrow="${l.id}" ${S.sel.has(l.id)?"checked":""} ${canSel?"":"disabled"} aria-label="Select ${esc(l.name)}"></td>
+      <td><div class="row"><span class="av">${l.name.split(" ").map(x=>x[0]).join("")}</span><div><div class="b">${l.name}</div><div class="small faint">${l.title}, ${l.co}</div></div></div></td>
+      <td><span class="chip">${l.comp}</span></td><td>${scoreHtml(l.score)}</td>
+      <td>${stageChip(l.stage)} ${l.moved?'<span class="chip out">↑ moved</span>':""}</td>
+      <td class="small" style="max-width:200px">${l.sig}</td>
+      <td><span class="chip ${l.crm==="Open deal"?"dark":l.crm==="Customer"?"mid":l.crm==="In sequence"?"out":""}">${l.crm}</span></td>
+      <td style="white-space:nowrap">${act}</td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="muted" style="padding:28px;text-align:center">Nothing here yet.</td></tr>`;
+  const n = S.sel.size;
+  return `<div class="col" style="gap:12px">
+    <div class="row" style="gap:10px">${tile("new","New since yesterday",12)}${tile("moved","Moved stage",todo.filter(l=>l.moved).length)}${tile("late","Evaluation or decision",todo.filter(l=>RANK(l.stage)>=3).length)}${tile("owner","Routed to owners",todo.filter(isOwner).length)}</div>
+    <div class="row"><select data-act="compF">${["All","Datacove","Pipewise","Sightline"].map(c=>`<option ${S.compF===c?"selected":""} value="${c}">Competitor: ${c}</option>`).join("")}</select>
+      <span class="btn sm">Score: High + Med</span><span class="btn sm">My territory</span><div class="sp"></div><span class="small faint">Sort: stage, score, recency</span></div>
+    ${n?`<div class="card row" style="padding:8px 12px;background:var(--soft)"><b>${n} selected</b><button class="btn sm pri" data-act="bulk">Add to sequence</button><button class="btn sm" data-act="bsnooze">Snooze</button><button class="btn sm" data-act="bclear">Clear</button></div>`:""}
+    <div class="card" style="overflow:hidden"><table><tr><th></th><th>Person</th><th>Competitor</th><th>Intent</th><th>Stage</th><th>Latest signal</th><th>In CRM</th><th></th></tr>${rows}</table></div>
+  </div>`;
+}
+
+/* ---------- drawer ---------- */
+function openLead(id){
+  const l = lead(id); S.open = id;
+  const cur = RANK(l.stage);
+  const jr = STAGES.map((s,i)=>`<div class="${i===cur?"cur":""}"><div class="small b">${s}</div><div class="small faint">${l.seen[s]||""}${i===cur?" · now":""}</div></div>`).join("");
+  const blocked = isOwner(l) || l.crm==="In sequence" || l.status;
+  const ownerBox = isOwner(l) ? `<div class="card" style="padding:12px;background:var(--soft)"><div class="b">${l.crm==="Open deal"?"On "+esc(l.owner)+"’s open deal":"Current customer"}</div><div class="small muted" style="margin-top:3px">${l.crm==="Open deal"?esc(l.deal)+". "+esc(l.owner)+" got the alert with the Pipewise battlecard, and it’s logged on the opportunity.":esc(l.owner)+" got a churn-risk alert. Customers are never added to prospecting sequences."}</div>${l.crm==="Open deal"?`<div style="margin-top:8px"><button class="btn sm" data-act="crm">See what Alex sees in the CRM</button></div>`:""}</div>` : "";
+  $("#drawer").innerHTML = `<div class="body">
+    <div class="row"><span class="av" style="width:42px;height:42px;font-size:14px">${l.name.split(" ").map(x=>x[0]).join("")}</span><div style="flex:1"><div class="b" style="font-size:16px">${l.name}</div><div class="small muted">${l.title} · ${l.co}</div></div><button class="btn ghost" data-act="close" aria-label="Close">✕</button></div>
+    <div class="row">${scoreHtml(l.score)}<span class="small b">· ${l.score}</span>${stageChip(l.stage)}<span class="chip">${l.comp}</span><span class="chip">${l.crm==="New prospect"?"Not in CRM":l.crm}</span></div>
+    ${ownerBox}
+    <div class="card" style="padding:12px;background:var(--soft)"><div class="kick">Duo summary</div><div style="margin-top:4px">${l.sum}</div></div>
+    <div><div class="b">Why this stage?</div><div class="small faint">${l.why}</div></div>
+    <div><div class="b" style="margin-bottom:6px">Mini journey</div><div class="journey">${jr}</div><div class="small faint" style="margin-top:5px">Competitors at this stage: ${l.comp==="Datacove"?"Datacove, Pipewise":l.comp}</div></div>
+    <div><div class="b">Signal timeline</div>${l.tl.map(t=>`<div class="tl"><i></i><div style="flex:1"><div>${t[1]}</div><div class="small faint">${t[2]}</div></div><span class="small faint">${t[0]} ago</span></div>`).join("")}
+      <div class="small faint" style="margin-top:6px">Sources: public social activity, ad engagement, event listings. <u>How we source signals</u></div></div>
+    ${l.team.length?`<div><div class="b" style="margin-bottom:6px">Buying committee at ${l.co}</div><div class="row">${l.team.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`:""}
+  </div>
+  <div class="foot2"><button class="btn pri" data-act="add1" data-id="${l.id}" ${blocked?"disabled":""}>Add to sequence</button><button class="btn" data-act="task" ${l.status?"disabled":""}>Create task</button><button class="btn" data-act="pushcrm">Push to CRM</button><div class="sp"></div>
+    <span class="small faint">Useful?</span><button class="btn sm" data-act="up" aria-label="Useful">👍</button>
+    <select data-act="notrel" aria-label="Not relevant reason"><option value="">👎 Not relevant…</option><option>Wrong person</option><option>Not in market</option><option>Wrong stage</option><option>Already a customer</option><option>Wrong competitor</option></select></div>`;
+  $("#drawer").classList.add("show"); $("#scrim").classList.add("show");
+  renderGuide();
+}
+function closeAll(){
+  S.open=null; S.modalIds=[];
+  $("#drawer").classList.remove("show"); $("#modal").classList.remove("show"); $("#pop").classList.remove("show"); $("#scrim").classList.remove("show");
+  renderGuide();
+}
+
+/* ---------- modal ---------- */
+function openModal(ids){
+  const all = ids.map(lead);
+  const ok = all.filter(l=>!isOwner(l) && l.crm!=="In sequence" && !l.status);
+  const blocked = all.filter(l=>!ok.includes(l));
+  if (!ok.length){ toast("Nothing to add: these leads are owned by a colleague or already in a sequence."); return; }
+  S.modalIds = ok.map(l=>l.id);
+  const first = ok[0];
+  const stIx = RANK(first.stage);
+  const rec = S.stages[stIx].seq;
+  if (!S.modalSeq || !S.modalOpenFor || S.modalOpenFor!==ids.join()) { S.modalSeq = rec; S.draftIx = 0; S.modalOpenFor = ids.join(); }
+  const seqs = [...new Set([rec, ...Object.values(SEQS)])];
+  const key = DRAFTS[first.stage] ? first.stage : (RANK(first.stage)>=3?"Evaluation":"Solution search");
+  const draft = DRAFTS[key][S.draftIx % 2](first);
+  const [subj, ...bodyL] = draft.split("\n");
+  const priv = !PRIVACY.test(draft);
+  $("#modal").innerHTML = `<div class="row" style="padding:16px 22px;border-bottom:1px solid var(--line)"><div class="b" style="font-size:16px;flex:1">Add ${ok.length} ${ok.length>1?"people":"person"} to a sequence</div><button class="btn ghost" data-act="close" aria-label="Close">✕</button></div>
+   <div class="body">
+    <div class="row" style="flex-wrap:wrap">${ok.map(l=>`<span class="chip">${l.name} · ${l.stage} · ${l.comp}</span>`).join("")}${blocked.map(l=>`<span class="chip out">⚠ ${l.name} skipped: ${isOwner(l)?"owned by "+esc(l.owner):"already in a sequence"}</span>`).join("")}</div>
+    <div class="row" style="gap:20px;align-items:flex-start">
+     <div class="col" style="width:360px;flex:none"><div class="kick">1 · Sequence (matched to stage)</div>
+      ${seqs.map(q=>`<button class="seq ${q===S.modalSeq?"on":""}" data-act="pickseq" data-q="${esc(q)}"><span class="dot"></span><div style="flex:1"><div class="b">${q}</div></div>${q===rec?`<span class="chip">Recommended for ${first.stage}</span>`:""}</button>`).join("")}
+      <div class="small faint">You mapped a sequence to each stage in setup. You can pick any sequence.</div>
+      <div class="kick" style="margin-top:6px">2 · Contact details</div>
+      <label class="card row" style="padding:9px 12px;background:var(--soft)"><input type="checkbox" checked> Find verified email + phone <span class="small faint">· charged only on add</span></label>
+     </div>
+     <div class="col" style="flex:1;min-width:0"><div class="kick">3 · First touch, drafted by Duo</div>
+      <div class="card" style="padding:14px">
+       <div class="row small faint">To: ${first.name} · Step 1 · Email<div class="sp"></div><button class="btn sm" data-act="regen">↻ Regenerate</button></div>
+       <div class="b" style="margin-top:8px">${esc(subj)}</div>
+       <div style="white-space:pre-wrap;margin-top:6px;color:var(--ink2)">${esc(bodyL.join("\n").trim())}</div>
+       <div class="card" style="padding:8px 10px;background:var(--soft);margin-top:12px"><span class="small"><b>${priv?"✓ Signal privacy check passed":"⚠ Mentions how we know"}</b> <span class="faint">No mention of ads, webinars or follows.</span></span></div>
+       <div class="small faint" style="margin-top:6px">Uses: stage = ${first.stage} · competitor = ${first.comp} · battlecard v4 · persona = ${first.title}</div>
+      </div></div>
+    </div></div>
+   <div class="row" style="padding:12px 22px;border-top:1px solid var(--line)"><span class="small faint">Lead moves to “Actioned”. Source = Amplemarket CI is set on CRM sync.</span><div class="sp"></div><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="confirm">Add ${ok.length} to sequence</button></div>`;
+  $("#modal").classList.add("show"); $("#scrim").classList.add("show");
+  renderGuide();
+}
+
+/* ---------- alerts ---------- */
+function togglePop(force){
+  const p = $("#pop"); const show = force ?? !p.classList.contains("show");
+  if (show){
+    S.unread = 0; renderTop();
+    p.innerHTML = `<div class="row" style="padding:12px 14px;border-bottom:1px solid var(--line)"><b style="flex:1">Notifications</b><span class="small faint">Competitive intel</span></div>
+     <div class="note"><span class="chip dark">Moved stage</span> <span class="small faint">now</span><div style="margin-top:5px">Maya Chen (Brightbank) moved to <b>Evaluation</b> for Datacove</div><div class="small faint">Pricing webinar 2h ago · New prospect</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="popopen" data-id="maya">Open</button><button class="btn sm" data-act="popadd" data-id="maya">Add to sequence</button></div></div>
+     <div class="note"><span class="chip dark">High intent</span> <span class="small faint">1h</span><div style="margin-top:5px"><b>Priya Nair</b> (Kitewell) is comparing Datacove and Lumen</div><div class="small faint">Clicked a comparison ad · 2 colleagues also active</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="popopen" data-id="priya">Open</button></div></div>
+     <div class="note"><span class="chip mid">Routed to owner</span> <span class="small faint">5h</span><div style="margin-top:5px">Tom Okafor is on <b>Fluxo – Annual</b>, Alex D.’s open deal</div><div class="small faint">Alex got the alert with the Pipewise battlecard</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="crm">What Alex sees</button></div></div>
+     <div class="note"><span class="chip">Digest</span> <span class="small faint">Mon</span><div style="margin-top:5px">Weekly summary: 38 new leads, 9 in evaluation or decision</div></div>`;
+  }
+  p.classList.toggle("show", show);
+  renderGuide();
+}
+function crmCard(){
+  $("#pop").classList.remove("show");
+  $("#modal").innerHTML = `<div class="row" style="padding:16px 22px;border-bottom:1px solid var(--line)"><div style="flex:1"><div class="kick">What the deal owner sees in Salesforce</div><div class="b" style="font-size:16px">Fluxo – Annual</div><div class="small faint">Opportunity · Stage: Proposal · USD 48K · Owner: Alex D.</div></div><button class="btn ghost" data-act="close" aria-label="Close">✕</button></div>
+   <div class="body"><div class="card" style="padding:14px;border-color:var(--ink)"><div class="row"><span class="chip dark">Amplemarket CI</span><b>Competitor activity on this deal</b></div>
+   <div style="margin-top:6px">Tom Okafor (Head of Analytics) is engaging with <b>Pipewise</b>: commented on a Pipewise AE post, attended Pipewise demo day.</div>
+   <div class="row" style="margin-top:10px"><span class="btn sm">Battlecard: Lumen vs Pipewise</span><span class="btn sm">Suggested next step: share migration TCO</span></div></div>
+   <div class="kick">Activity</div><div class="small" style="line-height:1.9">• Today: Amplemarket CI: competitor signal (Pipewise, Evaluation)<br>• 3d ago: Call with Tom Okafor<br>• 8d ago: Proposal sent</div></div>`;
+  S.modalIds = [];
+  $("#modal").classList.add("show"); $("#scrim").classList.add("show"); renderGuide();
+}
+
+/* ---------- results ---------- */
+function results(){
+  const m = S.team ? 6.2 : 1;
+  const hva = Math.round((186 + S.actions*3) * m), act = Math.round((141 + S.actions)*m), surf = Math.round(214*m);
+  const rate = Math.round(act/surf*100);
+  const kpi = (k,v,s) => `<div class="card" style="padding:14px;flex:1"><div class="kick">${k}</div><div style="font-size:24px;font-weight:700;margin-top:3px">${v}</div><div class="small faint">${s}</div></div>`;
+  const F = [["Surfaced",surf],["Actioned ≤7d",act],["Replied",Math.round(31*m)],["Meetings",Math.round(14*m)],["Opportunities",Math.round(8*m)]];
+  return `<div class="col" style="gap:14px">
+   <div class="row" style="gap:12px">${kpi("High-value actions from CI leads",hva,`${Math.round(14*m)} meetings · ${Math.round(38*m)} calls · ${hva-Math.round(52*m)} emails`)}${kpi("Action rate (≤7 days)",rate+"%","Target 60%")}${kpi("Meetings and pipeline",`${Math.round(14*m)} · USD ${Math.round(312*m)}K`,`${Math.round(8*m)} opportunities`)}${kpi("Median time to first touch",S.team?"14h":"9h","From signal to step 1")}</div>
+   <div class="row" style="gap:12px;align-items:stretch">
+    <div class="card funnel" style="padding:16px;flex:1"><div class="b">Signal → pipeline funnel</div>${F.map(([t,v])=>`<div class="r"><span class="t">${t}</span><div class="track"><div class="fill" style="width:${Math.max(3,v/surf*100)}%"></div></div><b style="width:44px;text-align:right">${v}</b></div>`).join("")}</div>
+    <div class="card" style="padding:16px;width:400px"><div class="b">Uplift vs ${S.team?"the team’s":"your"} non-CI lists</div>
+     <div class="row" style="gap:26px;margin-top:12px"><div><div class="kick">High-value actions per lead</div><div style="font-size:20px;font-weight:700">0.87 <span class="small faint">vs 0.41</span></div></div><div><div class="kick">Meeting rate</div><div style="font-size:20px;font-weight:700">6.5% <span class="small faint">vs 2.8%</span></div></div></div>
+     <div class="small faint" style="margin-top:8px">Same period, with a holdout.</div>
+     <div class="kick" style="margin-top:14px">Meeting rate by stage</div>
+     ${[["Evaluation",11],["Shortlist",6],["Solution search",2]].map(([s,v])=>`<div class="row small" style="margin-top:6px"><span style="width:110px">${s}</span><div style="flex:1;height:8px;background:var(--soft);border-radius:4px"><div style="width:${v*8}%;height:100%;background:var(--ink2);border-radius:4px"></div></div><b>${v}%</b></div>`).join("")}
+     <div class="small faint" style="margin-top:6px">If these were flat, the stages wouldn’t be telling reps anything.</div></div>
+   </div>
+   <div class="small faint">${S.team?"Team view: 6 SDRs. ":""}Illustrative numbers. ${S.actions?`Includes the ${S.actions} lead${S.actions>1?"s":""} you actioned in this prototype.`:""}</div>
+  </div>`;
+}
+
+/* ---------- journey map ---------- */
+const CH = ["Organic search","AI assistants","Review sites (G2)","LinkedIn content","Paid ads","Events / webinars"];
+const CELLS = {"0,0":["Datacove"],"0,3":["Datacove","Pipewise"],"1,0":["Datacove","Sightline"],"1,1":["Datacove","Pipewise"],"1,3":["Pipewise"],"2,1":["Datacove","Pipewise","Sightline"],"2,2":["Datacove","Pipewise"],"2,4":["Datacove"],"3,2":["Pipewise"],"3,4":["Datacove*"],"3,5":["Datacove","Pipewise"],"4,5":["Pipewise"],"4,2":["Datacove"],"0,4":["Sightline"]};
+const YOU = new Set(["1,0","2,2","3,3","0,3"]);
+function evidence(k){
+  const [ci,si] = k.split(",").map(Number); const c = CELLS[k]||[]; const ch = CH[ci], st = STAGES[si];
+  const q = {0:"“data observability tools for banks”",1:"“What’s the best data observability tool for a fintech?”",2:"G2 category: Data Observability, sorted by reviews",3:"Posts from vendor employees and data creators",4:"LinkedIn, Google and Meta ad libraries",5:"Event listings and webinar pages"}[ci];
+  return `<div class="kick">${st} · ${ch}</div>
+   <div class="small" style="margin-top:6px"><b>Checked:</b> ${q}</div>
+   ${c.length?c.map(x=>`<div class="card" style="padding:10px;margin-top:8px"><div class="b">${x.replace("*","")}${x.includes("*")?' <span class="chip out">new this month</span>':""}</div><div class="small muted" style="margin-top:3px">${ci===1?"Recommended in 3 of 5 answers. Claim: “lineage out of the box”.":ci===4?"Running "+(x.includes("*")?"3 comparison ads against Lumen":"2 awareness ads")+".":"Present with “"+(si>=3?"migration in a week":"cut alert noise by 60%")+"”."}</div></div>`).join(""):`<div class="small muted" style="margin-top:8px">No competitor seen here. ${YOU.has(k)?"Lumen is present.":"A gap for everyone."}</div>`}
+   ${YOU.has(k)?`<div class="small" style="margin-top:8px">✓ Lumen is present here.</div>`:c.length?`<div class="small" style="margin-top:8px">Lumen is missing here.</div>`:""}
+   <div class="row" style="margin-top:10px">${si>=3?`<button class="btn sm" data-act="toast" data-msg="Battlecard update drafted for review">Update battlecard</button>`:""}<button class="btn sm" data-act="toast" data-msg="Shared with marketing">Share with marketing</button></div>`;
+}
+function journey(){
+  const g = `<table class="grid" style="table-layout:fixed"><tr><th style="width:140px">Channel ↓ / Stage →</th>${STAGES.map(s=>`<th>${s}</th>`).join("")}</tr>
+   ${CH.map((ch,ci)=>`<tr><td class="small b">${ch}</td>${STAGES.map((_,si)=>{const k=ci+","+si,c=CELLS[k]||[];
+     return `<td class="cell ${S.cell===k?"sel":""}" data-cell="${k}">${c.map(x=>`<span class="chip ${x.startsWith("Datacove")?"dark":x==="Pipewise"?"mid":""}" style="margin:2px">${x}</span>`).join("")}${YOU.has(k)?'<span class="chip out" style="margin:2px">Lumen</span>':""}${!c.length&&!YOU.has(k)?'<span class="small faint">gap</span>':""}</td>`}).join("")}</tr>`).join("")}</table>`;
+  return `<div class="row" style="gap:14px;align-items:flex-start"><div class="col" style="flex:1;min-width:0">
+    <div class="card" style="overflow:hidden">${g}</div>
+    <div class="row small"><span class="chip dark">Datacove</span><span class="chip mid">Pipewise</span><span class="chip">Sightline</span><span class="chip out">Lumen (you)</span><span class="faint">* new this month · click a cell for evidence</span></div>
+    <div class="card small" style="padding:10px 14px;background:var(--soft)"><b>How this is built:</b> a synthetic-buyer agent runs this persona’s searches and AI-assistant prompts, reads G2 and comparison pages, and checks public ad libraries. Observation only: no ad clicks, no sign-ups.</div></div>
+   <div class="col" style="width:300px;flex:none">
+    <div class="card" style="padding:14px" id="evid">${S.cell?evidence(S.cell):`<div class="kick">Evidence</div><div class="small muted" style="margin-top:6px">Click any cell in the map to see the queries run, AI answers, ads and claims seen.</div>`}</div>
+    <div class="card" style="padding:14px"><div class="kick">Play for Sam</div><div style="margin-top:6px">Evaluation leads vs Datacove → “Competitor comparison” sequence + TCO one-pager.</div><div style="margin-top:8px"><button class="btn sm" data-view="setup3">Edit stage plays</button></div></div>
+   </div></div>`;
+}
+
+/* ---------- render + events ---------- */
+function render(){
+  renderSide(); renderTop(); renderTabs();
+  const V = {setup1,setup2,setup3,setup4,feed,results,journey};
+  $("#content").innerHTML = V[S.view]();
+  renderGuide();
+}
+function go(v){ closeAll(); S.view=v; if(v!=="feed"){S.sel.clear();} render(); $("#content").scrollTop=0; }
+let tt;
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),2600); }
+function setStatus(ids,st){ ids.forEach(id=>{ const l=lead(id); l.status=st; l.moved=false; S.sel.delete(id); }); }
+
+document.addEventListener("click", e=>{
+  const g = e.target.closest("[data-g]"); if (g){ GUIDE[+g.dataset.g].go(); return; }
+  if (e.target.id==="reset"){ init(); closeAll(); render(); toast("Prototype reset"); return; }
+  const inApp = e.target.closest("#app"); if (!inApp) return;
+  if (e.target.id==="scrim"){ closeAll(); return; }
+  const v = e.target.closest("[data-view]"); if (v){ go(v.dataset.view); return; }
+  const tb = e.target.closest("[data-tab]"); if (tb){ S.tab=tb.dataset.tab; S.tile=null; render(); return; }
+  const ti = e.target.closest("[data-tile]"); if (ti){ const k=ti.dataset.tile; S.tile = (S.tile===k||k==="new")?null:k; S.tab="todo"; render(); return; }
+  if (e.target.matches("[data-selrow]")){ const id=e.target.dataset.selrow; e.target.checked?S.sel.add(id):S.sel.delete(id); render(); return; }
+  const cell = e.target.closest("[data-cell]"); if (cell){ S.cell=cell.dataset.cell; render(); return; }
+  const a = e.target.closest("[data-act]");
+  if (a){
+    const act=a.dataset.act;
+    if (a.tagName==="SELECT"||a.tagName==="INPUT") return;
+    if (act==="comp"){ S.comps[+a.dataset.i].s=a.dataset.s; render(); return; }
+    if (act==="addcomp"){ const v=$("#newcomp").value.trim(); if(!v){toast("Type a domain first, e.g. observa.io");return;} S.comps.push({n:v.replace(/^https?:\/\//,"").split(".")[0].replace(/^\w/,c=>c.toUpperCase()),d:v,why:"Added by you",s:"on"}); render(); toast("Competitor added"); return; }
+    if (act==="finish"){ go("feed"); toast("Setup done. Showing the last 30 days of signals while new ones arrive."); return; }
+    if (act==="add1"){ openModal([a.dataset.id]); return; }
+    if (act==="bulk"){ openModal([...S.sel]); return; }
+    if (act==="bsnooze"){ const n=S.sel.size; setStatus([...S.sel],"snoozed"); render(); toast(`${n} snoozed for 7 days`); return; }
+    if (act==="bclear"){ S.sel.clear(); render(); return; }
+    if (act==="close"){ closeAll(); return; }
+    if (act==="pickseq"){ S.modalSeq=a.dataset.q; openModal(S.modalIds); return; }
+    if (act==="regen"){ S.draftIx++; openModal(S.modalIds); return; }
+    if (act==="confirm"){ const ids=[...S.modalIds]; setStatus(ids,"actioned"); S.actions+=ids.length; const q=S.modalSeq; closeAll(); S.modalSeq=null; S.modalOpenFor=null; render(); toast(`Added to “${q}”. Lead moved to Actioned.`); return; }
+    if (act==="task"){ toast("Task created for tomorrow: follow up on competitor activity"); return; }
+    if (act==="pushcrm"){ toast("Pushed to Salesforce with source = Amplemarket CI"); return; }
+    if (act==="up"){ toast("Thanks. Saved as a training label for model v1.3"); return; }
+    if (act==="bell"){ togglePop(); return; }
+    if (act==="popopen"){ $("#pop").classList.remove("show"); if(S.view!=="feed"){S.view="feed";render();} openLead(a.dataset.id); return; }
+    if (act==="popadd"){ $("#pop").classList.remove("show"); if(S.view!=="feed"){S.view="feed";render();} openModal([a.dataset.id]); return; }
+    if (act==="crm"){ $("#drawer").classList.remove("show"); S.open=null; crmCard(); return; }
+    if (act==="toast"){ toast(a.dataset.msg); return; }
+  }
+  const row = e.target.closest("[data-open]");
+  if (row && !e.target.closest("button,input,select")){ openLead(row.dataset.open); return; }
+  if (!e.target.closest("#pop") && $("#pop").classList.contains("show")) togglePop(false);
+});
+document.addEventListener("change", e=>{
+  const a=e.target.closest("[data-act]"); if(!a) return; const act=a.dataset.act;
+  if (act==="pick" && a.value){ const c=S.comps[+a.dataset.i]; c.d=a.value; c.why="You picked "+a.value; c.s="on"; render(); }
+  if (act==="seq"){ S.stages[+a.dataset.i].seq=a.value; toast(`${S.stages[+a.dataset.i].name} now uses “${a.value}”`); }
+  if (act==="rename"){ const v=a.value.trim()||STAGES[+a.dataset.i]; S.stages[+a.dataset.i].name=v; }
+  if (act==="cycle"){ S.cycle=+a.value||47; }
+  if (act==="al"){ S.alerts[a.dataset.k]=a.checked; }
+  if (act==="max"){ S.alerts.max=+a.value; }
+  if (act==="compF"){ S.compF=a.value; render(); }
+  if (act==="view"){ S.team = a.value.includes("Team"); render(); }
+  if (act==="notrel" && a.value){ const id=S.open; setStatus([id],"notrel"); closeAll(); render(); toast(`Marked not relevant (${a.value}). Saved as a training label.`); }
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); });
+
+init(); render();
+</script>
+</body>
+</html>
