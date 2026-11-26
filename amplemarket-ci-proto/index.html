@@ -147,6 +147,7 @@ input[type=checkbox]{accent-color:var(--ink);width:14px;height:14px}
 .hl{animation:hl 1.6s ease 2}
 @keyframes hl{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 3px var(--mid)}}
 
+.seg .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .mob{display:none}
 @media (max-width:980px){
   .mob{display:inline}
@@ -276,24 +277,24 @@ function renderSide(){
   $("#side").innerHTML = `<div class="logo"><i></i>Amplemarket</div>
     ${["Home","Searcher","Duo"].map(x=>`<div class="nv"><i></i>${x}</div>`).join("")}
     <div class="nv"><i></i>Signals</div>
-    <div class="nv sub grp">Competitive intel</div>
-    ${sub("setup1","Setup",["setup2","setup3","setup4"])}${sub("journey","Journey map")}${sub("feed","Leads")}${sub("results","Results")}
-    ${["Sequences","Inbox","Dialer","Analytics","Settings"].map(x=>`<div class="nv"><i></i>${x}</div>`).join("")}
+    <button class="nv sub link ${["feed","journey"].includes(S.view)?"on":""}" data-view="feed">Competitive intel</button>
+    ${["Sequences","Inbox","Dialer"].map(x=>`<div class="nv"><i></i>${x}</div>`).join("")}
+    <button class="nv link ${S.view==="results"?"on":""}" data-view="results"><i></i>Analytics</button>
+    <button class="nv link ${S.view.startsWith("setup")?"on":""}" data-view="setup1"><i></i>Settings</button>
     <div class="user"><span class="av">SR</span>Sam Reyes</div>`;
 }
 
 /* ---------- top bar ---------- */
 function bell(){ return `<button class="btn ghost bell" data-act="bell" aria-label="Notifications">🔔${S.unread?`<span class="badge">${S.unread}</span>`:""}</button>`; }
 function renderTop(){
+  const st = ["Settings › Competitive intel","Set up competitive intelligence"];
   const T = {
-    setup1:["Competitive intel › Setup","Set up competitive intelligence"], setup2:["Competitive intel › Setup","Set up competitive intelligence"],
-    setup3:["Competitive intel › Setup","Set up competitive intelligence"], setup4:["Competitive intel › Setup","Set up competitive intelligence"],
-    feed:["Duo › Competitive intel","People evaluating your competitors"], results:["Competitive intel › Results","Is CI paying off?"],
-    journey:["Competitive intel › Journey map · phase 2 beta","Where competitors meet your buyers"]};
+    setup1:st, setup2:st, setup3:st, setup4:st,
+    feed:["Signals","Competitive intel"], results:["Analytics","Analytics"],
+    journey:["Signals","Competitive intel"]};
   const [c,h] = T[S.view];
   let right = "";
   if (S.view==="results") right = `<select data-act="view"><option ${!S.team?"selected":""}>View: Me</option><option ${S.team?"selected":""}>View: Team</option></select><span class="btn sm">Last 90 days</span>`;
-  if (S.view==="journey") right = `<span class="btn sm">Persona: VP Data, 200–2,000 FTE, EU</span><span class="btn sm">Last run 1 Dec</span>`;
   if (S.view.startsWith("setup")) right = `<span class="small faint">Draft saved</span>`;
   $("#top").innerHTML = `<div><div class="crumb">${c}</div><h2>${h}</h2></div><div class="sp"></div>${right}${S.view.startsWith("setup")?"":bell()}`;
 }
@@ -343,7 +344,7 @@ function setup3(){
     <div class="card" style="padding:14px 16px"><div class="b" style="font-size:15px">How do your buyers buy?</div><div class="small muted">Duo drafted these stages from your category (data observability) and 212 won deals in Salesforce. Rename a stage or change its sequence.</div></div>
     <div class="card row" style="padding:10px 16px"><span class="kick" style="width:150px">Expected sales cycle</span><input type="number" min="7" max="365" value="${S.cycle}" data-act="cycle" style="width:70px"> <b>days</b><span class="small faint">median from first touch to closed-won (212 deals) · used to judge how close a lead is to a decision</span></div>
     <div class="row" style="gap:8px;align-items:stretch">${cols}</div>
-    <div class="card" style="padding:10px 16px;background:var(--soft)"><span class="kick">Phase 2</span> <span class="small muted">The journey map agent replaces this draft with what it observes for your buyers.</span></div>
+    <div class="card" style="padding:10px 16px;background:var(--soft)"><span class="kick">Journey map beta</span> <span class="small muted">Turn it on to replace this draft with what our agent observes for your buyers.</span></div>
     <div class="row"><div class="sp"></div><button class="btn" data-view="setup2">Back</button><button class="btn pri" data-view="setup4">Continue to alerts →</button></div>
   </div></div>`;
 }
@@ -369,9 +370,19 @@ function visible(){
   return L.sort((a,b)=> RANK(b.stage)-RANK(a.stage) || b.score-a.score);
 }
 function renderTabs(){
-  if (S.view!=="feed"){ $("#tabs").innerHTML=""; return; }
+  const pt = (v,label) => `<button class="tab ${S.view===v?"on":""}" data-view="${v}">${label}</button>`;
+  const inert = label => `<span class="tab" style="cursor:default">${label}</span>`;
+  if (S.view==="feed"||S.view==="journey")
+    $("#tabs").innerHTML = `<div class="tabs" style="align-items:center">${pt("feed","Leads")}${pt("journey","Journey map <span class='chip out' style='margin-left:4px'>Beta</span>")}<div class="sp"></div>
+      <button class="btn sm ghost" data-view="results">See results →</button><button class="btn sm ghost" data-view="setup1">⚙ CI settings</button></div>`;
+  else if (S.view==="results")
+    $("#tabs").innerHTML = `<div class="tabs">${inert("Overview")}${inert("Sequences")}${inert("Reps")}${pt("results","Competitive intel")}</div>`;
+  else
+    $("#tabs").innerHTML = `<div class="tabs">${inert("Account")}${inert("Integrations")}${inert("Mailboxes")}<button class="tab on" data-view="setup1">Competitive intel</button></div>`;
+}
+function statusSeg(){
   const c = k => S.leads.filter(l => k==="todo"? l.status==null : l.status===k).length;
-  $("#tabs").innerHTML = `<div class="tabs">${[["todo","To do"],["actioned","Actioned"],["snoozed","Snoozed"],["notrel","Not relevant"]].map(([k,t])=>`<button class="tab ${S.tab===k?"on":""}" data-tab="${k}">${t} (${c(k)})</button>`).join("")}</div>`;
+  return `<div class="row seg" style="gap:6px">${[["todo","To do"],["actioned","Actioned"],["snoozed","Snoozed"],["notrel","Not relevant"]].map(([k,t])=>`<button class="btn sm ${S.tab===k?"on":""}" data-tab="${k}">${t} (${c(k)})</button>`).join("")}</div>`;
 }
 function feed(){
   const todo = S.leads.filter(l=>l.status==null);
@@ -395,6 +406,7 @@ function feed(){
   }).join("") || `<tr><td colspan="8" class="muted" style="padding:28px;text-align:center">Nothing here yet.</td></tr>`;
   const n = S.sel.size;
   return `<div class="col" style="gap:12px">
+    <div class="row"><div><div class="b" style="font-size:15px">People evaluating your competitors</div><div class="small faint">Ranked by how close they are to a decision</div></div><div class="sp"></div>${statusSeg()}</div>
     <div class="row" style="gap:10px">${tile("new","New since yesterday",12)}${tile("moved","Moved stage",todo.filter(l=>l.moved).length)}${tile("late","Evaluation or decision",todo.filter(l=>RANK(l.stage)>=3).length)}${tile("owner","Routed to owners",todo.filter(isOwner).length)}</div>
     <div class="row"><select data-act="compF">${["All","Datacove","Pipewise","Sightline"].map(c=>`<option ${S.compF===c?"selected":""} value="${c}">Competitor: ${c}</option>`).join("")}</select>
       <span class="btn sm">Score: High + Med</span><span class="btn sm">My territory</span><div class="sp"></div><span class="small faint">Sort: stage, score, recency</span></div>
@@ -506,6 +518,7 @@ function results(){
   const kpi = (k,v,s) => `<div class="card" style="padding:14px;flex:1"><div class="kick">${k}</div><div style="font-size:24px;font-weight:700;margin-top:3px">${v}</div><div class="small faint">${s}</div></div>`;
   const F = [["Surfaced",surf],["Actioned ≤7d",act],["Replied",Math.round(31*m)],["Meetings",Math.round(14*m)],["Opportunities",Math.round(8*m)]];
   return `<div class="col" style="gap:14px">
+   <div class="row"><div><div class="b" style="font-size:15px">Is CI paying off?</div><div class="small faint">Competitive intel results, next to the rest of your reporting</div></div><div class="sp"></div><button class="btn sm" data-view="feed">Open leads →</button></div>
    <div class="row" style="gap:12px">${kpi("High-value actions from CI leads",hva,`${Math.round(14*m)} meetings · ${Math.round(38*m)} calls · ${hva-Math.round(52*m)} emails`)}${kpi("Action rate (≤7 days)",rate+"%","Target 60%")}${kpi("Meetings and pipeline",`${Math.round(14*m)} · USD ${Math.round(312*m)}K`,`${Math.round(8*m)} opportunities`)}${kpi("Median time to first touch",S.team?"14h":"9h","From signal to step 1")}</div>
    <div class="row" style="gap:12px;align-items:stretch">
     <div class="card funnel" style="padding:16px;flex:1"><div class="b">Signal → pipeline funnel</div>${F.map(([t,v])=>`<div class="r"><span class="t">${t}</span><div class="track"><div class="fill" style="width:${Math.max(3,v/surf*100)}%"></div></div><b style="width:44px;text-align:right">${v}</b></div>`).join("")}</div>
@@ -538,6 +551,7 @@ function journey(){
    ${CH.map((ch,ci)=>`<tr><td class="small b">${ch}</td>${STAGES.map((_,si)=>{const k=ci+","+si,c=CELLS[k]||[];
      return `<td class="cell ${S.cell===k?"sel":""}" data-cell="${k}">${c.map(x=>`<span class="chip ${x.startsWith("Datacove")?"dark":x==="Pipewise"?"mid":""}" style="margin:2px">${x}</span>`).join("")}${YOU.has(k)?'<span class="chip out" style="margin:2px">Lumen</span>':""}${!c.length&&!YOU.has(k)?'<span class="small faint">gap</span>':""}</td>`}).join("")}</tr>`).join("")}</table>`;
   return `<div class="row" style="gap:14px;align-items:flex-start"><div class="col" style="flex:1;min-width:0">
+    <div><div class="b" style="font-size:15px">Where competitors meet your buyers</div><div class="small faint">Persona: VP Data, 200–2,000 FTE, EU · last run 1 Dec</div></div>
     <div class="card" style="overflow:hidden">${g}</div>
     <div class="row small"><span class="chip dark">Datacove</span><span class="chip mid">Pipewise</span><span class="chip">Sightline</span><span class="chip out">Lumen (you)</span><span class="faint">* new this month · click a cell for evidence</span></div>
     <div class="card small" style="padding:10px 14px;background:var(--soft)"><b>How this is built:</b> a synthetic-buyer agent runs this persona’s searches and AI-assistant prompts, reads G2 and comparison pages, and checks public ad libraries. Observation only: no ad clicks, no sign-ups.</div></div>
