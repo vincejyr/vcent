@@ -360,6 +360,8 @@ async function buildWrap(login, onStep){
   onStep(4, W);
   const prsOpened = await soft(searchCount(`author:${L} type:pr created:${RANGE}`), null, W);
   const prsMerged = await soft(searchCount(`author:${L} type:pr is:merged created:${RANGE}`), null, W);
+  // pull requests to repos the user doesn't own (copied history in mirrors can't fake these)
+  const prsElsewhere = await soft(searchCount(`author:${L} type:pr -user:${L} created:${RANGE}`), null, W);
   const issues = await soft(searchCount(`author:${L} type:issue created:${RANGE}`), null, W);
   const reviews = await soft(searchCount(`reviewed-by:${L} -author:${L} type:pr created:${RANGE}`), null, W);
 
@@ -368,7 +370,6 @@ async function buildWrap(login, onStep){
   for (const c of sample) byRepo[c.repo] = (byRepo[c.repo] || 0) + 1;
   const topRepos = Object.entries(byRepo).sort((a, b) => b[1] - a[1]).slice(0, 5)
     .map(([name, n]) => ({ name, commits: n, own: name.split('/')[0].toLowerCase() === L.toLowerCase() }));
-  const otherRepos = Object.keys(byRepo).filter(n => n.split('/')[0].toLowerCase() !== L.toLowerCase()).length;
 
   onStep(5, W);
   const langAgg = {};
@@ -396,7 +397,7 @@ async function buildWrap(login, onStep){
     totalStars: repos.filter(r => !r.fork).reduce((a, r) => a + r.stargazers_count, 0),
   };
   W.commits = { total: commitTotal, sample };
-  W.collab = { prsOpened, prsMerged, issues, reviews, otherRepos };
+  W.collab = { prsOpened, prsMerged, prsElsewhere, issues, reviews };
   W.topRepos = topRepos;
   W.languages = languages;
 
@@ -459,8 +460,6 @@ function archetype(W, D){
     add('The Twilight Hacker', eve, .4, `${pct(eve)} of your commits landed between 6 and 10pm. The day job ends, the side quest begins.`);
     add('The Nine-to-Fiver', office, .7, `${pct(office)} of your commits landed in office hours. Steady, sustainable, shipped.`);
     add('The Weekend Warrior', weekend, .4, `${pct(weekend)} of your commits landed on a Saturday or Sunday.`);
-    const away = n ? W.commits.sample.filter(c => c.owner.toLowerCase() !== W.user.login.toLowerCase()).length / n : 0;
-    add('The Open-Source Citizen', away, .5, `${pct(away)} of your recent commits went to repos you don't own.`);
   }
 
   // how: from the full contribution calendar
@@ -482,6 +481,10 @@ function archetype(W, D){
   // who you work with: pull requests, reviews, issues
   const prs = cb.prsOpened || 0;
   if (cb.reviews >= 10) add('The Reviewer', cb.reviews / Math.max(1, prs), 1.5, `You reviewed ${plural(cb.reviews, 'pull request')} and opened ${fmt(prs)}. Other people's code got better because of you.`);
+  // contributing to other people's projects, measured by pull requests (commit search also finds
+  // copies of your commits in mirrors, which made maintainers look like outside contributors)
+  const elsewhere = cb.prsElsewhere || 0;
+  if (elsewhere >= 5 && prs) add('The Open-Source Citizen', elsewhere / prs, .5, `${fmt(elsewhere)} of your ${plural(prs, 'pull request')} went to projects you don't own.`);
   if (prs >= 10 && cb.prsMerged != null) add('The Closer', cb.prsMerged / prs, .9, `${pct(cb.prsMerged / prs)} of your ${fmt(prs)} pull requests got merged.`);
   if (cb.issues >= 10) add('The Bug Hunter', cb.issues / Math.max(1, prs), 1.5, `You opened ${plural(cb.issues, 'issue')}, more than your ${plural(prs, 'pull request')}. Somebody has to find them.`);
 
@@ -586,7 +589,7 @@ function buildCards(W, D){
       <div class="k eb rise">You pushed</div>
       ${num(W.commits.total)}
       <div class="h rise" style="--d:.3s">public commits</div>
-      <p class="p rise" style="--d:.45s">${perDay >= 1 ? `That's ${perDay.toFixed(1)} a day, every day.` : `That's one every ${Math.round(1 / perDay)} days.`}${W.collab.otherRepos ? ` They landed in ${plural(W.collab.otherRepos, 'repo')} you don't own, too.` : ''}</p>
+      <p class="p rise" style="--d:.45s">${perDay >= 1 ? `That's ${perDay.toFixed(1)} a day, every day.` : `That's one every ${Math.round(1 / perDay)} days.`}</p>
       <div class="grow"></div>
       <p class="note rise" style="--d:.6s">Counts commits on the default branches of public repos.</p>` });
   }
