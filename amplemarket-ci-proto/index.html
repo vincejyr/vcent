@@ -190,6 +190,7 @@ input[type=checkbox]{accent-color:var(--ink);width:14px;height:14px}
 <script>
 const STAGES = ["Problem aware","Solution search","Shortlist","Evaluation","Decision"];
 const RANK = s => STAGES.indexOf(s);
+const SL = s => (typeof S!=="undefined" && S && S.stages && S.stages[RANK(s)] ? S.stages[RANK(s)].name : s);
 const SEQS = {
   "Problem aware":"Point of view · 6 steps",
   "Solution search":"Point of view · 6 steps",
@@ -259,7 +260,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&
 const lead = id => S.leads.find(l=>l.id===id);
 const isOwner = l => l.crm==="Open deal" || l.crm==="Customer";
 const scoreHtml = v => `<span class="score"><span class="bar"><i style="width:${v}%"></i></span>${v>=80?"High":"Med"}</span>`;
-const stageChip = s => `<span class="chip ${RANK(s)>=3?"dark":RANK(s)==2?"mid":""}">${s}</span>`;
+const stageChip = s => `<span class="chip ${RANK(s)>=3?"dark":RANK(s)==2?"mid":""}">${esc(SL(s))}</span>`;
 
 /* ---------- guide ---------- */
 const GUIDE = [
@@ -413,7 +414,7 @@ function feed(){
   const n = S.sel.size;
   return `<div class="col" style="gap:12px">
     <div class="row"><div><div class="b" style="font-size:15px">People evaluating your competitors</div><div class="small faint">Ranked by how close they are to a decision</div></div><div class="sp"></div>${statusSeg()}</div>
-    <div class="row" style="gap:10px">${tile("new","New since yesterday",12)}${tile("moved","Moved stage",todo.filter(l=>l.moved).length)}${tile("late","Evaluation or decision",todo.filter(l=>RANK(l.stage)>=3).length)}${tile("owner","Routed to owners",todo.filter(isOwner).length)}</div>
+    <div class="row" style="gap:10px">${tile("new","New since yesterday",12)}${tile("moved","Moved stage",todo.filter(l=>l.moved).length)}${tile("late",`${esc(SL("Evaluation"))} or ${esc(SL("Decision"))}`,todo.filter(l=>RANK(l.stage)>=3).length)}${tile("owner","Routed to owners",todo.filter(isOwner).length)}</div>
     <div class="row"><select data-act="compF">${["All","Datacove","Pipewise","Sightline"].map(c=>`<option ${S.compF===c?"selected":""} value="${c}">Competitor: ${c}</option>`).join("")}</select>
       <span class="btn sm">Score: High + Med</span><span class="btn sm">My territory</span><div class="sp"></div><span class="small faint">Sort: stage, score, recency</span></div>
     ${n?`<div class="card row" style="padding:8px 12px;background:var(--soft)"><b>${n} selected</b><button class="btn sm pri" data-act="bulk">Add to sequence</button><button class="btn sm" data-act="bsnooze">Snooze</button><button class="btn sm" data-act="bclear">Clear</button></div>`:""}
@@ -425,7 +426,7 @@ function feed(){
 function openLead(id){
   const l = lead(id); S.open = id;
   const cur = RANK(l.stage);
-  const jr = STAGES.map((s,i)=>`<div class="${i===cur?"cur":""}"><div class="small b">${s}</div><div class="small faint">${l.seen[s]||""}${i===cur?" · now":""}</div></div>`).join("");
+  const jr = STAGES.map((s,i)=>`<div class="${i===cur?"cur":""}"><div class="small b">${esc(SL(s))}</div><div class="small faint">${l.seen[s]||""}${i===cur?" · now":""}</div></div>`).join("");
   const blocked = isOwner(l) || l.crm==="In sequence" || l.status;
   const ownerBox = isOwner(l) ? `<div class="card" style="padding:12px;background:var(--soft)"><div class="b">${l.crm==="Open deal"?"On "+esc(l.owner)+"’s open deal":"Current customer"}</div><div class="small muted" style="margin-top:3px">${l.crm==="Open deal"?esc(l.deal)+". "+esc(l.owner)+" got the alert with the Pipewise battlecard, and it’s logged on the opportunity.":esc(l.owner)+" got a churn-risk alert. Customers are never added to prospecting sequences."}</div>${l.crm==="Open deal"?`<div style="margin-top:8px"><button class="btn sm" data-act="crm">See what Alex sees in the CRM</button></div>`:""}</div>` : "";
   $("#drawer").innerHTML = `<div class="body">
@@ -469,10 +470,10 @@ function openModal(ids){
   const priv = !PRIVACY.test(draft);
   $("#modal").innerHTML = `<div class="row" style="padding:16px 22px;border-bottom:1px solid var(--line)"><div class="b" style="font-size:16px;flex:1">Add ${ok.length} ${ok.length>1?"people":"person"} to a sequence</div><button class="btn ghost" data-act="close" aria-label="Close">✕</button></div>
    <div class="body">
-    <div class="row" style="flex-wrap:wrap">${ok.map(l=>`<span class="chip">${l.name} · ${l.stage} · ${l.comp}</span>`).join("")}${blocked.map(l=>`<span class="chip out">⚠ ${l.name} skipped: ${isOwner(l)?"owned by "+esc(l.owner):"already in a sequence"}</span>`).join("")}</div>
+    <div class="row" style="flex-wrap:wrap">${ok.map(l=>`<span class="chip">${l.name} · ${esc(SL(l.stage))} · ${l.comp}</span>`).join("")}${blocked.map(l=>`<span class="chip out">⚠ ${l.name} skipped: ${isOwner(l)?"owned by "+esc(l.owner):"already in a sequence"}</span>`).join("")}</div>
     <div class="row" style="gap:20px;align-items:flex-start">
      <div class="col" style="width:360px;flex:none"><div class="kick">1 · Sequence (matched to stage)</div>
-      ${seqs.map(q=>`<button class="seq ${q===S.modalSeq?"on":""}" data-act="pickseq" data-q="${esc(q)}"><span class="dot"></span><div style="flex:1"><div class="b">${q}</div></div>${q===rec?`<span class="chip">Recommended for ${first.stage}</span>`:""}</button>`).join("")}
+      ${seqs.map(q=>`<button class="seq ${q===S.modalSeq?"on":""}" data-act="pickseq" data-q="${esc(q)}"><span class="dot"></span><div style="flex:1"><div class="b">${q}</div></div>${q===rec?`<span class="chip">Recommended for ${esc(SL(first.stage))}</span>`:""}</button>`).join("")}
       <div class="small faint">You mapped a sequence to each stage in setup. You can pick any sequence.</div>
       <div class="kick" style="margin-top:6px">2 · Contact details</div>
       <label class="card row" style="padding:9px 12px;background:var(--soft)"><input type="checkbox" checked> Find verified email + phone <span class="small faint">· charged only on add</span></label>
@@ -483,7 +484,7 @@ function openModal(ids){
        <div class="b" style="margin-top:8px">${esc(subj)}</div>
        <div style="white-space:pre-wrap;margin-top:6px;color:var(--ink2)">${esc(bodyL.join("\n").trim())}</div>
        <div class="card" style="padding:8px 10px;background:var(--soft);margin-top:12px"><span class="small"><b>${priv?"✓ Signal privacy check passed":"⚠ Mentions how we know"}</b> <span class="faint">No mention of ads, webinars or follows.</span></span></div>
-       <div class="small faint" style="margin-top:6px">Uses: stage = ${first.stage} · competitor = ${first.comp} · battlecard v4 · persona = ${first.title}</div>
+       <div class="small faint" style="margin-top:6px">Uses: stage = ${esc(SL(first.stage))} · competitor = ${first.comp} · battlecard v4 · persona = ${first.title}</div>
       </div></div>
     </div></div>
    <div class="row" style="padding:12px 22px;border-top:1px solid var(--line)"><span class="small faint">Lead moves to “Actioned”. Source = Amplemarket CI is set on CRM sync.</span><div class="sp"></div><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="confirm">Add ${ok.length} to sequence</button></div>`;
@@ -497,10 +498,10 @@ function togglePop(force){
   if (show){
     S.unread = 0; renderTop();
     p.innerHTML = `<div class="row" style="padding:12px 14px;border-bottom:1px solid var(--line)"><b style="flex:1">Notifications</b><span class="small faint">Competitive intel</span></div>
-     <div class="note"><span class="chip dark">Moved stage</span> <span class="small faint">now</span><div style="margin-top:5px">Maya Chen (Brightbank) moved to <b>Evaluation</b> for Datacove</div><div class="small faint">Pricing webinar 2h ago · New prospect</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="popopen" data-id="maya">Open</button><button class="btn sm" data-act="popadd" data-id="maya">Add to sequence</button></div></div>
+     <div class="note"><span class="chip dark">Moved stage</span> <span class="small faint">now</span><div style="margin-top:5px">Maya Chen (Brightbank) moved to <b>${esc(SL("Evaluation"))}</b> for Datacove</div><div class="small faint">Pricing webinar 2h ago · New prospect</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="popopen" data-id="maya">Open</button><button class="btn sm" data-act="popadd" data-id="maya">Add to sequence</button></div></div>
      <div class="note"><span class="chip dark">High intent</span> <span class="small faint">1h</span><div style="margin-top:5px"><b>Priya Nair</b> (Kitewell) is comparing Datacove and Lumen</div><div class="small faint">Clicked a comparison ad · 2 colleagues also active</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="popopen" data-id="priya">Open</button></div></div>
      <div class="note"><span class="chip mid">Routed to owner</span> <span class="small faint">5h</span><div style="margin-top:5px">Tom Okafor is on <b>Fluxo – Annual</b>, Alex D.’s open deal</div><div class="small faint">Alex got the alert with the Pipewise battlecard</div><div class="row" style="margin-top:7px"><button class="btn sm" data-act="crm">What Alex sees</button></div></div>
-     <div class="note"><span class="chip">Digest</span> <span class="small faint">Mon</span><div style="margin-top:5px">Weekly summary: 38 new leads, 9 in evaluation or decision</div></div>`;
+     <div class="note"><span class="chip">Digest</span> <span class="small faint">Mon</span><div style="margin-top:5px">Weekly summary: 38 new leads, 9 in ${esc(SL("Evaluation"))} or ${esc(SL("Decision"))}</div></div>`;
   }
   p.classList.toggle("show", show);
   renderGuide();
@@ -532,7 +533,7 @@ function results(){
      <div class="row" style="gap:26px;margin-top:12px"><div><div class="kick">High-value actions per lead</div><div style="font-size:20px;font-weight:700">0.87 <span class="small faint">vs 0.41</span></div></div><div><div class="kick">Meeting rate</div><div style="font-size:20px;font-weight:700">6.5% <span class="small faint">vs 2.8%</span></div></div></div>
      <div class="small faint" style="margin-top:8px">Same period, with a holdout.</div>
      <div class="kick" style="margin-top:14px">Meeting rate by stage</div>
-     ${[["Evaluation",11],["Shortlist",6],["Solution search",2]].map(([s,v])=>`<div class="row small" style="margin-top:6px"><span style="width:110px">${s}</span><div style="flex:1;height:8px;background:var(--soft);border-radius:4px"><div style="width:${v*8}%;height:100%;background:var(--ink2);border-radius:4px"></div></div><b>${v}%</b></div>`).join("")}
+     ${[["Evaluation",11],["Shortlist",6],["Solution search",2]].map(([s,v])=>`<div class="row small" style="margin-top:6px"><span style="width:110px">${esc(SL(s))}</span><div style="flex:1;height:8px;background:var(--soft);border-radius:4px"><div style="width:${v*8}%;height:100%;background:var(--ink2);border-radius:4px"></div></div><b>${v}%</b></div>`).join("")}
      <div class="small faint" style="margin-top:6px">If these were flat, the stages wouldn’t be telling reps anything.</div></div>
    </div>
    <div class="small faint">${S.team?"Team view: 6 SDRs. ":""}Illustrative numbers. ${S.actions?`Includes the ${S.actions} lead${S.actions>1?"s":""} you actioned in this prototype.`:""}</div>
@@ -546,14 +547,14 @@ const YOU = new Set(["1,0","2,2","3,3","0,3"]);
 function evidence(k){
   const [ci,si] = k.split(",").map(Number); const c = CELLS[k]||[]; const ch = CH[ci], st = STAGES[si];
   const q = {0:"“data observability tools for banks”",1:"“What’s the best data observability tool for a fintech?”",2:"G2 category: Data Observability, sorted by reviews",3:"Posts from vendor employees and data creators",4:"LinkedIn, Google and Meta ad libraries",5:"Event listings and webinar pages"}[ci];
-  return `<div class="kick">${st} · ${ch}</div>
+  return `<div class="kick">${esc(SL(st))} · ${ch}</div>
    <div class="small" style="margin-top:6px"><b>Checked:</b> ${q}</div>
    ${c.length?c.map(x=>`<div class="card" style="padding:10px;margin-top:8px"><div class="b">${x.replace("*","")}${x.includes("*")?' <span class="chip out">new this month</span>':""}</div><div class="small muted" style="margin-top:3px">${ci===1?"Recommended in 3 of 5 answers. Claim: “lineage out of the box”.":ci===4?"Running "+(x.includes("*")?"3 comparison ads against Lumen":"2 awareness ads")+".":"Present with “"+(si>=3?"migration in a week":"cut alert noise by 60%")+"”."}</div></div>`).join(""):`<div class="small muted" style="margin-top:8px">No competitor seen here. ${YOU.has(k)?"Lumen is present.":"A gap for everyone."}</div>`}
    ${YOU.has(k)?`<div class="small" style="margin-top:8px">✓ Lumen is present here.</div>`:c.length?`<div class="small" style="margin-top:8px">Lumen is missing here.</div>`:""}
    <div class="row" style="margin-top:10px">${si>=3?`<button class="btn sm" data-act="toast" data-msg="Battlecard update drafted for review">Update battlecard</button>`:""}<button class="btn sm" data-act="toast" data-msg="Shared with marketing">Share with marketing</button></div>`;
 }
 function journey(){
-  const g = `<table class="grid" style="table-layout:fixed"><tr><th style="width:130px">Channel ↓ / Stage →</th>${STAGES.map(s=>`<th>${s}</th>`).join("")}</tr>
+  const g = `<table class="grid" style="table-layout:fixed"><tr><th style="width:130px">Channel ↓ / Stage →</th>${STAGES.map(s=>`<th>${esc(SL(s))}</th>`).join("")}</tr>
    ${CH.map((ch,ci)=>`<tr><td class="small b">${ch}</td>${STAGES.map((_,si)=>{const k=ci+","+si,c=CELLS[k]||[];
      return `<td class="cell ${S.cell===k?"sel":""}" data-cell="${k}">${c.map(x=>`<span class="chip ${x.startsWith("Datacove")?"dark":x==="Pipewise"?"mid":""}" style="margin:2px">${x}</span>`).join("")}${YOU.has(k)?'<span class="chip out" style="margin:2px">Lumen</span>':""}${!c.length&&!YOU.has(k)?'<span class="small faint">gap</span>':""}</td>`}).join("")}</tr>`).join("")}</table>`;
   return `<div class="col" style="gap:12px">
@@ -623,7 +624,7 @@ document.addEventListener("change", e=>{
   const a=e.target.closest("[data-act]"); if(!a) return; const act=a.dataset.act;
   if (act==="pick" && a.value){ const c=S.comps[+a.dataset.i]; c.d=a.value; c.why="You picked "+a.value; c.s="on"; render(); }
   if (act==="seq"){ S.stages[+a.dataset.i].seq=a.value; toast(`${S.stages[+a.dataset.i].name} now uses “${a.value}”`); }
-  if (act==="rename"){ const v=a.value.trim()||STAGES[+a.dataset.i]; S.stages[+a.dataset.i].name=v; }
+  if (act==="rename"){ const v=a.value.replace(/\s+/g," ").trim()||STAGES[+a.dataset.i]; S.stages[+a.dataset.i].name=v; a.value=v; toast(`Stage renamed to “${v}”. It updates across leads, drafts, results and the journey map.`); }
   if (act==="cycle"){ S.cycle=+a.value||47; }
   if (act==="al"){ S.alerts[a.dataset.k]=a.checked; }
   if (act==="max"){ S.alerts.max=+a.value; }
@@ -631,7 +632,7 @@ document.addEventListener("change", e=>{
   if (act==="view"){ S.team = a.value.includes("Team"); render(); }
   if (act==="notrel" && a.value){ const id=S.open; setStatus([id],"notrel"); closeAll(); render(); toast(`Marked not relevant (${a.value}). Saved as a training label.`); }
 });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); if(e.key==="Enter" && e.target.classList.contains("stname")){ e.preventDefault(); e.target.blur(); } });
 
 function fit(){
   const f = $(".frame"), app = $("#app"), W = f.clientWidth;
