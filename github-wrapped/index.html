@@ -18,6 +18,7 @@ title: GitHub Wrapped 2026
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  --ease-out:cubic-bezier(.2,.8,.2,1); --ease-expo:cubic-bezier(.16,1,.3,1); --ease-back:cubic-bezier(.34,1.56,.64,1); --ease-inout:cubic-bezier(.65,0,.35,1);
   --bg:#07080c; --fg:#f5f5f7; --muted:rgba(245,245,247,.68); --line:rgba(255,255,255,.14);
   --green:#39d353; --pink:#ff4f9a; --violet:#8b5cf6; --amber:#ffb224; --cyan:#22d3ee;
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
@@ -94,11 +95,51 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .ib{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.08);display:grid;place-items:center;cursor:pointer}
 .ib svg{width:16px;height:16px}
 
-.card{position:absolute;inset:0;padding:calc(76px + 3cqh) 7cqw 6cqh;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s, visibility .45s;background:var(--cbg)}
-.card.active{opacity:1;visibility:visible}
+.card{position:absolute;inset:0;isolation:isolate;overflow:hidden;padding:calc(76px + 3cqh) 7cqw 6cqh;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s, visibility .45s;background:var(--cbg)}
+.card.active{opacity:1;visibility:visible;animation:pushIn .7s var(--ease-out)}
+@keyframes pushIn{from{transform:scale(1.045)}to{transform:none}}
 .card .rise{opacity:0;transform:translateY(18px)}
-.card.active .rise{animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:var(--d,0s)}
+.card.active .rise{animation:rise .7s var(--ease-out) forwards;animation-delay:calc(var(--cd,0s) + var(--d,0s))}
 @keyframes rise{to{opacity:1;transform:none}}
+
+/* motion layer */
+/* kinetic type: each word rises out of its own mask */
+.wm{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .04em .12em;margin:0 -.04em -.12em}
+.wi{display:inline-block;transform:translateY(108%)}
+.card.active .wi{animation:wordUp .85s var(--ease-expo) forwards;animation-delay:calc(var(--cd,0s) + var(--d,0s) + var(--w) * 70ms)}
+@keyframes wordUp{to{transform:none}}
+/* the persona name lands like a stamp, after a beat */
+.slam{opacity:0;transform:scale(1.7);filter:blur(10px);transform-origin:left center}
+.card.active .slam{animation:slam .75s var(--ease-back) forwards;animation-delay:calc(var(--cd,0s) + var(--d,0s))}
+@keyframes slam{55%{opacity:1;filter:blur(0)}to{opacity:1;transform:none;filter:none}}
+/* numbers punch when the count-up lands */
+.cu{display:inline-block;transform-origin:left 80%}
+.cu.land{animation:punch .55s var(--ease-back)}
+@keyframes punch{40%{transform:scale(1.09);text-shadow:0 0 .35em var(--ac)}to{transform:none;text-shadow:none}}
+/* slow light behind every card, in the chapter's colour */
+.card::before,.card::after{content:'';position:absolute;z-index:-1;width:110cqw;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 20%,transparent),transparent);pointer-events:none}
+.card::before{top:-45cqw;right:-55cqw}
+.card::after{bottom:-50cqw;left:-60cqw;opacity:.65}
+.card.active::before{animation:drift 15s ease-in-out infinite alternate}
+.card.active::after{animation:drift 19s ease-in-out -7s infinite alternate-reverse}
+@keyframes drift{to{transform:translate(-18cqw,22cqw) scale(1.2)}}
+.paused .card::before,.paused .card::after,.paused .pring::before,.paused .pring::after{animation-play-state:paused}
+/* a new chapter sweeps in with its colour */
+.wipe{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.wipe i{position:absolute;top:-10%;bottom:-10%;left:-35%;width:170%;transform:translateX(-125%) skewX(-14deg)}
+.wipe i:first-child{background:var(--wc,#39d353)}
+.wipe i:last-child{background:rgba(255,255,255,.9);width:12%;transform:translateX(-320%) skewX(-14deg)}
+.wipe.go i:first-child{animation:sweep .8s var(--ease-inout) forwards}
+.wipe.go i:last-child{animation:sweepThin .8s var(--ease-inout) .07s forwards}
+@keyframes sweep{to{transform:translateX(125%) skewX(-14deg)}}
+@keyframes sweepThin{to{transform:translateX(1300%) skewX(-14deg)}}
+/* rings pulse out from the avatar */
+.pring{position:relative;border-radius:50%}
+.pring::before,.pring::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--ac);opacity:0;pointer-events:none}
+.card.active .pring::before{animation:ring 2.6s var(--ease-out) .7s infinite}
+.card.active .pring::after{animation:ring 2.6s var(--ease-out) 2s infinite}
+@keyframes ring{0%{transform:scale(1);opacity:.75}100%{transform:scale(2);opacity:0}}
+.spark{position:absolute;border-radius:2px;pointer-events:none;z-index:3}
 .k{font-family:var(--mono);font-size:max(11px,3.1cqw);letter-spacing:.16em;text-transform:uppercase;opacity:.85}
 .h{font-size:8.6cqw;line-height:1.02;font-weight:700;letter-spacing:-.02em;margin:2.2cqh 0 0}
 .big{font-size:23cqw;line-height:.9;font-weight:700;letter-spacing:-.04em;margin:3cqh 0 1cqh;font-variant-numeric:tabular-nums}
@@ -121,6 +162,8 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .mrow b{width:7cqw;font-weight:500}
 .mrow .v{width:9cqw;text-align:right}
 .mrow.top{color:var(--ac)}
+.mrows .mrow{opacity:0;transform:translateX(-5cqw)}
+.card.active .mrows .mrow{animation:rise .55s var(--ease-out) forwards;animation-delay:calc(var(--cd,0s) + .55s + var(--r) * 45ms)}
 .mcells{flex:1;display:grid;grid-template-columns:repeat(31,minmax(0,1fr));gap:.45cqw}
 .mcells i,.legend i{aspect-ratio:1;border-radius:.35cqw;background:rgba(255,255,255,.08)}
 .mcells i.f{background:rgba(255,255,255,.03)}
@@ -132,7 +175,7 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 /* streak: one square per day of the streak */
 .streak{display:grid;gap:1.1cqw;margin-top:3cqh}
 .streak i{aspect-ratio:1;border-radius:.9cqw;background:#26a641;transform:scale(0)}
-.card.active .streak i{animation:pop .35s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.45s + var(--i) * 14ms)}
+.card.active .streak i{animation:pop .4s var(--ease-back) forwards;animation-delay:calc(var(--cd,0s) + .45s + var(--i) * 14ms)}
 @keyframes pop{to{transform:none}}
 .streak-more{margin-top:1.2cqh;font-family:var(--mono);font-size:max(10px,2.6cqw);color:rgba(245,245,247,.62)}
 
@@ -140,7 +183,7 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .clock{position:relative;width:60cqw;aspect-ratio:1;margin:3cqh auto 0}
 .clock .hb{position:absolute;left:50%;top:0;width:2.2cqw;margin-left:-1.1cqw;height:50%;transform-origin:50% 100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:9cqw;box-sizing:border-box}
 .clock s{display:block;width:100%;border-radius:99px;background:rgba(255,255,255,.26);text-decoration:none;transform-origin:bottom;transform:scaleY(0)}
-.card.active .clock s{animation:grow .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.3s + var(--i) * .03s)}
+.card.active .clock s{animation:grow .9s var(--ease-back) forwards;animation-delay:calc(var(--cd,0s) + .5s + var(--i) * .03s)}
 .clock s.hot{background:var(--ac)}
 .clock .ring{position:absolute;left:calc(50% - 7cqw);top:calc(50% - 7cqw);width:14cqw;height:14cqw;box-sizing:border-box;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:max(10px,2.4cqw);color:rgba(245,245,247,.6)}
 .clock .lb{position:absolute;font-family:var(--mono);font-size:max(10px,2.4cqw);color:rgba(245,245,247,.6);white-space:nowrap}
@@ -152,7 +195,7 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .chart{display:flex;align-items:flex-end;gap:1.4cqw;height:34cqh;margin-top:4cqh}
 .chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:1cqh}
 .chart s{display:block;width:100%;border-radius:1.2cqw 1.2cqw .3cqw .3cqw;background:rgba(255,255,255,.28);text-decoration:none;transform-origin:bottom;transform:scaleY(0)}
-.card.active .chart s{animation:grow .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.25s + var(--i) * .04s)}
+.card.active .chart s{animation:grow .9s var(--ease-back) forwards;animation-delay:calc(var(--cd,0s) + .45s + var(--i) * .05s)}
 @keyframes grow{to{transform:none}}
 .chart s.hot{background:var(--ac)}
 .chart span{font-family:var(--mono);font-size:2.6cqw;opacity:.7}
@@ -165,7 +208,7 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .row .v{font-family:var(--mono);font-size:3.8cqw;opacity:.85}
 .lbar{height:2.4cqh;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:.8cqh}
 .lbar b{display:block;height:100%;border-radius:99px;transform-origin:left;transform:scaleX(0)}
-.card.active .lbar b{animation:growx 1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:var(--d,0s)}
+.card.active .lbar b{animation:growx 1.1s var(--ease-expo) forwards;animation-delay:calc(var(--cd,0s) + var(--d,0s))}
 @keyframes growx{to{transform:none}}
 
 .trio{display:grid;gap:3.6cqh;margin-top:5cqh}
@@ -174,8 +217,10 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:4cqh 4cqw;margin-top:4cqh}
 
 /* summary */
-.sumwrap{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr);place-items:center;margin-top:2cqh}
-.sumimg{display:block;max-width:100%;max-height:100%;border-radius:2cqw;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1)}
+.sumwrap{perspective:1000px;flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr);place-items:center;margin-top:2cqh}
+.card.active .sumimg{animation:drop 1s var(--ease-expo) .25s both}
+@keyframes drop{from{opacity:0;transform:translateY(10%) rotateX(28deg) scale(.9)}}
+.sumimg{transform-origin:50% 100%;display:block;max-width:100%;max-height:100%;border-radius:2cqw;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1)}
 .sumimg:not([src]){width:72%;aspect-ratio:4/5;background:#111}
 .share{display:flex;align-items:center;justify-content:center;gap:8px;height:max(48px,6.4cqh);margin-top:1.4cqh;border:0;border-radius:12px;background:#f5f5f7;color:#07080c;font-weight:700;font-size:max(15px,4cqw);cursor:pointer}
 .share svg{width:18px;height:18px}
@@ -191,6 +236,9 @@ button:disabled{opacity:.5;cursor:wait}
   .card .rise,.card.active .rise{animation:none;opacity:1;transform:none}
   .chart s,.lbar b,.clock s,.streak i{animation:none!important;transform:none}
   .viewer{transition:none}
+  .wi,.slam,.mrows .mrow,.sumimg,.cu.land,.card.active{animation:none!important;opacity:1;transform:none;filter:none}
+  .card::before,.card::after,.pring::before,.pring::after{animation:none!important}
+  .wipe{display:none}
 }
 </style>
 </head>
@@ -235,6 +283,7 @@ button:disabled{opacity:.5;cursor:wait}
       <button class="ib" id="closeBtn" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="cards"></div>
+    <div class="wipe" id="wipe" aria-hidden="true"><i></i><i></i></div>
     <div class="toast" id="toast"></div>
   </div>
 </div>
@@ -557,7 +606,7 @@ function monthRowsHTML(days, D){
       cells += c ? `<i class="l${lvl(c)}" title="${iso}: ${c}"></i>` : '<i></i>';
     }
     const future = isoOf(m, 1) > END_ISO;
-    rows += `<div class="mrow${m === D.topMonth ? ' top' : ''}"><b>${MONTHS[m].slice(0, 3)}</b><div class="mcells">${cells}</div><span class="v">${future ? '—' : fmt(D.months[m])}</span></div>`;
+    rows += `<div class="mrow${m === D.topMonth ? ' top' : ''}" style="--r:${m}"><b>${MONTHS[m].slice(0, 3)}</b><div class="mcells">${cells}</div><span class="v">${future ? '—' : fmt(D.months[m])}</span></div>`;
   }
   return `<div class="mrows rise" style="--d:.5s" role="img" aria-label="Contributions by day, one row per month">${rows}</div>
     <div class="legend rise" style="--d:.6s">Less <i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</div>`;
@@ -591,6 +640,54 @@ const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' 
 // story chapters: one accent each
 const CHAPTER_OF = { intro: 'activity', contrib: 'activity', commits: 'activity', months: 'activity', streak: 'activity', clock: 'rhythm', langs: 'craft', repos: 'craft', new: 'craft', collab: 'people', sum: 'share' };
 const CHAPTERS = ['activity', 'rhythm', 'craft', 'people', 'share'];
+const CHAPTER_AC = { activity: '#39d353', rhythm: '#c4b5fd', craft: '#22d3ee', people: '#ffb224', share: '#39d353' };
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- motion ----------
+// kinetic type: wrap each word in a mask so it can rise out of it (screen readers get the plain text)
+function splitWords(el){
+  if (el.dataset.split) return;
+  el.dataset.split = 1;
+  el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+  el.classList.remove('rise');
+  let n = 0;
+  const walk = node => [...node.childNodes].forEach(c => {
+    if (c.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      c.textContent.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.append(' '); return; }
+        const m = document.createElement('span'); m.className = 'wm'; m.setAttribute('aria-hidden', 'true');
+        const w = document.createElement('span'); w.className = 'wi'; w.style.setProperty('--w', n++); w.textContent = part;
+        m.append(w); frag.append(m);
+      });
+      c.replaceWith(frag);
+    } else if (c.nodeType === 1 && c.tagName !== 'BR') walk(c);
+  });
+  walk(el);
+}
+
+// a burst of contribution squares from a point on the card
+function burst(card, x, y, colors, n = 22){
+  if (reduced()) return;
+  const cw = card.clientWidth;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('i'), a = (i / n) * Math.PI * 2 + Math.random() * .5;
+    const r = cw * (.16 + Math.random() * .22), sz = cw * (.014 + Math.random() * .016);
+    p.className = 'spark';
+    Object.assign(p.style, { left: x + 'px', top: y + 'px', width: sz + 'px', height: sz + 'px', background: colors[i % colors.length] });
+    card.append(p);
+    const dx = Math.cos(a) * r, dy = Math.sin(a) * r;
+    p.animate([
+      { transform: 'translate(-50%,-50%) scale(0)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1) rotate(${(Math.random() * 180) | 0}deg)`, opacity: 1, offset: .55 },
+      { transform: `translate(calc(-50% + ${dx * 1.15}px), calc(-50% + ${dy * 1.15 + cw * .08}px)) scale(.5)`, opacity: 0 }
+    ], { duration: 1000 + Math.random() * 400, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => p.remove();
+  }
+}
+const SPARKS = ['#0e4429', '#006d32', '#26a641', '#39d353'];
+let fxTimer = 0, fresh = true;
+
 const CHAPTER_BG = { activity: '#06120a', rhythm: '#0d0a1f', craft: '#041417', people: '#141006', share: '#07080c' };
 
 function buildCards(W, D){
@@ -599,7 +696,7 @@ function buildCards(W, D){
 
   C.push({ t: 'intro', html: `
     <div class="grow"></div>
-    <img src="${esc(u.avatar)}&s=240" alt="" class="rise" style="width:26cqw;height:26cqw;border-radius:50%;border:3px solid rgba(255,255,255,.85)">
+    <div class="pring rise" style="width:26cqw;height:26cqw"><img src="${esc(u.avatar)}&s=240" alt="" style="display:block;width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:3px solid rgba(255,255,255,.85)"></div>
     <div class="k rise" style="--d:.15s;margin-top:4cqh">GitHub Wrapped ${YEAR}</div>
     <div class="h rise" style="--d:.25s;font-size:11cqw">Hey ${esc(u.name.split(' ')[0])}.<br>Let's look back.</div>
     <p class="p rise" style="--d:.4s">${yrs > 0 ? `${yrs} year${yrs === 1 ? '' : 's'} on GitHub. ` : ''}Here's your ${YEAR}${IN_PROGRESS ? `, Jan 1 – ${fmtDay(END_ISO)}` : ''}.</p>
@@ -664,8 +761,8 @@ function buildCards(W, D){
     C.push({ t: 'clock', html: `
       <div class="k eb rise">Your coding personality</div>
       <p class="p rise" style="--d:.1s;margin-top:2.6cqh">This year you were</p>
-      <div class="h rise" style="--d:.25s;font-size:${len > 16 ? 9.5 : len > 11 ? 11 : 14}cqw;margin-top:.4cqh;color:var(--ac)">${title}</div>
-      <p class="p rise" style="--d:.4s">${esc(D.archetype.line)}</p>
+      <div class="h slam" style="--d:.8s;font-size:${len > 16 ? 9.5 : len > 11 ? 11 : 14}cqw;margin-top:.4cqh;color:var(--ac)">${title}</div>
+      <p class="p rise" style="--d:1.3s">${esc(D.archetype.line)}</p>
       <div class="grow"></div>
       ${hasClock ? clockHTML(D.hours, D.peakHour) : hasWeek ? weekHTML() : ''}
       <div class="grow"></div>
@@ -675,7 +772,7 @@ function buildCards(W, D){
 
   if (W.languages.length) C.push({ t: 'langs', html: `
     <div class="k eb rise">You spoke</div>
-    <div class="mid rise" style="--d:.15s;margin-top:3cqh;color:${W.languages[0].color}">${esc(W.languages[0].name)}</div>
+    <div class="mid kt" style="--d:.15s;margin-top:3cqh;color:${W.languages[0].color}">${esc(W.languages[0].name)}</div>
     <p class="p rise" style="--d:.3s">more than anything else${W.languages.length > 1 ? `, with ${W.languages.slice(1, 3).map(l => esc(l.name)).join(' and ')} close behind` : ''}.</p>
     <div class="list">${W.languages.map((l, i) => `
       <div class="rise" style="--d:${.4 + i * .08}s">
@@ -898,6 +995,7 @@ function openStory(){
   chs = C.map(c => c.ch);
   $('cards').innerHTML = C.map(c => `<section class="card ch-${c.ch} t-${c.t}">${c.html}</section>`).join('');
   cards = [...document.querySelectorAll('#cards .card')];
+  cards.forEach(c => c.querySelectorAll('.h:not(.slam), .kt').forEach(splitWords));
   $('bars').innerHTML = '<i><b></b></i>'.repeat(cards.length);
   barFills = [...$('bars').querySelectorAll('b')];
   $('tbAv').src = W.user.avatar + '&s=64';
@@ -906,6 +1004,7 @@ function openStory(){
   document.body.style.overflow = 'hidden';
   cardPng = null;
   viewed = new Set();
+  fresh = true;
   show(0);
   last = performance.now();
   cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
@@ -926,29 +1025,47 @@ function closeStory(){
 }
 
 function show(i){
+  const old = idx;
   idx = Math.max(0, Math.min(cards.length - 1, i));
   elapsed = 0;
+  // moving forward into a new chapter: sweep its colour across, and hold the entrances until it passes
+  const wipe = $('wipe'), sweep = !fresh && idx > old && chs[idx] !== chs[old] && !reduced();
+  fresh = false;
+  $('cards').style.setProperty('--cd', sweep ? '.3s' : '0s');
+  if (sweep) { wipe.style.setProperty('--wc', CHAPTER_AC[chs[idx]]); wipe.classList.remove('go'); void wipe.offsetWidth; wipe.classList.add('go'); }
+  clearTimeout(fxTimer);
+  const card = cards[idx], cd = sweep ? 300 : 0;
+  const fire = (sel, delay, at) => { fxTimer = setTimeout(() => {
+    const el = card.querySelector(sel);
+    if (!el || !card.classList.contains('active')) return;
+    const cr = card.getBoundingClientRect(), r = el.getBoundingClientRect();
+    burst(card, r.left - cr.left + r.width * at[0], r.top - cr.top + r.height * at[1], SPARKS.concat(getComputedStyle(card).getPropertyValue('--ac').trim() || '#fff'));
+  }, cd + delay); };
+  if (card.querySelector('.slam')) fire('.slam', 1150, [.35, .5]);
+  else if (card.querySelector('.sumimg')) fire('.sumimg', 900, [.5, .25]);
   cards.forEach((c, j) => c.classList.toggle('active', j === idx));
   barFills.forEach((b, j) => b.style.width = j < idx ? '100%' : '0%');
   if (idx === cards.length - 1) barFills[idx].style.width = '100%';
   $('viewer').style.setProperty('--vbg', CHAPTER_BG[chs[idx]] || '#000');
   $('prevBtn').disabled = idx === 0;
   $('nextBtn').disabled = idx === cards.length - 1;
-  countUp(cards[idx]);
+  countUp(cards[idx], cd);
   if (!viewed.has(idx)) {
     viewed.add(idx);
     track('story_card_viewed', { card: (cards[idx].className.match(/\bt-(\w+)/) || [])[1], chapter: chs[idx], position: idx + 1, total: cards.length });
   }
 }
 
-function countUp(card){
+function countUp(card, cd = 0){
   card.querySelectorAll('.cu').forEach(el => {
     const to = +el.dataset.to || 0, t0 = performance.now(), dur = 1300;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = fmt(to); return; }
+    el.classList.remove('land');
+    if (reduced()) { el.textContent = fmt(to); return; }
     const step = now => {
-      const p = Math.min(1, (now - t0 - 150) / dur);
+      const p = Math.min(1, (now - t0 - 150 - cd) / dur);
       el.textContent = fmt(Math.round(to * (p <= 0 ? 0 : 1 - Math.pow(1 - p, 3))));
-      if (p < 1 && card.classList.contains('active')) requestAnimationFrame(step); else el.textContent = fmt(to);
+      if (p < 1 && card.classList.contains('active')) requestAnimationFrame(step);
+      else { el.textContent = fmt(to); if (p >= 1 && to) el.classList.add('land'); }
     };
     requestAnimationFrame(step);
   });
@@ -967,6 +1084,7 @@ function tick(now){
 
 function setPaused(p){
   paused = p;
+  $('stage').classList.toggle('paused', p);
   $('pauseBtn').setAttribute('aria-label', p ? 'Play' : 'Pause');
   $('pauseBtn').innerHTML = p
     ? '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>'
