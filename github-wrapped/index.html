@@ -559,7 +559,6 @@ const CHAPTER_BG = { activity: '#06120a', rhythm: '#0d0a1f', craft: '#041417', p
 
 function buildCards(W, D){
   const u = W.user, C = [];
-  const span = IN_PROGRESS ? `Jan 1 – ${fmtDay(END_ISO)}` : 'the whole year';
   const yrs = Math.max(0, YEAR - +u.created.slice(0, 4));
 
   C.push({ t: 'intro', html: `
@@ -567,7 +566,7 @@ function buildCards(W, D){
     <img src="${esc(u.avatar)}&s=240" alt="" class="rise" style="width:26cqw;height:26cqw;border-radius:50%;border:3px solid rgba(255,255,255,.85)">
     <div class="k rise" style="--d:.15s;margin-top:4cqh">GitHub Wrapped ${YEAR}</div>
     <div class="h rise" style="--d:.25s;font-size:11cqw">Hey ${esc(u.name.split(' ')[0])}.<br>Let's look back.</div>
-    <p class="p rise" style="--d:.4s">${yrs > 0 ? `${yrs} year${yrs === 1 ? '' : 's'} on GitHub, and ` : ''}${IN_PROGRESS ? `${YEAR} isn't over yet. Here's ${span}.` : `here's all of ${YEAR}.`}</p>
+    <p class="p rise" style="--d:.4s">${yrs > 0 ? `${yrs} year${yrs === 1 ? '' : 's'} on GitHub. ` : ''}Here's your ${YEAR}${IN_PROGRESS ? `, Jan 1 – ${fmtDay(END_ISO)}` : ''}.</p>
     <div class="grow"></div>` });
 
   if (W.cal && W.cal.total > 0) C.push({ t: 'contrib', html: `
