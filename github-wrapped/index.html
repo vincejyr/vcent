@@ -129,6 +129,13 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .legend{display:flex;align-items:center;gap:1cqw;margin-top:2cqh;font-family:var(--mono);font-size:max(10px,2.6cqw);color:rgba(245,245,247,.62)}
 .legend i{width:2.2cqw}
 
+/* streak: one square per day of the streak */
+.streak{display:grid;gap:1.1cqw;margin-top:3cqh}
+.streak i{aspect-ratio:1;border-radius:.9cqw;background:#26a641;transform:scale(0)}
+.card.active .streak i{animation:pop .35s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.45s + var(--i) * 14ms)}
+@keyframes pop{to{transform:none}}
+.streak-more{margin-top:1.2cqh;font-family:var(--mono);font-size:max(10px,2.6cqw);color:rgba(245,245,247,.62)}
+
 /* 24h clock */
 .clock{position:relative;width:60cqw;aspect-ratio:1;margin:3cqh auto 0}
 .clock .hb{position:absolute;left:50%;top:0;width:2.2cqw;margin-left:-1.1cqw;height:50%;transform-origin:50% 100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:9cqw;box-sizing:border-box}
@@ -182,7 +189,7 @@ button:disabled{opacity:.5;cursor:wait}
 
 @media (prefers-reduced-motion:reduce){
   .card .rise,.card.active .rise{animation:none;opacity:1;transform:none}
-  .chart s,.lbar b,.clock s{animation:none!important;transform:none}
+  .chart s,.lbar b,.clock s,.streak i{animation:none!important;transform:none}
   .viewer{transition:none}
 }
 </style>
@@ -537,6 +544,16 @@ function monthRowsHTML(days, D){
     <div class="legend rise" style="--d:.6s">Less <i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</div>`;
 }
 
+// the streak as squares, a week per row (two weeks per row for long streaks), shaded by that day's count
+function streakHTML(days, D){
+  if (D.streak < 2 || !D.streakStart) return '';
+  const lvl = levelFn(days), run = days.filter(d => d.date >= D.streakStart && d.date <= D.streakEnd);
+  const cols = run.length > 42 ? 14 : 7, cap = cols * 10, shown = run.slice(0, cap);
+  const cells = shown.map((d, i) => `<i class="l${Math.max(1, lvl(d.count))}" style="--i:${i}" title="${d.date}: ${d.count}"></i>`).join('');
+  return `<div class="streak" style="grid-template-columns:repeat(${cols},minmax(0,1fr));width:${cols === 7 ? 62 : 86}cqw" role="img" aria-label="${D.streak} days in a row, shaded by contributions each day">${cells}</div>
+    ${run.length > cap ? `<div class="streak-more rise" style="--d:.6s">+ ${plural(run.length - cap, 'more day')}</div>` : ''}`;
+}
+
 // 24 bars around a dial: midnight at the top, clockwise
 function clockHTML(hours, peak){
   const max = Math.max(...hours, 1);
@@ -605,6 +622,8 @@ function buildCards(W, D){
     ${num(D.streak)}
     <div class="h rise" style="--d:.3s">day${D.streak === 1 ? '' : 's'} in a row</div>
     <p class="p rise" style="--d:.4s">${D.streak > 1 ? `${fmtDay(D.streakStart)} to ${fmtDay(D.streakEnd)}, without missing a day.` : 'Every day counts.'}</p>
+    <div class="grow"></div>
+    ${streakHTML(W.cal.days, D)}
     <div class="grow"></div>
     <div class="k rise" style="--d:.55s">Biggest single day</div>
     <div class="mid rise" style="--d:.65s;margin-top:1.4cqh">${fmtDay(D.busiest.date)}</div>
