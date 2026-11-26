@@ -399,6 +399,10 @@ async function buildWrap(login, onStep){
 function derive(W){
   const D = {};
   const s = W.commits.sample;
+  // Commit search also counts copies of your commits in other people's mirrors. Real public
+  // commits can't be far above the contribution calendar (which also includes PRs, issues and
+  // reviews), so a much bigger number means copies: don't show the count or the repos it names.
+  D.copies = !!(W.cal && W.cal.total > 0 && W.commits.total > W.cal.total * 1.5);
   // months
   D.months = new Array(12).fill(0);
   D.monthUnit = 'contributions';
@@ -574,7 +578,7 @@ function buildCards(W, D){
     <div class="grow"></div>
     ${monthRowsHTML(W.cal.days, D)}` });
 
-  if (W.commits.total) {
+  if (W.commits.total && !D.copies) {
     const perDay = W.commits.total / Math.max(1, (W.cal ? W.cal.days.length : 365));
     C.push({ t: 'commits', html: `
       <div class="k eb rise">You pushed</div>
@@ -636,7 +640,7 @@ function buildCards(W, D){
         <div class="lbar"><b style="width:${l.pct * 100}%;background:${l.color};--d:${.5 + i * .08}s"></b></div>
       </div>`).join('')}</div>` });
 
-  if (W.topRepos.length) C.push({ t: 'repos', html: `
+  if (W.topRepos.length && !D.copies) C.push({ t: 'repos', html: `
     <div class="k eb rise">Where you spent your time</div>
     <div class="h rise" style="--d:.15s">Your top repos</div>
     <div class="list">${W.topRepos.map((r, i) => `
@@ -803,7 +807,7 @@ async function drawCard(W, D){
   if (W.cal && D.streak) stats.push(['LONGEST STREAK', `${D.streak} day${D.streak === 1 ? '' : 's'}`]);
   if (W.languages.length) stats.push(['TOP LANGUAGE', W.languages[0].name, W.languages[0].color]);
   if (D.topMonth >= 0) stats.push(['LOUDEST MONTH', MONTHS[D.topMonth]]);
-  if (W.commits.total && heroL !== 'public commits') stats.push(['COMMITS', fmt(W.commits.total)]);
+  if (W.commits.total && !D.copies && heroL !== 'public commits') stats.push(['COMMITS', fmt(W.commits.total)]);
   if (W.collab.prsOpened) stats.push(['PRS OPENED', fmt(W.collab.prsOpened)]);
   if (W.repos.created) stats.push(['NEW REPOS', fmt(W.repos.created)]);
   const row = stats.slice(0, 3);
