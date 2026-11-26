@@ -612,6 +612,12 @@ function buildCards(W, D){
 
   if (D.archetype) {
     const hasClock = D.sampleN >= 8 && D.peakHour >= 0;
+    // no commit times (private work or too few public commits): show the week from the calendar instead
+    const hasWeek = !hasClock && W.cal && D.calDow && D.calDow.some(v => v);
+    const weekHTML = () => {
+      const order = [1, 2, 3, 4, 5, 6, 0], max = Math.max(...D.calDow, 1);
+      return `<div class="chart rise" style="--d:.4s" role="img" aria-label="Contributions by day of the week; busiest is ${DAYS[D.topDow]}">${order.map((d, i) => `<div><s class="${d === D.topDow ? 'hot' : ''}" style="height:${Math.max(2, D.calDow[d] / max * 100)}%;--i:${i}"></s><span>${DAYS[d].slice(0, 3)}</span></div>`).join('')}</div>`;
+    };
     const stats = [];
     if (hasClock) stats.push(['Peak hour', hourLabel(D.peakHour)]);
     if (D.topDow >= 0) stats.push(['Favourite day', DAYS[D.topDow]]);
@@ -623,10 +629,10 @@ function buildCards(W, D){
       <div class="h rise" style="--d:.25s;font-size:${len > 16 ? 9.5 : len > 11 ? 11 : 14}cqw;margin-top:.4cqh;color:var(--ac)">${title}</div>
       <p class="p rise" style="--d:.4s">${esc(D.archetype.line)}</p>
       <div class="grow"></div>
-      ${hasClock ? clockHTML(D.hours, D.peakHour) : ''}
+      ${hasClock ? clockHTML(D.hours, D.peakHour) : hasWeek ? weekHTML() : ''}
       <div class="grow"></div>
       ${stats.length ? `<div class="duo rise" style="--d:.6s;margin-top:2cqh">${stats.map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="sv">${v}</div></div>`).join('')}</div>` : ''}
-      ${hasClock ? `<p class="note rise" style="--d:.7s">From your ${plural(D.sampleN, 'most recent commit')}, each in its own time zone.</p>` : ''}` });
+      ${hasClock ? `<p class="note rise" style="--d:.7s">From your ${plural(D.sampleN, 'most recent commit')}, each in its own time zone.</p>` : hasWeek ? `<p class="note rise" style="--d:.7s">${D.sampleN ? 'Too few public commits to show the time of day' : 'Your commits are private, so the time of day isn’t visible'}. Days come from your contribution calendar.</p>` : ''}` });
   }
 
   if (W.languages.length) C.push({ t: 'langs', html: `
@@ -659,7 +665,7 @@ function buildCards(W, D){
         <div class="rise" style="--d:${.15 + i * .15}s"><div class="k">${k}</div><div class="mid"><span class="cu" data-to="${v}">0</span></div>${s ? `<p class="p" style="margin-top:.8cqh;color:#fff">${s}</p>` : ''}</div>`).join('')}</div>` });
   }
 
-  if (W.repos.created || W.repos.totalStars || u.followers) C.push({ t: 'new', html: `
+  if (W.repos.created || W.repos.totalStars) C.push({ t: 'new', html: `
     <div class="k eb rise">New this year</div>
     <div class="duo">
       <div class="rise" style="--d:.15s"><div class="mid"><span class="cu" data-to="${W.repos.created}">0</span></div><div class="k" style="margin-top:1cqh">new repos</div></div>
