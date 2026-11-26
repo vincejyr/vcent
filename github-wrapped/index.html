@@ -39,7 +39,7 @@ a{color:inherit}
 .try button{min-height:44px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:none;font-family:var(--mono);font-size:14px;cursor:pointer}
 .try button:hover{border-color:rgba(255,255,255,.4)}
 .sample{flex:0 1 340px;margin:0;display:flex;flex-direction:column;align-items:center;gap:16px}
-.stack{position:relative;width:min(340px,78vw);aspect-ratio:4/5}
+.stack{position:relative;width:min(300px,70vw);aspect-ratio:9/16}
 .stack::before{content:"";position:absolute;inset:0;border-radius:14px;background:#0d0a1f;border:1px solid var(--line);transform:rotate(-5deg) translate(-18px,8px)}
 .stack img{position:relative;display:block;width:100%;height:100%;border-radius:14px;transform:rotate(2deg);box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.1);background:#0c0d12}
 .sample figcaption{font-family:var(--mono);font-size:12px;color:rgba(245,245,247,.6)}
@@ -83,8 +83,7 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
   .stage{height:var(--sh);width:var(--sw);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
   .nav{display:grid}
 }
-.bars{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;gap:10px;padding:12px 12px 0}
-.bars .g{display:flex;gap:3px}
+.bars{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;gap:4px;padding:12px 12px 0}
 .bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.28);overflow:hidden}
 .bars i b{display:block;height:100%;width:0;background:#fff}
 .topbar{position:absolute;top:18px;left:12px;right:12px;z-index:5;display:flex;align-items:center;gap:10px;font-size:13px}
@@ -171,9 +170,6 @@ form.go{display:flex;gap:10px;flex-wrap:wrap}
 .sumwrap{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr);place-items:center;margin-top:2cqh}
 .sumimg{display:block;max-width:100%;max-height:100%;border-radius:2cqw;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1)}
 .sumimg:not([src]){width:72%;aspect-ratio:4/5;background:#111}
-.seg{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:12px;background:rgba(255,255,255,.07);margin-top:2cqh}
-.seg button{height:max(38px,5cqh);border:0;border-radius:9px;background:none;color:rgba(245,245,247,.72);font-weight:700;font-size:max(13px,3.2cqw);cursor:pointer}
-.seg button[aria-pressed="true"]{background:rgba(255,255,255,.16);color:#fff}
 .share{display:flex;align-items:center;justify-content:center;gap:8px;height:max(48px,6.4cqh);margin-top:1.4cqh;border:0;border-radius:12px;background:#f5f5f7;color:#07080c;font-weight:700;font-size:max(15px,4cqw);cursor:pointer}
 .share svg{width:18px;height:18px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw;margin-top:1.4cqh}
@@ -494,7 +490,7 @@ function clockHTML(hours, peak){
 const num = (n, cls = 'big') => `<div class="${cls} rise" style="--d:.15s"><span class="cu" data-to="${n}">0</span></div>`;
 const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
 
-// story chapters: one accent each, progress bars grouped by chapter
+// story chapters: one accent each
 const CHAPTER_OF = { intro: 'activity', contrib: 'activity', commits: 'activity', months: 'activity', streak: 'activity', clock: 'rhythm', langs: 'craft', repos: 'craft', new: 'craft', collab: 'people', sum: 'share' };
 const CHAPTERS = ['activity', 'rhythm', 'craft', 'people', 'share'];
 const CHAPTER_NAME = { activity: 'Activity', rhythm: 'Rhythm', craft: 'Craft', people: 'People', share: 'Your card' };
@@ -616,10 +612,6 @@ function buildCards(W, D){
     <div class="k eb">That's a wrap</div>
     <div class="h" style="font-size:7cqw;margin-top:1cqh">Your ${YEAR}, on one card</div>
     <div class="sumwrap"><img class="sumimg" id="sumImg" alt="Summary card for @${esc(u.login)}"></div>
-    <div class="seg" role="group" aria-label="Card format">
-      <button data-fmt="post" aria-pressed="true">Post · 4:5</button>
-      <button data-fmt="story" aria-pressed="false">Story · 9:16</button>
-    </div>
     <button class="share" data-act="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share</button>
     <div class="acts">
       <button data-act="save">Save image</button>
@@ -644,9 +636,8 @@ function loadImg(src){
   });
 }
 
-async function drawCard(W, D, format){
-  const story = format === 'story';
-  const w = 1080, h = story ? 1920 : 1350;
+async function drawCard(W, D){
+  const w = 1080, h = 1920;
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
   const x = cv.getContext('2d');
   try { await document.fonts.ready; } catch {}
@@ -691,7 +682,7 @@ async function drawCard(W, D, format){
   if (D.topDow >= 0) facts.push(`Busiest day: ${DAYS[D.topDow]}.`);
   const headline = A_ ? A_.name : `${YEAR} in code`;
   x.font = `700 108px ${SG}`;
-  const ns = fit(headline, 700, story ? 120 : 108, 56, w - 2 * P);
+  const ns = fit(headline, 700, 120, 56, w - 2 * P);
   const archH = 22 + 22 + ns * 0.76 + (facts.length ? 52 : 0) + 8;
   blocks.push({ h: archH, draw(y){
     x.font = `500 22px ${JB}`; x.fillStyle = MU; x.fillText(spaced(A_ ? 'THIS YEAR YOU WERE' : 'YOUR YEAR'), P, y + 20);
@@ -731,7 +722,7 @@ async function drawCard(W, D, format){
   const heroN = W.cal && W.cal.total ? W.cal.total : (W.commits.total || 0);
   const heroL = W.cal && W.cal.total ? 'contributions' : 'public commits';
   x.font = `500 34px ${SG}`; const lw = x.measureText(heroL).width;
-  const hs = fit(fmt(heroN), 700, story ? 200 : 168, 90, w - 2 * P - lw - 28);
+  const hs = fit(fmt(heroN), 700, 200, 90, w - 2 * P - lw - 28);
   blocks.push({ h: hs * 0.74, draw(y){
     x.font = `700 ${hs}px ${SG}`; x.fillStyle = '#ffffff';
     const by = y + hs * 0.74; x.fillText(fmt(heroN), P - 4, by);
@@ -760,14 +751,14 @@ async function drawCard(W, D, format){
     });
   } });
 
-  const top = story ? 170 : 88, bottom = h - (story ? 200 : 130);
+  const top = 170, bottom = h - 200;
   const used = blocks.reduce((a, b) => a + b.h, 0);
-  const gapY = Math.max(32, Math.min(story ? 190 : 72, (bottom - top - used) / Math.max(1, blocks.length - 1)));
+  const gapY = Math.max(32, Math.min(190, (bottom - top - used) / Math.max(1, blocks.length - 1)));
   let y = top;
   for (const b of blocks) { b.draw(y); y += b.h + gapY; }
 
   // footer
-  const fy = h - (story ? 110 : 64);
+  const fy = h - 110;
   x.font = `500 26px ${JB}`; x.fillStyle = 'rgba(245,245,247,.7)'; x.textAlign = 'left';
   x.fillText('Get yours →', P, fy);
   x.font = `700 26px ${JB}`; x.fillStyle = FG; x.textAlign = 'right';
@@ -778,33 +769,31 @@ async function drawCard(W, D, format){
 
 // ---------- story viewer ----------
 let W = null, D = null, cards = [], chs = [], barFills = [], idx = 0, elapsed = 0, paused = false, last = 0, raf = 0;
-let blobs = {}, fmtSel = 'post';
+// One card format: 9:16, sized for phone stories.
+let cardPng = null;
 
 function openStory(){
   const C = buildCards(W, D);
   chs = C.map(c => c.ch);
   $('cards').innerHTML = C.map(c => `<section class="card ch-${c.ch} t-${c.t}">${c.html}</section>`).join('');
   cards = [...document.querySelectorAll('#cards .card')];
-  // progress bars grouped by chapter
-  const groups = [];
-  chs.forEach(ch => { const g = groups[groups.length - 1]; if (g && g.ch === ch) g.n++; else groups.push({ ch, n: 1 }); });
-  $('bars').innerHTML = groups.map(g => `<div class="g" style="flex:${g.n}">${'<i><b></b></i>'.repeat(g.n)}</div>`).join('');
+  $('bars').innerHTML = '<i><b></b></i>'.repeat(cards.length);
   barFills = [...$('bars').querySelectorAll('b')];
   $('tbAv').src = W.user.avatar + '&s=64';
   $('tbWho').textContent = '@' + W.user.login;
   $('viewer').classList.add('open');
   document.body.style.overflow = 'hidden';
-  blobs = {}; fmtSel = 'post';
+  cardPng = null;
   show(0);
   last = performance.now();
   cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
   // render the share card in the background
-  cardBlob('post').then(b => { const img = $('sumImg'); if (img && b && fmtSel === 'post') img.src = URL.createObjectURL(b); });
+  cardBlob().then(b => { const img = $('sumImg'); if (img && b) img.src = URL.createObjectURL(b); });
 }
 
-async function cardBlob(format){
-  if (!blobs[format]) blobs[format] = drawCard(W, D, format).then(cv => new Promise(r => cv.toBlob(r, 'image/png')));
-  return blobs[format];
+function cardBlob(){
+  if (!cardPng) cardPng = drawCard(W, D).then(cv => new Promise(r => cv.toBlob(r, 'image/png')));
+  return cardPng;
 }
 
 function closeStory(){
@@ -903,9 +892,9 @@ function download(blob, name){
 }
 
 // share: the native share sheet where it takes files; otherwise save the image
-async function shareCard(format, mode){
-  const blob = await cardBlob(format);
-  const name = `github-wrapped-${YEAR}-${W.user.login}-${format}.png`;
+async function shareCard(mode){
+  const blob = await cardBlob();
+  const name = `github-wrapped-${YEAR}-${W.user.login}.png`;
   const file = new File([blob], name, { type: 'image/png' });
   if (mode === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: `My GitHub Wrapped ${YEAR}`, text: `My ${YEAR} on GitHub. Get yours: ${SHARE_URL}` }); return; }
@@ -916,17 +905,9 @@ async function shareCard(format, mode){
 }
 
 $('cards').addEventListener('click', async e => {
-  const f = e.target.closest('button[data-fmt]');
-  if (f) {
-    fmtSel = f.dataset.fmt;
-    f.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === f)));
-    const b = await cardBlob(fmtSel);
-    if (b && fmtSel === f.dataset.fmt) $('sumImg').src = URL.createObjectURL(b);
-    return;
-  }
   const b = e.target.closest('button[data-act]'); if (!b) return;
   const act = b.dataset.act;
-  if (act === 'share' || act === 'save') { b.disabled = true; try { await shareCard(fmtSel, act); } finally { b.disabled = false; } }
+  if (act === 'share' || act === 'save') { b.disabled = true; try { await shareCard(act); } finally { b.disabled = false; } }
   else if (act === 'link') {
     const link = `${SHARE_URL}?u=${encodeURIComponent(W.user.login)}${YEAR !== 2026 ? `&y=${YEAR}` : ''}`;
     try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); }
@@ -989,14 +970,14 @@ function sampleWrap(){
   Object.assign(SD, { archetype: { name: 'Night Owl', line: '' }, peakHour: 22, sampleN: 160, topDow: 2 });
   return [SW, SD];
 }
-drawCard(...sampleWrap(), 'post').then(cv => cv.toBlob(b => { if (b) $('sampleImg').src = URL.createObjectURL(b); }, 'image/png')).catch(e => console.warn('sample card', e));
+drawCard(...sampleWrap()).then(cv => cv.toBlob(b => { if (b) $('sampleImg').src = URL.createObjectURL(b); }, 'image/png')).catch(e => console.warn('sample card', e));
 
 $('try').addEventListener('click', e => {
   const b = e.target.closest('button[data-u]'); if (!b) return;
   $('u').value = b.dataset.u; run(b.dataset.u);
 });
 
-if (qs.has('debug')) window.__gw = { drawCard: f => drawCard(W, D, f) };
+if (qs.has('debug')) window.__gw = { drawCard: () => drawCard(W, D) };
 $('form').addEventListener('submit', e => { e.preventDefault(); run($('u').value); });
 const preset = qs.get('u');
 if (preset) { $('u').value = preset; run(preset); } else $('u').focus();
