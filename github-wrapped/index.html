@@ -802,24 +802,28 @@ async function drawCard(W, D){
     x.font = `500 34px ${SG}`; x.fillStyle = 'rgba(245,245,247,.8)'; x.fillText(heroL, P + nw + 24, by);
   } });
 
-  // three supporting stats
+  // supporting stats: up to two rows of three, most telling first
   const stats = [];
   if (W.cal && D.streak) stats.push(['LONGEST STREAK', `${D.streak} day${D.streak === 1 ? '' : 's'}`]);
   if (W.languages.length) stats.push(['TOP LANGUAGE', W.languages[0].name, W.languages[0].color]);
   if (D.topMonth >= 0) stats.push(['LOUDEST MONTH', MONTHS[D.topMonth]]);
-  if (W.commits.total && !D.copies && heroL !== 'public commits') stats.push(['COMMITS', fmt(W.commits.total)]);
+  if (D.sampleN >= 8 && D.peakHour >= 0) stats.push(['PEAK HOUR', hourLabel(D.peakHour)]);
+  if (D.topDow >= 0) stats.push(['FAVOURITE DAY', DAYS[D.topDow]]);
+  if (W.cal && D.active) stats.push(['ACTIVE DAYS', fmt(D.active)]);
   if (W.collab.prsOpened) stats.push(['PRS OPENED', fmt(W.collab.prsOpened)]);
+  if (W.collab.reviews) stats.push(['PRS REVIEWED', fmt(W.collab.reviews)]);
   if (W.repos.created) stats.push(['NEW REPOS', fmt(W.repos.created)]);
-  const row = stats.slice(0, 3);
-  if (row.length) blocks.push({ h: 100, draw(y){
+  if (W.commits.total && !D.copies && heroL !== 'public commits') stats.push(['COMMITS', fmt(W.commits.total)]);
+  const shown = stats.slice(0, 6), rows = Math.ceil(shown.length / 3), rowGap = 44;
+  if (shown.length) blocks.push({ h: rows * 100 + (rows - 1) * rowGap, draw(y){
     const cg = 32, colW = (w - 2 * P - cg * 2) / 3;
-    row.forEach(([k, v, dot], i) => {
-      const cx = P + i * (colW + cg);
-      x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(cx, y, colW, 2);
-      x.font = `500 19px ${JB}`; x.fillStyle = MU; x.fillText(k, cx, y + 40);
+    shown.forEach(([k, v, dot], i) => {
+      const cx = P + (i % 3) * (colW + cg), cy = y + Math.floor(i / 3) * (100 + rowGap);
+      x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(cx, cy, colW, 2);
+      x.font = `500 19px ${JB}`; x.fillStyle = MU; x.fillText(k, cx, cy + 40);
       const tx = dot ? cx + 28 : cx;
-      fit(v, 700, 40, 24, colW - (tx - cx)); x.fillStyle = FG; x.fillText(v, tx, y + 92);
-      if (dot) { x.fillStyle = dot; x.beginPath(); x.arc(cx + 9, y + 78, 9, 0, Math.PI * 2); x.fill(); }
+      fit(v, 700, 40, 24, colW - (tx - cx)); x.fillStyle = FG; x.fillText(v, tx, cy + 92);
+      if (dot) { x.fillStyle = dot; x.beginPath(); x.arc(cx + 9, cy + 78, 9, 0, Math.PI * 2); x.fill(); }
     });
   } });
 
