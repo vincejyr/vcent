@@ -640,7 +640,55 @@ function fit(){
   app.style.zoom = z === 1 ? "" : z.toFixed(3);
 }
 window.addEventListener("resize", fit);
+
+// ---------- analytics (vcent.in PostHog, cookieless) ----------
+// Events wait in a queue until the async PostHog script is ready; a no-op if it never loads.
+// Listeners run in the capture phase so they see the clicked element before render() replaces it.
+// No typed text is sent (competitor domains, stage names): only which control was used.
+const evQ=[]; let evT=0, evTries=0;
+function flushEv(){ const ph=window.posthog; if(ph&&typeof ph.capture==="function"){ while(evQ.length){ const [n,p]=evQ.shift(); try{ph.capture(n,p);}catch(e){} } evT=0; return; }
+  if(!evT && evTries++<60) evT=setTimeout(()=>{evT=0;flushEv();},500); }
+function track(n,p={}){ evQ.push([n,{proto:"amplemarket-ci",view:S.view,...p}]); flushEv(); }
+
+const _go=go; go=function(v){ const from=S.view; _go(v); if(v!==from) track("proto_view_opened",{view:v,from}); };
+const _openLead=openLead; openLead=function(id){ _openLead(id); const l=lead(id); if(l) track("proto_lead_opened",{lead:id,stage:l.stage,competitor:l.comp,crm:l.crm||null}); };
+const viewsSeen=new Set(["setup1"]); const t0=Date.now();
+const _render=render; render=function(){ _render(); viewsSeen.add(S.view); };
+
+document.addEventListener("click", e=>{
+  const g=e.target.closest("[data-g]"); if(g){ track("proto_guide_step_clicked",{step:+g.dataset.g+1,title:GUIDE[+g.dataset.g].t}); return; }
+  if(e.target.id==="reset"){ track("proto_reset"); return; }
+  if(!e.target.closest("#app")) return;
+  const tb=e.target.closest("[data-tab]"); if(tb){ track("proto_status_tab_clicked",{tab:tb.dataset.tab}); return; }
+  const ti=e.target.closest("[data-tile]"); if(ti){ track("proto_tile_clicked",{tile:ti.dataset.tile}); return; }
+  const cell=e.target.closest("[data-cell]"); if(cell){ track("proto_journey_cell_clicked",{cell:cell.dataset.cell}); return; }
+  const a=e.target.closest("[data-act]");
+  if(a && a.tagName!=="SELECT" && a.tagName!=="INPUT"){
+    const act=a.dataset.act, p={action:act};
+    if(a.dataset.id) p.lead=a.dataset.id;
+    if(act==="comp") p.state=a.dataset.s;
+    if(act==="bulk"||act==="bsnooze") p.count=S.sel.size;
+    if(act==="pickseq") p.sequence=a.dataset.q;
+    if(act==="confirm"){ p.count=S.modalIds.length; p.sequence=S.modalSeq; }
+    if(act==="close"||act==="toast") return;
+    track(act==="finish"?"proto_setup_finished":act==="confirm"?"proto_sequence_confirmed":"proto_action",p);
+  }
+}, true);
+
+document.addEventListener("change", e=>{
+  const a=e.target.closest("[data-act]"); if(!a) return; const act=a.dataset.act;
+  if(act==="notrel"&&a.value) track("proto_lead_not_relevant",{lead:S.open,reason:a.value});
+  else if(act==="compF"||act==="view") track("proto_filter_changed",{filter:act==="view"?"me_team":"competitor",value:a.value});
+  else if(["pick","seq","rename","cycle","al","max"].includes(act)) track("proto_setting_changed",{setting:act==="al"?"alert_"+a.dataset.k:act,value:act==="pick"||act==="seq"?a.value:act==="al"?a.checked:act==="cycle"||act==="max"?+a.value:undefined});
+}, true);
+
+let sentSummary=false;
+function sendSummary(){ const ph=window.posthog; if(sentSummary||!ph||typeof ph.capture!=="function") return; sentSummary=true; const p={proto:"amplemarket-ci",views_seen:[...viewsSeen],views_count:viewsSeen.size,seconds:Math.round((Date.now()-t0)/1000),actions:S.actions};
+  try{ ph.capture("proto_session_summary",p,{transport:"sendBeacon"}); }catch(e){} }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") sendSummary(); else sentSummary=false; });
+
 init(); render(); fit();
 </script>
+{% include analytics.html %}
 </body>
 </html>
